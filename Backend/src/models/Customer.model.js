@@ -6,7 +6,6 @@ const customerSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
       required: true,
-      index: true,
     },
     name: {
       type: String,
@@ -36,5 +35,6 @@ const customerSchema = new mongoose.Schema(
 );
 
 customerSchema.index({ userId: 1, name: 1 });
+customerSchema.index({ userId: 1, phone: 1 });
 
 export const Customer = mongoose.model('Customer', customerSchema);

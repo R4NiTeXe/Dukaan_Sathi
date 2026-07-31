@@ -6,7 +6,6 @@ const billSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
       required: true,
-      index: true,
     },
     customerId: {
       type: mongoose.Schema.Types.ObjectId,
@@ -42,7 +41,6 @@ const billSchema = new mongoose.Schema(
       type: String,
       enum: ['paid', 'pending'],
       default: 'paid',
-      index: true,
     },
   },
   {
@@ -51,5 +49,7 @@ const billSchema = new mongoose.Schema(
 );
 
 billSchema.index({ userId: 1, createdAt: -1 });
+billSchema.index({ userId: 1, paymentStatus: 1 });
+billSchema.index({ userId: 1, customerId: 1 });
 
 export const Bill = mongoose.model('Bill', billSchema);

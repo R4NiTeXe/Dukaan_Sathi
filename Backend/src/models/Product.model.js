@@ -6,7 +6,6 @@ const productSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
       required: true,
-      index: true,
     },
     name: {
       type: String,
@@ -38,5 +37,6 @@ const productSchema = new mongoose.Schema(
 );
 
 productSchema.index({ userId: 1, name: 1 });
+productSchema.index({ userId: 1, category: 1 });
 
 export const Product = mongoose.model('Product', productSchema);
