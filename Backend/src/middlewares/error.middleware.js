@@ -25,6 +25,8 @@ const errorHandler = (err, req, res, next) => {
     error = new ApiError(401, 'Unauthorized: Invalid or expired token');
   } else if (error instanceof multer.MulterError) {
     error = new ApiError(400, error.message);
+  } else if (error.type === 'entity.too.large') {
+    error = new ApiError(413, 'Request payload too large');
   } else if (!(error instanceof ApiError)) {
     error = new ApiError(500, error.message || 'Internal server error');
   }
