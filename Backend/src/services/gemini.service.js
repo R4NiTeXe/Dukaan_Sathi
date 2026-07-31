@@ -24,6 +24,21 @@ Output format:
 
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
+const ASSISTANT_PROMPT = `You are a business analytics assistant for a local shop owner.
+You can ONLY answer using the provided business data.
+Do NOT invent or assume any information not present in the data.
+If the data does not contain an answer, say you do not have enough data.
+
+Shop Data:
+{data}
+
+Owner's Question: "{question}"
+
+Answer concisely in a helpful, friendly tone (max 5-6 sentences).
+Use numbers and specifics from the data.
+If the owner asked in Bengali or Hindi, answer in that language.
+Return ONLY the answer text, no JSON.`;
+
 const generateWithRetry = async (model, prompt, attempts = 3) => {
   for (let attempt = 1; attempt <= attempts; attempt++) {
     try {
@@ -61,4 +76,13 @@ export const extractBillItems = async (transcript) => {
   } catch (error) {
     throw new Error(`Gemini returned invalid JSON: ${rawText.slice(0, 200)}`);
   }
+};
+
+export const askAssistant = async (question, data) => {
+  const model = genAI.getGenerativeModel({ model: process.env.GEMINI_MODEL || 'gemini-flash-latest' });
+  const result = await generateWithRetry(
+    model,
+    ASSISTANT_PROMPT.replace('{data}', JSON.stringify(data)).replace('{question}', question)
+  );
+  return result.response.text().trim();
 };

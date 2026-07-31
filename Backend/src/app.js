@@ -12,12 +12,18 @@ import billRoutes from './routes/bills.route.js';
 import dashboardRoutes from './routes/dashboard.route.js';
 import analyticsRoutes from './routes/analytics.route.js';
 import searchRoutes from './routes/search.route.js';
+import assistantRoutes from './routes/assistant.route.js';
 import { notFoundHandler, errorHandler } from './middlewares/error.middleware.js';
 
 const app = express();
 
 app.use(helmet());
-app.use(cors());
+app.use(
+  cors({
+    origin: process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN.split(',') : true,
+    credentials: true,
+  })
+);
 app.use(express.json({ limit: '1mb' }));
 app.use(cookieParser());
 
@@ -49,6 +55,7 @@ app.use('/api/bills', billRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/search', searchRoutes);
+app.use('/api/assistant', assistantRoutes);
 
 app.get('/', (req, res) => {
   res.send('AI Billing API is running');
