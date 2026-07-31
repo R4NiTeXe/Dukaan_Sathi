@@ -13,7 +13,7 @@ export const BACKEND_DIR = path.resolve(
   '..'
 )
 
-export const spawnServer = async ({ rateLimitMax = 10000 } = {}) => {
+export const spawnServer = async ({ rateLimitMax = 10000, env = {} } = {}) => {
   const port = 20000 + Math.floor(Math.random() * 30000)
   const dbName = `ai-billing-test-${Date.now()}-${Math.floor(Math.random() * 1000)}`
 
@@ -25,6 +25,7 @@ export const spawnServer = async ({ rateLimitMax = 10000 } = {}) => {
       DB_NAME: dbName,
       RATE_LIMIT_MAX: String(rateLimitMax),
       NODE_ENV: 'test',
+      ...env,
     },
     stdio: ['ignore', 'pipe', 'pipe'],
   })
@@ -61,7 +62,7 @@ export const spawnServer = async ({ rateLimitMax = 10000 } = {}) => {
   })
 
   return {
-    baseUrl: `http://localhost:${port}`,
+    baseUrl: `http://127.0.0.1:${port}`,
     dbName,
     stop: () => child.kill('SIGTERM'),
   }

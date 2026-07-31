@@ -49,6 +49,11 @@ const rateLimit = {
   windowMs: 15 * 60 * 1000,
 }
 
+const loginThrottle = {
+  maxFailures: parseInt(env.LOGIN_MAX_FAILURES, 10) || 5,
+  windowMs: parseInt(env.LOGIN_WINDOW_MS, 10) || 15 * 60 * 1000,
+}
+
 const cors = {
   origins: env.CORS_ORIGIN ? env.CORS_ORIGIN.split(',') : true,
 }
@@ -88,6 +93,7 @@ export default {
   cloudinary,
   cookie,
   rateLimit,
+  loginThrottle,
   cors,
   validateEnv,
 }

@@ -31,6 +31,9 @@ npm run dev
 | `GEMINI_MODEL` | no | Model id (default `gemini-flash-latest`) |
 | `CLOUDINARY_CLOUD_NAME` / `_API_KEY` / `_API_SECRET` | yes | Cloudinary credentials for QR uploads |
 | `RATE_LIMIT_MAX` | no | Requests per 15 min per IP (default `300`) |
+| `LOGIN_MAX_FAILURES` | no | Failed logins before lockout, per email+IP (default `5`) |
+| `LOGIN_WINDOW_MS` | no | Login lockout window in ms (default `900000`) |
+| `GEMINI_MOCK` | no | Test-only: `ok` returns canned Gemini answers, `fail` simulates downtime |
 | `CORS_ORIGIN` | no | Comma-separated allowed origins (default: all) |
 | `NODE_ENV` | no | `production` hides error stacks, logs to files only |
 
@@ -40,7 +43,7 @@ npm run dev
 |---|---|
 | `npm start` | Run the server |
 | `npm run dev` | Run with nodemon auto-reload |
-| `npm test` | Lint + run the full test suite (55 tests) |
+| `npm test` | Lint + run the full test suite (65 tests) |
 | `npm run test:watch` | Re-run tests on file changes |
 | `npm run lint` | ESLint check |
 | `npm run format` | Prettier formatting |
@@ -131,7 +134,7 @@ All errors return `{ statusCode, success: false, message, errors? }`.
 | 404 | Resource not found |
 | 409 | Duplicate value (e.g. registered email) |
 | 413 | Request payload too large (> 1 MB) |
-| 429 | Rate limited |
+| 429 | Rate limited — or login locked after too many failed attempts |
 | 500 | Unexpected server error |
 | 502 | Upstream AI failure (Gemini) |
 | 503 | DB or network service temporarily unavailable |

@@ -9,6 +9,7 @@ import {
 } from '../controllers/auth.controller.js'
 import { verifyJWT } from '../middlewares/auth.middleware.js'
 import { uploadImage } from '../middlewares/upload.middleware.js'
+import { loginThrottle } from '../middlewares/loginThrottle.middleware.js'
 
 const router = Router()
 
@@ -22,7 +23,7 @@ const uploadQRMiddleware = (req, res, next) => {
 }
 
 router.post('/register', register)
-router.post('/login', login)
+router.post('/login', loginThrottle, login)
 router.post('/refresh', refresh)
 router.post('/logout', logout)
 router.get('/profile', verifyJWT, getProfile)

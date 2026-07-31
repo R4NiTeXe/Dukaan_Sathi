@@ -23,7 +23,7 @@ const detectIntent = (question) => {
   const q = question.toLowerCase()
 
   if (
-    /best seller|best selling|top product|top selling|popular|bestseller/.test(
+    /best seller|best selling|top product|top selling|popular|bestseller|sell(s|ing)? the most|sold the most/.test(
       q
     )
   ) {

@@ -1,20 +1,19 @@
 ﻿import { test, before, after } from 'node:test'
 import assert from 'node:assert/strict'
-import { spawnServer, dropTestDb, request } from './helpers/server.mjs'
+import {
+  spawnServer,
+  dropTestDb,
+  request,
+  registerUser,
+} from './helpers/server.mjs'
 import 'dotenv/config'
-
-const hasGemini = Boolean(process.env.GEMINI_API_KEY)
-let geminiUp = false
-const intentTest = (name, opts, fn) => {
-  test(name, { ...opts, skip: !(hasGemini && geminiUp) }, fn)
-}
 
 let server
 let baseUrl
 let token
 
 before(async () => {
-  server = await spawnServer()
+  server = await spawnServer({ env: { GEMINI_MOCK: 'ok' } })
   baseUrl = server.baseUrl
 
   const reg = await request(baseUrl, 'POST', '/api/v1/auth/register', {
@@ -27,9 +26,6 @@ before(async () => {
     },
   })
   token = reg.json.data.accessToken
-
-  const health = await request(baseUrl, 'GET', '/health')
-  geminiUp = health.json.services?.gemini === 'ok'
 })
 
 after(async () => {
@@ -53,7 +49,7 @@ test('unauthorized request returns 401', async () => {
   assert.equal(r.status, 401)
 })
 
-intentTest(
+test(
   'answers today summary with revenue data',
   { timeout: 60000 },
   async () => {
@@ -75,7 +71,7 @@ intentTest(
   }
 )
 
-intentTest('answers top products question', { timeout: 60000 }, async () => {
+test('answers top products question', { timeout: 60000 }, async () => {
   const r = await request(baseUrl, 'POST', '/api/v1/assistant/ask', {
     token,
     body: { question: 'which products sell the most?' },
@@ -85,21 +81,17 @@ intentTest('answers top products question', { timeout: 60000 }, async () => {
   assert.ok(r.json.data.answer.length > 0)
 })
 
-intentTest(
-  'answers weekly comparison question',
-  { timeout: 60000 },
-  async () => {
-    const r = await request(baseUrl, 'POST', '/api/v1/assistant/ask', {
-      token,
-      body: { question: 'compare this week with last week' },
-    })
-    assert.equal(r.status, 200, r.json?.message)
-    assert.equal(r.json.data.intent, 'weeklyCompare')
-    assert.ok(r.json.data.answer.length > 0)
-  }
-)
+test('answers weekly comparison question', { timeout: 60000 }, async () => {
+  const r = await request(baseUrl, 'POST', '/api/v1/assistant/ask', {
+    token,
+    body: { question: 'compare this week with last week' },
+  })
+  assert.equal(r.status, 200, r.json?.message)
+  assert.equal(r.json.data.intent, 'weeklyCompare')
+  assert.ok(r.json.data.answer.length > 0)
+})
 
-intentTest('answers customer question', { timeout: 60000 }, async () => {
+test('answers customer question', { timeout: 60000 }, async () => {
   const r = await request(baseUrl, 'POST', '/api/v1/assistant/ask', {
     token,
     body: { question: 'who are my top customers?' },
@@ -109,24 +101,20 @@ intentTest('answers customer question', { timeout: 60000 }, async () => {
   assert.ok(r.json.data.answer.length > 0)
 })
 
-intentTest(
-  'answers Bengali question in Bengali',
-  { timeout: 60000 },
-  async () => {
-    const r = await request(baseUrl, 'POST', '/api/v1/assistant/ask', {
-      token,
-      body: {
-        question:
-          '\u0986\u099c\u0995\u09c7\u09b0 \u09ac\u09bf\u0995\u09cd\u09b0\u09bf \u0995\u09c7\u09ae\u09a8?',
-      },
-    })
-    assert.equal(r.status, 200, r.json?.message)
-    assert.equal(r.json.data.intent, 'today')
-    assert.ok(r.json.data.answer.length > 0)
-  }
-)
+test('answers Bengali question in Bengali', { timeout: 60000 }, async () => {
+  const r = await request(baseUrl, 'POST', '/api/v1/assistant/ask', {
+    token,
+    body: {
+      question:
+        '\u0986\u099c\u0995\u09c7\u09b0 \u09ac\u09bf\u0995\u09cd\u09b0\u09bf \u0995\u09c7\u09ae\u09a8?',
+    },
+  })
+  assert.equal(r.status, 200, r.json?.message)
+  assert.equal(r.json.data.intent, 'today')
+  assert.ok(r.json.data.answer.length > 0)
+})
 
-intentTest('answers Hindi question', { timeout: 60000 }, async () => {
+test('answers Hindi question', { timeout: 60000 }, async () => {
   const r = await request(baseUrl, 'POST', '/api/v1/assistant/ask', {
     token,
     body: {
@@ -139,22 +127,29 @@ intentTest('answers Hindi question', { timeout: 60000 }, async () => {
   assert.ok(r.json.data.answer.length > 0)
 })
 
-test(
-  'assistant answers when Gemini is up, graceful 502 when down',
-  { timeout: 60000 },
-  async () => {
-    const health = await request(baseUrl, 'GET', '/health')
-    const geminiUpNow = health.json.services?.gemini === 'ok'
-    const r = await request(baseUrl, 'POST', '/api/v1/assistant/ask', {
-      token,
+test('extracts items from a voice transcript (mocked Gemini)', async () => {
+  const r = await request(baseUrl, 'POST', '/api/v1/billing/extract', {
+    token,
+    body: { transcript: 'two kg rice 200 taka' },
+  })
+  assert.equal(r.status, 200, r.json?.message)
+  assert.equal(r.json.data.items[0].productName, 'Rice')
+  assert.equal(r.json.data.items[0].price, 200)
+})
+
+test('graceful 502 when Gemini is down', { timeout: 60000 }, async () => {
+  const down = await spawnServer({ env: { GEMINI_MOCK: 'fail' } })
+  try {
+    const reg = await registerUser(down.baseUrl, 'down@test.com')
+    const r = await request(down.baseUrl, 'POST', '/api/v1/assistant/ask', {
+      token: reg.json.data.accessToken,
       body: { question: 'today summary' },
     })
-    if (geminiUpNow) {
-      assert.equal(r.status, 200, r.json?.message)
-      assert.ok(r.json.data.answer.length > 0)
-    } else {
-      assert.equal(r.status, 502)
-      assert.match(r.json.message, /AI assistant failed/)
-    }
+    assert.equal(r.status, 502)
+    assert.match(r.json.message, /AI assistant failed/)
+  } finally {
+    down.stop()
+    await new Promise((resolve) => setTimeout(resolve, 500))
+    await dropTestDb(down.dbName)
   }
-)
+})

@@ -1,7 +1,9 @@
 ﻿import { GoogleGenerativeAI } from '@google/generative-ai'
 import config from '../config/index.js'
 
-const genAI = new GoogleGenerativeAI(config.gemini.apiKey)
+const GEMINI_MOCK = process.env.GEMINI_MOCK
+
+const genAI = GEMINI_MOCK ? null : new GoogleGenerativeAI(config.gemini.apiKey)
 
 const PROMPT = `You are a billing assistant for a local Indian shop.
 The shop owner speaks in Bengali or Hindi to describe items being sold.
@@ -70,6 +72,9 @@ const generateWithRetry = async (model, prompt, attempts = 3) => {
 }
 
 export const extractBillItems = async (transcript) => {
+  if (GEMINI_MOCK === 'ok') {
+    return [{ productName: 'Rice', quantity: 2, unit: 'kg', price: 200 }]
+  }
   const model = genAI.getGenerativeModel({ model: config.gemini.model })
   const result = await generateWithRetry(
     model,
@@ -113,6 +118,12 @@ export const extractBillItems = async (transcript) => {
 }
 
 export const askAssistant = async (question, data) => {
+  if (GEMINI_MOCK === 'ok') {
+    return 'Mocked answer: revenue 200 INR from 1 bill today.'
+  }
+  if (GEMINI_MOCK === 'fail') {
+    throw new Error('Gemini unavailable (test mock)')
+  }
   const model = genAI.getGenerativeModel({ model: config.gemini.model })
   const result = await generateWithRetry(
     model,
@@ -125,6 +136,8 @@ export const askAssistant = async (question, data) => {
 }
 
 export const pingGemini = async () => {
+  if (GEMINI_MOCK === 'ok') return true
+  if (GEMINI_MOCK === 'fail') return false
   try {
     const model = genAI.getGenerativeModel({ model: config.gemini.model })
     await withTimeout(

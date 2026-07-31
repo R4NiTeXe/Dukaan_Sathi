@@ -22,6 +22,8 @@ Body: `{ email, password }`
 
 **200** → `{ accessToken, refreshToken, user }` + `Set-Cookie: refreshToken` (httpOnly, 30d, Path=/) · **401** bad credentials
 
+**429** — too many failed attempts for this email+IP (default 5 in 15 min, configurable via `LOGIN_MAX_FAILURES` / `LOGIN_WINDOW_MS`). A successful login resets the counter.
+
 ### POST /auth/refresh
 No body. Sends new `Set-Cookie`. Rotates the refresh token (old one becomes invalid).
 
