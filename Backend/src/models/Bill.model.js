@@ -8,6 +8,12 @@ const billSchema = new mongoose.Schema(
       required: true,
       index: true,
     },
+    customerId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Customer',
+      default: null,
+      index: true,
+    },
     billNumber: {
       type: String,
       required: true,
@@ -31,6 +37,12 @@ const billSchema = new mongoose.Schema(
       type: String,
       enum: ['cash', 'upi'],
       required: true,
+    },
+    paymentStatus: {
+      type: String,
+      enum: ['paid', 'pending'],
+      default: 'paid',
+      index: true,
     },
   },
   {

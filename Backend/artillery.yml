@@ -1,0 +1,113 @@
+config:
+  target: "http://localhost:8999"
+  phases:
+    - duration: 30
+      arrivalRate: 10
+      name: "Warm up"
+    - duration: 60
+      arrivalRate: 50
+      name: "Sustained load"
+    - duration: 30
+      arrivalRate: 100
+      name: "Peak load"
+  defaults:
+    headers:
+      Content-Type: "application/json"
+  processor: "./artillery-processor.js"
+
+scenarios:
+  - name: "Full billing flow"
+    weight: 70
+    flow:
+      - post:
+          url: "/api/auth/register"
+          json:
+            ownerName: "LoadTest"
+            shopName: "LoadTest Shop"
+            shopType: "grocery"
+            email: "loadtest-{{ $randomString() }}@test.com"
+            password: "secret123"
+          capture:
+            - json: "$.data.accessToken"
+              as: "accessToken"
+            - header: "set-cookie"
+              as: "cookie"
+      - think: 1
+      - post:
+          url: "/api/customers"
+          headers:
+            Authorization: "Bearer {{ accessToken }}"
+          json:
+            name: "Customer {{ $randomString() }}"
+            phone: "9{{ $randomNumber(100000000, 999999999) }}"
+      - think: 1
+      - post:
+          url: "/api/products"
+          headers:
+            Authorization: "Bearer {{ accessToken }}"
+          json:
+            name: "Product {{ $randomString() }}"
+            price: "{{ $randomNumber(10, 500) }}"
+            category: "Test"
+            unit: "piece"
+            stock: 100
+      - think: 1
+      - post:
+          url: "/api/billing/save"
+          headers:
+            Authorization: "Bearer {{ accessToken }}"
+          json:
+            items:
+              - productName: "Item A"
+                quantity: 2
+                unit: "piece"
+                price: 100
+              - productName: "Item B"
+                quantity: 1
+                unit: "kg"
+                price: 50
+            paymentMethod: "cash"
+            paymentStatus: "paid"
+      - think: 2
+      - get:
+          url: "/api/dashboard/summary"
+          headers:
+            Authorization: "Bearer {{ accessToken }}"
+      - think: 1
+      - get:
+          url: "/api/analytics/monthly"
+          headers:
+            Authorization: "Bearer {{ accessToken }}"
+      - think: 1
+      - get:
+          url: "/api/search?q=Item"
+          headers:
+            Authorization: "Bearer {{ accessToken }}"
+
+  - name: "Read-only dashboard"
+    weight: 30
+    flow:
+      - post:
+          url: "/api/auth/login"
+          json:
+            email: "loadtest-{{ $randomString() }}@test.com"
+            password: "secret123"
+          capture:
+            - json: "$.data.accessToken"
+              as: "accessToken"
+      - get:
+          url: "/api/dashboard/summary"
+          headers:
+            Authorization: "Bearer {{ accessToken }}"
+      - get:
+          url: "/api/bills"
+          headers:
+            Authorization: "Bearer {{ accessToken }}"
+      - get:
+          url: "/api/analytics/top-products"
+          headers:
+            Authorization: "Bearer {{ accessToken }}"
+      - get:
+          url: "/api/customers"
+          headers:
+            Authorization: "Bearer {{ accessToken }}"

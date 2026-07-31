@@ -12,4 +12,15 @@ export const extractResponseSchema = z.array(billItemSchema).min(1, 'At least on
 export const saveBillSchema = z.object({
   items: z.array(billItemSchema).min(1, 'At least one item is required'),
   paymentMethod: z.enum(['cash', 'upi']),
+  paymentStatus: z.enum(['paid', 'pending']).optional(),
+  customerId: z.string().nullable().optional(),
 });
+
+export const updateBillSchema = z
+  .object({
+    items: z.array(billItemSchema).min(1).optional(),
+    paymentMethod: z.enum(['cash', 'upi']).optional(),
+    paymentStatus: z.enum(['paid', 'pending']).optional(),
+    customerId: z.string().nullable().optional(),
+  })
+  .refine((data) => Object.keys(data).length > 0, { message: 'At least one field must be provided' });

@@ -45,6 +45,10 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: null,
     },
+    refreshToken: {
+      type: String,
+      default: null,
+    },
   },
   {
     timestamps: true,
@@ -71,6 +75,28 @@ userSchema.methods.generateAccessToken = function () {
     process.env.JWT_SECRET,
     { expiresIn: process.env.JWT_EXPIRY || '7d' }
   );
+};
+
+userSchema.methods.generateRefreshToken = function () {
+  return jwt.sign(
+    { _id: this._id },
+    process.env.JWT_REFRESH_SECRET || process.env.JWT_SECRET,
+    { expiresIn: process.env.JWT_REFRESH_EXPIRY || '30d' }
+  );
+};
+
+userSchema.methods.setRefreshToken = async function (token) {
+  this.refreshToken = await bcrypt.hash(token, 10);
+  await this.save();
+};
+
+userSchema.methods.verifyRefreshToken = async function (token) {
+  return bcrypt.compare(token, this.refreshToken || '');
+};
+
+userSchema.methods.clearRefreshToken = async function () {
+  this.refreshToken = null;
+  await this.save();
 };
 
 export const User = mongoose.model('User', userSchema);

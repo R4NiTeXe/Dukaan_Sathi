@@ -10,29 +10,48 @@ if (!process.env.MONGODB_URI) {
 
 const PORT = process.env.PORT || 8000;
 
-connectDB()
-  .then(() => {
-    app.listen(PORT, () => {
-      console.log(`Server is running at port : ${PORT}`);
-    });
-  })
-  .catch((err) => {
-    console.error('MongoDB connection failed:', err.message);
-    process.exit(1);
+let server;
+
+const startServer = async () => {
+  await connectDB();
+  server = app.listen(PORT, () => {
+    console.log(`Server is running at port : ${PORT}`);
   });
+};
 
 const gracefulShutdown = async (signal) => {
   console.log(`${signal} received. Shutting down gracefully...`);
   try {
+    if (server) {
+      await new Promise((resolve, reject) => {
+        server.close((err) => (err ? reject(err) : resolve()));
+      });
+      console.log('HTTP server closed');
+    }
     if (mongoose.connection.readyState !== 0) {
       await mongoose.connection.close();
       console.log('MongoDB connection closed');
     }
   } catch (err) {
-    console.warn('Error closing MongoDB connection:', err.message);
+    console.warn('Error during shutdown:', err.message);
   }
   process.exit(0);
 };
 
 process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
 process.on('SIGINT', () => gracefulShutdown('SIGINT'));
+
+process.on('uncaughtException', (err) => {
+  console.error('Uncaught exception:', err);
+  gracefulShutdown('UNCAUGHT_EXCEPTION');
+});
+
+process.on('unhandledRejection', (reason) => {
+  console.error('Unhandled rejection:', reason);
+  gracefulShutdown('UNHANDLED_REJECTION');
+});
+
+startServer().catch((err) => {
+  console.error('Failed to start server:', err.message);
+  process.exit(1);
+});

@@ -1,7 +1,8 @@
-import { Bill } from '../models/Bill.js';
-import { extractBillItems } from '../services/geminiService.js';
-import { extractResponseSchema, saveBillSchema } from '../validators/billingValidator.js';
-import { generateBillNumber } from '../helpers/billNumber.js';
+import { Bill } from '../models/Bill.model.js';
+import { extractBillItems } from '../services/gemini.service.js';
+import { extractResponseSchema, saveBillSchema } from '../validators/billing.validator.js';
+import { generateBillNumber } from '../helpers/billNumber.helper.js';
+import { refreshCustomerStats } from '../helpers/customerStats.helper.js';
 import ApiError from '../utils/ApiError.js';
 import ApiResponse from '../utils/ApiResponse.js';
 import asyncHandler from '../utils/asyncHandler.js';
@@ -34,7 +35,7 @@ const saveBill = asyncHandler(async (req, res) => {
     throw new ApiError(400, 'Invalid bill data', validated.error.issues);
   }
 
-  const { items, paymentMethod } = validated.data;
+  const { items, paymentMethod, paymentStatus, customerId } = validated.data;
   const totalAmount = items.reduce((sum, item) => sum + item.price, 0);
   const billNumber = await generateBillNumber();
 
@@ -44,7 +45,13 @@ const saveBill = asyncHandler(async (req, res) => {
     items,
     totalAmount,
     paymentMethod,
+    paymentStatus: paymentStatus || 'paid',
+    customerId: customerId || null,
   });
+
+  if (bill.customerId) {
+    await refreshCustomerStats(bill.customerId);
+  }
 
   return res.status(201).json(new ApiResponse(201, { bill }, 'Bill saved'));
 });

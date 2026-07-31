@@ -48,7 +48,16 @@ export const extractBillItems = async (transcript) => {
     .trim();
 
   try {
-    return JSON.parse(cleaned);
+    const parsed = JSON.parse(cleaned);
+    return parsed
+      .filter((item) => item && typeof item.productName === 'string' && item.productName.trim())
+      .map((item) => ({
+        productName: item.productName.trim(),
+        quantity: typeof item.quantity === 'number' && item.quantity > 0 ? item.quantity : 1,
+        unit: typeof item.unit === 'string' && item.unit.trim() ? item.unit.trim() : 'piece',
+        price: typeof item.price === 'number' && item.price >= 0 ? item.price : 0,
+      }))
+      .filter((item) => item.price > 0 || item.quantity > 0);
   } catch (error) {
     throw new Error(`Gemini returned invalid JSON: ${rawText.slice(0, 200)}`);
   }
