@@ -1,4 +1,4 @@
-import mongoose from 'mongoose';
+import mongoose from 'mongoose'
 
 const billSchema = new mongoose.Schema(
   {
@@ -46,10 +46,10 @@ const billSchema = new mongoose.Schema(
   {
     timestamps: true,
   }
-);
+)
 
-billSchema.index({ userId: 1, createdAt: -1 });
-billSchema.index({ userId: 1, paymentStatus: 1 });
-billSchema.index({ userId: 1, customerId: 1 });
+billSchema.index({ userId: 1, createdAt: -1 })
+billSchema.index({ userId: 1, paymentStatus: 1 })
+billSchema.index({ userId: 1, customerId: 1 })
 
-export const Bill = mongoose.model('Bill', billSchema);
+export const Bill = mongoose.model('Bill', billSchema)

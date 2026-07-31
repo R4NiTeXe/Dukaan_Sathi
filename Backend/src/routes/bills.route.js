@@ -1,14 +1,19 @@
-import { Router } from 'express';
-import { listBills, getBillById, updateBill, deleteBill } from '../controllers/bill.controller.js';
-import { verifyJWT } from '../middlewares/auth.middleware.js';
+import { Router } from 'express'
+import {
+  listBills,
+  getBillById,
+  updateBill,
+  deleteBill,
+} from '../controllers/bill.controller.js'
+import { verifyJWT } from '../middlewares/auth.middleware.js'
 
-const router = Router();
+const router = Router()
 
-router.use(verifyJWT);
+router.use(verifyJWT)
 
-router.get('/', listBills);
-router.get('/:id', getBillById);
-router.put('/:id', updateBill);
-router.delete('/:id', deleteBill);
+router.get('/', listBills)
+router.get('/:id', getBillById)
+router.put('/:id', updateBill)
+router.delete('/:id', deleteBill)
 
-export default router;
+export default router

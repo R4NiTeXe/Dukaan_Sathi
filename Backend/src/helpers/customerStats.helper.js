@@ -1,23 +1,14 @@
-import mongoose from 'mongoose';
-import { Bill } from '../models/Bill.model.js';
-import { Customer } from '../models/Customer.model.js';
+import mongoose from 'mongoose'
+import { Customer } from '../models/Customer.model.js'
+import { customerPurchaseSummary } from './stats.helper.js'
 
 export const refreshCustomerStats = async (customerId) => {
-  if (!customerId || !mongoose.isValidObjectId(customerId)) return;
+  if (!customerId || !mongoose.isValidObjectId(customerId)) return
 
-  const [result] = await Bill.aggregate([
-    { $match: { customerId: new mongoose.Types.ObjectId(customerId) } },
-    {
-      $group: {
-        _id: null,
-        totalPurchases: { $sum: 1 },
-        lastPurchase: { $max: '$createdAt' },
-      },
-    },
-  ]);
+  const summary = await customerPurchaseSummary(customerId)
 
   await Customer.findByIdAndUpdate(customerId, {
-    totalPurchases: result?.totalPurchases || 0,
-    lastPurchase: result?.lastPurchase || null,
-  });
-};
+    totalPurchases: summary?.totalPurchases || 0,
+    lastPurchase: summary?.lastPurchase || null,
+  })
+}

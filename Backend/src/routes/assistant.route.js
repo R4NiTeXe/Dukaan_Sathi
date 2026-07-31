@@ -1,11 +1,11 @@
-import { Router } from 'express';
-import { ask } from '../controllers/assistant.controller.js';
-import { verifyJWT } from '../middlewares/auth.middleware.js';
+import { Router } from 'express'
+import { ask } from '../controllers/assistant.controller.js'
+import { verifyJWT } from '../middlewares/auth.middleware.js'
 
-const router = Router();
+const router = Router()
 
-router.use(verifyJWT);
+router.use(verifyJWT)
 
-router.post('/ask', ask);
+router.post('/ask', ask)
 
-export default router;
+export default router

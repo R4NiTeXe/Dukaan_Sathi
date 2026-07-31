@@ -1,11 +1,11 @@
-import { Router } from 'express';
-import { summary } from '../controllers/dashboard.controller.js';
-import { verifyJWT } from '../middlewares/auth.middleware.js';
+import { Router } from 'express'
+import { summary } from '../controllers/dashboard.controller.js'
+import { verifyJWT } from '../middlewares/auth.middleware.js'
 
-const router = Router();
+const router = Router()
 
-router.use(verifyJWT);
+router.use(verifyJWT)
 
-router.get('/summary', summary);
+router.get('/summary', summary)
 
-export default router;
+export default router

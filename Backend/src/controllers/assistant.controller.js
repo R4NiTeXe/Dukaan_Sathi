@@ -1,45 +1,48 @@
-import mongoose from 'mongoose';
-import { Bill } from '../models/Bill.model.js';
-import { Customer } from '../models/Customer.model.js';
-import { Product } from '../models/Product.model.js';
-import { askAssistant } from '../services/gemini.service.js';
-import ApiError from '../utils/ApiError.js';
-import ApiResponse from '../utils/ApiResponse.js';
-import asyncHandler from '../utils/asyncHandler.js';
+import mongoose from 'mongoose'
+import { Bill } from '../models/Bill.model.js'
+import { Customer } from '../models/Customer.model.js'
+import { askAssistant } from '../services/gemini.service.js'
+import ApiError from '../utils/ApiError.js'
+import ApiResponse from '../utils/ApiResponse.js'
+import asyncHandler from '../utils/asyncHandler.js'
 
 const startOfDay = () => {
-  const d = new Date();
-  d.setHours(0, 0, 0, 0);
-  return d;
-};
+  const d = new Date()
+  d.setHours(0, 0, 0, 0)
+  return d
+}
 
 const startOfMonth = () => {
-  const d = new Date();
-  d.setDate(1);
-  d.setHours(0, 0, 0, 0);
-  return d;
-};
+  const d = new Date()
+  d.setDate(1)
+  d.setHours(0, 0, 0, 0)
+  return d
+}
 
 const detectIntent = (question) => {
-  const q = question.toLowerCase();
+  const q = question.toLowerCase()
 
-  if (/best seller|best selling|top product|top selling|popular|bestseller/.test(q)) {
-    return 'topProducts';
+  if (
+    /best seller|best selling|top product|top selling|popular|bestseller/.test(
+      q
+    )
+  ) {
+    return 'topProducts'
   }
   if (/compare|last week|previous week|versus|vs/.test(q)) {
-    return 'weeklyCompare';
+    return 'weeklyCompare'
   }
   if (/customer/.test(q)) {
-    return 'customers';
+    return 'customers'
   }
   if (/month|trend|this month|monthly/.test(q)) {
-    return 'monthlyTrend';
+    return 'monthlyTrend'
   }
   if (/today|today's|aaj|आज|আজ/.test(q)) {
-    return 'today';
+    return 'today'
   }
-  return 'summary';
-};
+  return 'summary'
+}
 
 const fetchTopProducts = async (userId) => {
   return Bill.aggregate([
@@ -56,32 +59,55 @@ const fetchTopProducts = async (userId) => {
     { $sort: { totalRevenue: -1 } },
     { $limit: 5 },
     {
-      $project: { _id: 0, productName: '$_id', totalRevenue: 1, totalQuantity: 1, timesSold: 1 },
+      $project: {
+        _id: 0,
+        productName: '$_id',
+        totalRevenue: 1,
+        totalQuantity: 1,
+        timesSold: 1,
+      },
     },
-  ]);
-};
+  ])
+}
 
 const fetchWeeklyCompare = async (userId) => {
-  const now = new Date();
-  const thisWeekStart = new Date(now);
-  thisWeekStart.setDate(now.getDate() - 7);
-  const lastWeekStart = new Date(thisWeekStart);
-  lastWeekStart.setDate(thisWeekStart.getDate() - 7);
+  const now = new Date()
+  const thisWeekStart = new Date(now)
+  thisWeekStart.setDate(now.getDate() - 7)
+  const lastWeekStart = new Date(thisWeekStart)
+  lastWeekStart.setDate(thisWeekStart.getDate() - 7)
 
   const [thisWeek] = await Bill.aggregate([
     { $match: { userId, createdAt: { $gte: thisWeekStart } } },
-    { $group: { _id: null, revenue: { $sum: '$totalAmount' }, bills: { $sum: 1 } } },
-  ]);
+    {
+      $group: {
+        _id: null,
+        revenue: { $sum: '$totalAmount' },
+        bills: { $sum: 1 },
+      },
+    },
+  ])
   const [lastWeek] = await Bill.aggregate([
-    { $match: { userId, createdAt: { $gte: lastWeekStart, $lt: thisWeekStart } } },
-    { $group: { _id: null, revenue: { $sum: '$totalAmount' }, bills: { $sum: 1 } } },
-  ]);
+    {
+      $match: {
+        userId,
+        createdAt: { $gte: lastWeekStart, $lt: thisWeekStart },
+      },
+    },
+    {
+      $group: {
+        _id: null,
+        revenue: { $sum: '$totalAmount' },
+        bills: { $sum: 1 },
+      },
+    },
+  ])
 
   return {
     thisWeek: thisWeek || { revenue: 0, bills: 0 },
     lastWeek: lastWeek || { revenue: 0, bills: 0 },
-  };
-};
+  }
+}
 
 const fetchCustomers = async (userId) => {
   const topCustomers = await Bill.aggregate([
@@ -96,7 +122,12 @@ const fetchCustomers = async (userId) => {
     { $sort: { totalSpent: -1 } },
     { $limit: 5 },
     {
-      $lookup: { from: 'customers', localField: '_id', foreignField: '_id', as: 'customer' },
+      $lookup: {
+        from: 'customers',
+        localField: '_id',
+        foreignField: '_id',
+        as: 'customer',
+      },
     },
     { $unwind: '$customer' },
     {
@@ -107,16 +138,16 @@ const fetchCustomers = async (userId) => {
         totalSpent: 1,
       },
     },
-  ]);
+  ])
 
-  const totalCustomers = await Customer.countDocuments({ userId });
-  return { totalCustomers, topCustomers };
-};
+  const totalCustomers = await Customer.countDocuments({ userId })
+  return { totalCustomers, topCustomers }
+}
 
 const fetchMonthlyTrend = async (userId) => {
-  const sixMonthsAgo = new Date();
-  sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 5);
-  sixMonthsAgo.setDate(1);
+  const sixMonthsAgo = new Date()
+  sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 5)
+  sixMonthsAgo.setDate(1)
 
   return Bill.aggregate([
     { $match: { userId, createdAt: { $gte: sixMonthsAgo } } },
@@ -129,11 +160,11 @@ const fetchMonthlyTrend = async (userId) => {
     },
     { $sort: { _id: 1 } },
     { $project: { _id: 0, month: '$_id', totalRevenue: 1, billCount: 1 } },
-  ]);
-};
+  ])
+}
 
 const fetchToday = async (userId) => {
-  const userIdObj = new mongoose.Types.ObjectId(userId);
+  const userIdObj = new mongoose.Types.ObjectId(userId)
   const [result] = await Bill.aggregate([
     { $match: { userId: userIdObj, createdAt: { $gte: startOfDay() } } },
     {
@@ -141,89 +172,95 @@ const fetchToday = async (userId) => {
         revenue: [{ $group: { _id: null, total: { $sum: '$totalAmount' } } }],
         count: [{ $count: 'c' }],
         byMethod: [
-          { $group: { _id: '$paymentMethod', total: { $sum: '$totalAmount' } } },
+          {
+            $group: { _id: '$paymentMethod', total: { $sum: '$totalAmount' } },
+          },
           { $project: { _id: 0, method: '$_id', total: 1 } },
         ],
       },
     },
-  ]);
+  ])
 
   return {
     revenue: result?.revenue?.[0]?.total || 0,
     billCount: result?.count?.[0]?.c || 0,
     byMethod: result?.byMethod || [],
-  };
-};
+  }
+}
 
 const fetchSummary = async (userId) => {
-  const userIdObj = new mongoose.Types.ObjectId(userId);
+  const userIdObj = new mongoose.Types.ObjectId(userId)
   const [result] = await Bill.aggregate([
     { $match: { userId: userIdObj } },
     {
       $facet: {
         totalBills: [{ $count: 'c' }],
-        totalRevenue: [{ $group: { _id: null, total: { $sum: '$totalAmount' } } }],
+        totalRevenue: [
+          { $group: { _id: null, total: { $sum: '$totalAmount' } } },
+        ],
         monthlyRevenue: [
           { $match: { createdAt: { $gte: startOfMonth() } } },
           { $group: { _id: null, total: { $sum: '$totalAmount' } } },
         ],
         paymentBreakdown: [
-          { $group: { _id: '$paymentMethod', total: { $sum: '$totalAmount' } } },
+          {
+            $group: { _id: '$paymentMethod', total: { $sum: '$totalAmount' } },
+          },
           { $project: { _id: 0, method: '$_id', total: 1 } },
         ],
       },
     },
-  ]);
+  ])
 
   return {
     totalBills: result?.totalBills?.[0]?.c || 0,
     totalRevenue: result?.totalRevenue?.[0]?.total || 0,
     monthlyRevenue: result?.monthlyRevenue?.[0]?.total || 0,
     paymentBreakdown: result?.paymentBreakdown || [],
-  };
-};
+  }
+}
 
 const ask = asyncHandler(async (req, res) => {
-  const { question } = req.body;
+  const { question } = req.body
 
   if (!question || !question.trim()) {
-    throw new ApiError(400, 'Question is required');
+    throw new ApiError(400, 'Question is required')
   }
 
-  const userId = req.user._id;
-  const intent = detectIntent(question);
+  const userId = req.user._id
+  const intent = detectIntent(question)
 
-  let data;
+  let data
   switch (intent) {
     case 'topProducts':
-      data = { topProducts: await fetchTopProducts(userId) };
-      break;
+      data = { topProducts: await fetchTopProducts(userId) }
+      break
     case 'weeklyCompare':
-      data = await fetchWeeklyCompare(userId);
-      break;
+      data = await fetchWeeklyCompare(userId)
+      break
     case 'customers':
-      data = await fetchCustomers(userId);
-      break;
+      data = await fetchCustomers(userId)
+      break
     case 'monthlyTrend':
-      data = { monthlyTrend: await fetchMonthlyTrend(userId) };
-      break;
+      data = { monthlyTrend: await fetchMonthlyTrend(userId) }
+      break
     case 'today':
-      data = { today: await fetchToday(userId) };
-      break;
+      data = { today: await fetchToday(userId) }
+      break
     default:
-      data = await fetchSummary(userId);
+      data = await fetchSummary(userId)
   }
 
-  let answer;
+  let answer
   try {
-    answer = await askAssistant(question, data);
+    answer = await askAssistant(question, data)
   } catch (error) {
-    throw new ApiError(502, `AI assistant failed: ${error.message}`);
+    throw new ApiError(502, `AI assistant failed: ${error.message}`)
   }
 
-  return res.status(200).json(
-    new ApiResponse(200, { answer, intent, data }, 'Answer generated')
-  );
-});
+  return res
+    .status(200)
+    .json(new ApiResponse(200, { answer, intent, data }, 'Answer generated'))
+})
 
-export { ask };
+export { ask }
