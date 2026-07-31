@@ -2,20 +2,16 @@ import 'dotenv/config';
 import app from './app.js';
 import mongoose from 'mongoose';
 import connectDB from './db/index.js';
+import config from './config/index.js';
 
-if (!process.env.MONGODB_URI) {
-  console.error('Missing MONGODB_URI. Server cannot start.');
-  process.exit(1);
-}
-
-const PORT = process.env.PORT || 8000;
+config.validateEnv();
 
 let server;
 
 const startServer = async () => {
   await connectDB();
-  server = app.listen(PORT, () => {
-    console.log(`Server is running at port : ${PORT}`);
+  server = app.listen(config.server.port, () => {
+    console.log(`Server is running at port : ${config.server.port}`);
   });
 };
 
@@ -51,7 +47,9 @@ process.on('unhandledRejection', (reason) => {
   gracefulShutdown('UNHANDLED_REJECTION');
 });
 
-startServer().catch((err) => {
+try {
+  startServer();
+} catch (err) {
   console.error('Failed to start server:', err.message);
   process.exit(1);
-});
+}

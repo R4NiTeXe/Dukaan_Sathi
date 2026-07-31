@@ -1,6 +1,7 @@
-import { GoogleGenerativeAI } from '@google/generative-ai';
+﻿import { GoogleGenerativeAI } from '@google/generative-ai';
+import config from '../config/index.js';
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+const genAI = new GoogleGenerativeAI(config.gemini.apiKey);
 
 const PROMPT = `You are a billing assistant for a local Indian shop.
 The shop owner speaks in Bengali or Hindi to describe items being sold.
@@ -24,6 +25,16 @@ Output format:
 
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
+const withTimeout = (promise, ms, message) =>
+  Promise.race([
+    promise,
+    new Promise((_, reject) =>
+      setTimeout(() => reject(new Error(message)), ms)
+    ),
+  ]);
+
+const GENERATE_TIMEOUT_MS = 20000;
+
 const ASSISTANT_PROMPT = `You are a business analytics assistant for a local shop owner.
 You can ONLY answer using the provided business data.
 Do NOT invent or assume any information not present in the data.
@@ -42,7 +53,11 @@ Return ONLY the answer text, no JSON.`;
 const generateWithRetry = async (model, prompt, attempts = 3) => {
   for (let attempt = 1; attempt <= attempts; attempt++) {
     try {
-      return await model.generateContent(prompt);
+      return await withTimeout(
+        model.generateContent(prompt),
+        GENERATE_TIMEOUT_MS,
+        'Gemini request timed out'
+      );
     } catch (error) {
       const isRateLimit = /503|429|RESOURCE_EXHAUSTED|high demand/i.test(error.message);
       if (!isRateLimit || attempt === attempts) throw error;
@@ -53,7 +68,7 @@ const generateWithRetry = async (model, prompt, attempts = 3) => {
 };
 
 export const extractBillItems = async (transcript) => {
-  const model = genAI.getGenerativeModel({ model: process.env.GEMINI_MODEL || 'gemini-flash-latest' });
+  const model = genAI.getGenerativeModel({ model: config.gemini.model });
   const result = await generateWithRetry(model, PROMPT.replace('{transcribed_text}', transcript));
   const rawText = result.response.text().trim();
 
@@ -79,10 +94,24 @@ export const extractBillItems = async (transcript) => {
 };
 
 export const askAssistant = async (question, data) => {
-  const model = genAI.getGenerativeModel({ model: process.env.GEMINI_MODEL || 'gemini-flash-latest' });
+  const model = genAI.getGenerativeModel({ model: config.gemini.model });
   const result = await generateWithRetry(
     model,
     ASSISTANT_PROMPT.replace('{data}', JSON.stringify(data)).replace('{question}', question)
   );
   return result.response.text().trim();
+};
+
+export const pingGemini = async () => {
+  try {
+    const model = genAI.getGenerativeModel({ model: config.gemini.model });
+    await withTimeout(
+      model.generateContent('Reply with exactly: OK'),
+      5000,
+      'Gemini ping timed out'
+    );
+    return true;
+  } catch {
+    return false;
+  }
 };

@@ -29,3 +29,38 @@ export const uploadQRCode = (file) => {
     uploadStream.end(file.buffer);
   });
 };
+
+export const deleteImage = (imageUrl) => {
+  return new Promise((resolve) => {
+    if (!isConfigured() || !imageUrl) {
+      resolve(false);
+      return;
+    }
+    const match = imageUrl.match(/\/([^/]+)\.[a-z0-9]+(?:\?.*)?$/i);
+    if (!match) {
+      resolve(false);
+      return;
+    }
+    const publicId = `qr-codes/${match[1]}`;
+    cloudinary.uploader.destroy(publicId, (error, result) => {
+      if (error || result?.result !== 'ok') {
+        resolve(false);
+        return;
+      }
+      resolve(true);
+    });
+  });
+};
+
+export const pingCloudinary = async () => {
+  try {
+    if (!isConfigured()) return false;
+    const result = await Promise.race([
+      cloudinary.api.ping(),
+      new Promise((resolve) => setTimeout(() => resolve(null), 5000)),
+    ]);
+    return result?.status === 'ok';
+  } catch {
+    return false;
+  }
+};

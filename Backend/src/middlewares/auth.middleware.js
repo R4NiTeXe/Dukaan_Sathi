@@ -2,6 +2,7 @@ import jwt from 'jsonwebtoken';
 import { User } from '../models/User.model.js';
 import ApiError from '../utils/ApiError.js';
 import asyncHandler from '../utils/asyncHandler.js';
+import config from '../config/index.js';
 
 export const verifyJWT = asyncHandler(async (req, res, next) => {
   const token =
@@ -14,7 +15,7 @@ export const verifyJWT = asyncHandler(async (req, res, next) => {
 
   let decoded;
   try {
-    decoded = jwt.verify(token, process.env.JWT_SECRET);
+    decoded = jwt.verify(token, config.jwt.secret);
   } catch (error) {
     throw new ApiError(401, 'Unauthorized: Invalid or expired token');
   }

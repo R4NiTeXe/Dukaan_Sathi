@@ -34,3 +34,13 @@ services:
         sync: false
       - key: RATE_LIMIT_MAX
         value: 300
+
+static_sites:
+  - type: static
+    name: ai-billing-frontend
+    rootDirectory: Frontend
+    buildCommand: npm install && npm run build
+    publishPath: dist
+    envVars:
+      - key: VITE_API_URL
+        value: https://ai-billing-backend.onrender.com/api/v1

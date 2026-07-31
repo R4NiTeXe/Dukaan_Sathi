@@ -1,16 +1,17 @@
-import { User } from '../models/User.model.js';
+﻿import { User } from '../models/User.model.js';
 import { registerSchema, loginSchema, updateProfileSchema, refreshSchema } from '../validators/auth.validator.js';
-import { uploadQRCode } from '../services/cloudinary.service.js';
+import { uploadQRCode, deleteImage } from '../services/cloudinary.service.js';
 import ApiError from '../utils/ApiError.js';
 import ApiResponse from '../utils/ApiResponse.js';
 import asyncHandler from '../utils/asyncHandler.js';
+import config from '../config/index.js';
 
 const COOKIE_OPTIONS = {
-  httpOnly: true,
-  secure: process.env.NODE_ENV === 'production',
-  sameSite: 'lax',
-  maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
-  path: '/api/auth/refresh',
+  httpOnly: config.cookie.httpOnly,
+  secure: config.cookie.secure,
+  sameSite: config.cookie.sameSite,
+  maxAge: config.cookie.maxAge,
+  path: config.cookie.path,
 };
 
 const register = asyncHandler(async (req, res) => {
@@ -77,6 +78,7 @@ const getProfile = asyncHandler(async (req, res) => {
 
 const updateProfile = asyncHandler(async (req, res) => {
   let updates = {};
+  const previousUser = await User.findById(req.user._id).select('upiQrCode');
 
   if (req.file) {
     const url = await uploadQRCode(req.file);
@@ -98,6 +100,10 @@ const updateProfile = asyncHandler(async (req, res) => {
     { new: true, runValidators: true }
   ).select('-password');
 
+  if (updates.upiQrCode && previousUser?.upiQrCode && previousUser.upiQrCode !== updates.upiQrCode) {
+    await deleteImage(previousUser.upiQrCode);
+  }
+
   return res.status(200).json(new ApiResponse(200, { user }, 'Profile updated'));
 });
 
@@ -110,7 +116,7 @@ const refresh = asyncHandler(async (req, res) => {
   let decoded;
   try {
     const jwt = await import('jsonwebtoken');
-    decoded = jwt.default.verify(refreshToken, process.env.JWT_REFRESH_SECRET || process.env.JWT_SECRET);
+    decoded = jwt.default.verify(refreshToken, config.jwt.refreshSecret);
   } catch {
     throw new ApiError(401, 'Invalid or expired refresh token');
   }
@@ -142,7 +148,7 @@ const logout = asyncHandler(async (req, res) => {
     let decoded;
     try {
       const jwt = await import('jsonwebtoken');
-      decoded = jwt.default.verify(refreshToken, process.env.JWT_REFRESH_SECRET || process.env.JWT_SECRET);
+      decoded = jwt.default.verify(refreshToken, config.jwt.refreshSecret);
     } catch {
       decoded = null;
     }

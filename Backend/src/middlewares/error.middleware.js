@@ -1,6 +1,8 @@
 import mongoose from 'mongoose';
 import multer from 'multer';
 import ApiError from '../utils/ApiError.js';
+import config from '../config/index.js';
+import { logError } from '../utils/logger.js';
 
 const notFoundHandler = (req, res) => {
   res.status(404).json({
@@ -39,8 +41,18 @@ const errorHandler = (err, req, res, next) => {
   if (error.errors && error.errors.length > 0) {
     response.errors = error.errors;
   }
-  if (process.env.NODE_ENV === 'development' && error.statusCode >= 500) {
+  if (config.server.nodeEnv === 'development' && error.statusCode >= 500) {
     response.stack = error.stack;
+  }
+
+  if (error.statusCode >= 500) {
+    logError(error.message, {
+      method: req.method,
+      url: req.originalUrl,
+      ip: req.ip,
+      statusCode: error.statusCode,
+      stack: error.stack,
+    });
   }
 
   return res.status(error.statusCode).json(response);
