@@ -11,18 +11,10 @@
   --color-muted-red: #d97777;
   --color-muted-indigo: #5c6b9c;
   
-  --font-sans: 'Inter', sans-serif;
+  --font-sans: var(--font-inter), sans-serif;
   
   --radius-premium: 20px;
   
   --shadow-soft: 0 4px 20px -2px rgba(0, 0, 0, 0.05);
   --shadow-hover: 0 12px 30px -4px rgba(0, 0, 0, 0.08);
-}
-
-body {
-  background-color: var(--color-warm-ivory);
-  color: #2c2c2c; /* Avoid pure black */
-  font-family: var(--font-sans);
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
 }
