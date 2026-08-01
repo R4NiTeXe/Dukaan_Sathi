@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { pageVariants, listItemVariants } from '@/utils/animations';
-import { Search, Edit2, AlertCircle, Loader2, PackageOpen, TrendingDown } from 'lucide-react';
+import { Search, AlertCircle, Loader2, PackageOpen, TrendingDown } from 'lucide-react';
 import api from '@/services/api';
 
 export default function ProductsList() {
@@ -120,13 +120,12 @@ export default function ProductsList() {
                   <th className="pb-4 font-medium text-right">Price</th>
                   <th className="pb-4 font-medium text-right">Stock</th>
                   <th className="pb-4 font-medium pl-8">Status</th>
-                  <th className="pb-4 font-medium text-right pr-4">Action</th>
                 </tr>
               </thead>
               <tbody>
                 {products.length === 0 ? (
                   <tr>
-                    <td colSpan="5" className="text-center py-8 text-neutral-500">
+                    <td colSpan="4" className="text-center py-8 text-neutral-500">
                       No products found.
                     </td>
                   </tr>
@@ -152,11 +151,6 @@ export default function ProductsList() {
                           <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${status.classes}`}>
                             {status.label}
                           </span>
-                        </td>
-                        <td className="py-4 text-right pr-4">
-                          <button className="p-2 text-neutral-500 hover:text-forest-green hover:bg-sage-green/10 rounded-lg transition-colors">
-                            <Edit2 className="w-4 h-4" />
-                          </button>
                         </td>
                       </motion.tr>
                     )

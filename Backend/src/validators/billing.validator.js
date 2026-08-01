@@ -17,14 +17,3 @@ export const saveBillSchema = z.object({
   paymentStatus: z.enum(['paid', 'pending']).optional(),
   customerId: z.string().nullable().optional(),
 })
-
-export const updateBillSchema = z
-  .object({
-    items: z.array(billItemSchema).min(1).optional(),
-    paymentMethod: z.enum(['cash', 'upi']).optional(),
-    paymentStatus: z.enum(['paid', 'pending']).optional(),
-    customerId: z.string().nullable().optional(),
-  })
-  .refine((data) => Object.keys(data).length > 0, {
-    message: 'At least one field must be provided',
-  })

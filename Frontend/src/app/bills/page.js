@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { pageVariants } from '@/utils/animations';
-import { ArrowUpRight, Loader2, AlertCircle } from 'lucide-react';
+import { Loader2, AlertCircle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import api from '@/services/api';
 
@@ -104,11 +104,6 @@ export default function BillsList() {
                         </span>
                       </td>
                       <td className="py-4 text-neutral-600 text-sm">{bill.paymentMethod || '-'}</td>
-                      <td className="py-4 text-right pr-4">
-                        <button className="p-2 text-neutral-500 group-hover:text-forest-green transition-colors">
-                          <ArrowUpRight className="w-5 h-5" />
-                        </button>
-                      </td>
                     </tr>
                   ))
                 )}

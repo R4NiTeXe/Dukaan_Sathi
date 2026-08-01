@@ -71,10 +71,8 @@ Body:
 |---|---|---|
 | GET | `/customers` | Query: `page`, `limit` (≤50), `search` (customer number) → `{ customers, pagination }` |
 | POST | `/customers` | Body: `{}` — number auto-assigned as `CUST-<userId>-NNN` |
-| GET | `/customers/:id` | **404** if not found |
-| DELETE | `/customers/:id` | **200** → `{ deletedCustomerId }` |
 
-Customer `totalPurchases` is recalculated whenever a linked bill is saved, updated, or deleted.
+Customer `totalPurchases` is recalculated whenever a linked bill is saved.
 
 ---
 
@@ -84,9 +82,6 @@ Customer `totalPurchases` is recalculated whenever a linked bill is saved, updat
 |---|---|---|
 | GET | `/products` | Query: `page`, `limit`, `search` (name) → `{ products, pagination }` |
 | POST | `/products` | Body: `{ name, price, unit?, stock? }` |
-| GET | `/products/:id` | **404** if not found |
-| PUT | `/products/:id` | Body: any subset |
-| DELETE | `/products/:id` | **200** → `{ deletedProductId }` |
 
 ---
 
@@ -97,8 +92,8 @@ Query params: `page` (≥1), `limit` (1–50), `search` (bill number / product n
 
 **200** → `{ bills, pagination: { page, limit, total, totalPages } }`
 
-### GET /bills/:id · PUT /bills/:id · DELETE /bills/:id
-PUT body: `{ items?, paymentMethod?, paymentStatus?, customerId? }` (empty string customerId clears it). Deleting/updating refreshes the linked customer's stats.
+### GET /bills/:id
+**200** → `{ bill }` with `customerId` populated as `customerNumber`
 
 ---
 
@@ -121,10 +116,7 @@ PUT body: `{ items?, paymentMethod?, paymentStatus?, customerId? }` (empty strin
 
 ---
 
-## Search & Assistant
-
-### GET /search?q=rice
-**200** → `{ bills[5], products[5], customers[5] }` (case-insensitive) · **400** missing `q`
+## Assistant
 
 ### POST /assistant/ask
 Body: `{ question }`. Intent detection covers: today's summary, top products, weekly comparison, customer insights, monthly trend, general summary — in English, Hindi, or Bengali. Data is fetched from your own bills; Gemini only writes the answer.

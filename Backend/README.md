@@ -43,7 +43,7 @@ npm run dev
 |---|---|
 | `npm start` | Run the server |
 | `npm run dev` | Run with nodemon auto-reload |
-| `npm test` | Lint + run the full test suite (64 tests) |
+| `npm test` | Lint + run the full test suite (57 tests) |
 | `npm run test:watch` | Re-run tests on file changes |
 | `npm run lint` | ESLint check |
 | `npm run format` | Prettier formatting |
@@ -60,18 +60,16 @@ Base URL: `/api/v1` — all routes except `auth/login`, `auth/register`, `/healt
 | POST | `/auth/login` | Login, sets refresh cookie |
 | POST | `/auth/refresh` | Rotate refresh token |
 | POST | `/auth/logout` | Revoke refresh token |
+| GET | `/auth/profile` | Current profile |
 | PUT | `/auth/profile` | Update profile (multipart, optional `upiQrCode` image) |
 | POST | `/billing/extract` | Voice text -> items via Gemini |
 | POST | `/billing/save` | Save a bill |
 | GET/POST | `/customers` | List / create customers (auto CUST numbers, `?search=`) |
-| GET/DELETE | `/customers/:id` | Get / delete customer |
 | GET/POST | `/products` | List / create products |
-| GET/PUT/DELETE | `/products/:id` | Get / update / delete product |
 | GET | `/bills` | List with `search`, `startDate`, `endDate`, `paymentMethod`, `paymentStatus`, `sortBy`, `sortOrder`, `page`, `limit` |
-| GET/PUT/DELETE | `/bills/:id` | Get / update / delete bill |
+| GET | `/bills/:id` | Get single bill (customer populated as number) |
 | GET | `/dashboard/summary` | Totals, today/week/month revenue, recent bills, top customers |
 | GET | `/analytics/monthly` `/weekly` `/top-products` `/customer-report` | Analytics |
-| GET | `/search?q=` | Search bills, products, customers |
 | POST | `/assistant/ask` | Business questions (EN/BN/HI) |
 | GET | `/health` | DB/service pings, version, slow queries |
 | GET | `/metrics` | Request count, errors, avg latency per route |

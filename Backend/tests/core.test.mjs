@@ -6,7 +6,6 @@ let server
 let baseUrl
 let token
 let customerId
-let productId
 let billId
 
 before(async () => {
@@ -65,16 +64,6 @@ test('create product', async () => {
   })
   assert.equal(r.status, 201)
   assert.equal(r.json.data.product.name, 'Rice')
-  productId = r.json.data.product._id
-})
-
-test('update product', async () => {
-  const r = await request(baseUrl, 'PUT', `/api/v1/products/${productId}`, {
-    token,
-    body: { price: 110 },
-  })
-  assert.equal(r.status, 200)
-  assert.equal(r.json.data.product.price, 110)
 })
 
 test('save bill updates customer stats', async () => {
@@ -152,15 +141,6 @@ test('get single bill', async () => {
   assert.match(r.json.data.bill.billNumber, /^BILL-\d{8}-001$/)
 })
 
-test('update bill payment status and customer stats', async () => {
-  const r = await request(baseUrl, 'PUT', `/api/v1/bills/${billId}`, {
-    token,
-    body: { paymentStatus: 'paid' },
-  })
-  assert.equal(r.status, 200)
-  assert.equal(r.json.data.bill.paymentStatus, 'paid')
-})
-
 test('analytics customer-report includes customer details', async () => {
   const r = await request(baseUrl, 'GET', '/api/v1/analytics/customer-report', {
     token,
@@ -170,39 +150,14 @@ test('analytics customer-report includes customer details', async () => {
   assert.equal(r.json.data.data[0].totalSpent, 200)
 })
 
-test('search finds bills, products and customers', async () => {
-  const r = await request(baseUrl, 'GET', '/api/v1/search?q=Rice', { token })
-  assert.equal(r.status, 200)
-  assert.ok(r.json.data.bills.length >= 1)
-  assert.equal(r.json.data.products[0].name, 'Rice')
-
-  const byNumber = await request(baseUrl, 'GET', '/api/v1/search?q=001', {
-    token,
-  })
-  assert.equal(byNumber.status, 200)
-  assert.ok(byNumber.json.data.customers.length >= 1)
-})
-
-test('delete bill returns 404 on second delete', async () => {
-  const r = await request(baseUrl, 'DELETE', `/api/v1/bills/${billId}`, {
-    token,
-  })
-  assert.equal(r.status, 200)
-
-  const again = await request(baseUrl, 'DELETE', `/api/v1/bills/${billId}`, {
-    token,
-  })
-  assert.equal(again.status, 404)
-})
-
 test('dashboard summary aggregates correctly', async () => {
   const r = await request(baseUrl, 'GET', '/api/v1/dashboard/summary', {
     token,
   })
   assert.equal(r.status, 200)
-  assert.equal(r.json.data.totalBills, 2)
-  assert.equal(r.json.data.totalRevenue, 80)
-  assert.equal(r.json.data.todayRevenue, 80)
+  assert.equal(r.json.data.totalBills, 3)
+  assert.equal(r.json.data.totalRevenue, 280)
+  assert.equal(r.json.data.todayRevenue, 280)
   assert.ok(r.json.data.recentBills.length >= 1)
 })
 
@@ -212,7 +167,7 @@ test('analytics monthly returns current month entry', async () => {
   })
   assert.equal(r.status, 200)
   assert.equal(r.json.data.data.length, 1)
-  assert.equal(r.json.data.data[0].billCount, 2)
+  assert.equal(r.json.data.data[0].billCount, 3)
 })
 
 test('analytics weekly returns today entry', async () => {
@@ -226,28 +181,8 @@ test('analytics top-products ranks by revenue', async () => {
     token,
   })
   assert.equal(r.status, 200)
-  assert.equal(r.json.data.data[0].productName, 'Sugar')
-  assert.equal(r.json.data.data[0].totalRevenue, 50)
-})
-
-test('search without query returns 400', async () => {
-  const r = await request(baseUrl, 'GET', '/api/v1/search', { token })
-  assert.equal(r.status, 400)
-})
-
-test('delete customer', async () => {
-  const r = await request(
-    baseUrl,
-    'DELETE',
-    `/api/v1/customers/${customerId}`,
-    { token }
-  )
-  assert.equal(r.status, 200)
-})
-
-test('delete product', async () => {
-  const r = await request(baseUrl, 'DELETE', `/api/v1/products/${productId}`, {
-    token,
-  })
-  assert.equal(r.status, 200)
+  assert.equal(r.json.data.data[0].productName, 'Rice')
+  assert.equal(r.json.data.data[0].totalRevenue, 200)
+  assert.equal(r.json.data.data[1].productName, 'Sugar')
+  assert.equal(r.json.data.data[1].totalRevenue, 50)
 })

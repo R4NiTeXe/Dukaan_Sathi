@@ -15,7 +15,6 @@ import productRoutes from './routes/products.route.js'
 import billRoutes from './routes/bills.route.js'
 import dashboardRoutes from './routes/dashboard.route.js'
 import analyticsRoutes from './routes/analytics.route.js'
-import searchRoutes from './routes/search.route.js'
 import assistantRoutes from './routes/assistant.route.js'
 import {
   notFoundHandler,
@@ -106,7 +105,6 @@ app.use(`${API_PREFIX}/products`, productRoutes)
 app.use(`${API_PREFIX}/bills`, billRoutes)
 app.use(`${API_PREFIX}/dashboard`, dashboardRoutes)
 app.use(`${API_PREFIX}/analytics`, analyticsRoutes)
-app.use(`${API_PREFIX}/search`, searchRoutes)
 app.use(`${API_PREFIX}/assistant`, assistantRoutes)
 
 app.get('/', (req, res) => {

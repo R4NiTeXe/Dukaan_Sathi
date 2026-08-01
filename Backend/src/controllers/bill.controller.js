@@ -1,7 +1,5 @@
 import mongoose from 'mongoose'
 import { Bill } from '../models/Bill.model.js'
-import { updateBillSchema } from '../validators/billing.validator.js'
-import { refreshCustomerStats } from '../helpers/customerStats.helper.js'
 import ApiError from '../utils/ApiError.js'
 import ApiResponse from '../utils/ApiResponse.js'
 import asyncHandler from '../utils/asyncHandler.js'
@@ -76,56 +74,4 @@ const getBillById = asyncHandler(async (req, res) => {
   return res.status(200).json(new ApiResponse(200, { bill }))
 })
 
-const updateBill = asyncHandler(async (req, res) => {
-  const validated = updateBillSchema.parse(req.body)
-
-  const bill = await Bill.findOne({ _id: req.params.id, userId: req.user._id })
-  if (!bill) {
-    throw new ApiError(404, 'Bill not found')
-  }
-
-  const updates = { ...validated }
-  if (validated.customerId === '') {
-    updates.customerId = null
-  }
-  if (validated.items) {
-    updates.totalAmount = validated.items.reduce(
-      (sum, item) => sum + item.price,
-      0
-    )
-  }
-
-  const previousCustomerId = bill.customerId
-  const updatedBill = await Bill.findByIdAndUpdate(
-    bill._id,
-    { $set: updates },
-    { new: true, runValidators: true }
-  )
-
-  if (String(previousCustomerId || '') !== String(validated.customerId || '')) {
-    await refreshCustomerStats(previousCustomerId)
-    await refreshCustomerStats(validated.customerId)
-  }
-
-  return res
-    .status(200)
-    .json(new ApiResponse(200, { bill: updatedBill }, 'Bill updated'))
-})
-
-const deleteBill = asyncHandler(async (req, res) => {
-  const bill = await Bill.findOneAndDelete({
-    _id: req.params.id,
-    userId: req.user._id,
-  })
-  if (!bill) {
-    throw new ApiError(404, 'Bill not found')
-  }
-
-  await refreshCustomerStats(bill.customerId)
-
-  return res
-    .status(200)
-    .json(new ApiResponse(200, { deletedBillId: bill._id }, 'Bill deleted'))
-})
-
-export { listBills, getBillById, updateBill, deleteBill }
+export { listBills, getBillById }
