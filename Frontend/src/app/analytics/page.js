@@ -1,131 +1,182 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { pageVariants, listItemVariants } from '@/utils/animations';
 import { 
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  BarChart, Bar, Cell, PieChart, Pie
+  BarChart, Bar, Cell
 } from 'recharts';
-import { TrendingUp, Users, Package, Wallet } from 'lucide-react';
-
-const monthlyRevenue = [
-  { name: 'May', total: 120000 },
-  { name: 'Jun', total: 150000 },
-  { name: 'Jul', total: 145000 },
-  { name: 'Aug', total: 180000 },
-  { name: 'Sep', total: 210000 },
-  { name: 'Oct', total: 250000 },
-];
-
-const categorySales = [
-  { name: 'Grocery', value: 400 },
-  { name: 'Dairy', value: 300 },
-  { name: 'Snacks', value: 300 },
-  { name: 'Beverages', value: 200 },
-];
-
-const COLORS = ['var(--color-forest-green)', 'var(--color-sage-green)', 'var(--color-emerald)', 'var(--color-muted-indigo)'];
+import { TrendingUp, Users, ReceiptText, Wallet, Plus, BarChart3, Loader2, AlertCircle } from 'lucide-react';
+import api from '@/services/api';
 
 export default function AnalyticsDashboard() {
+  const [data, setData] = useState({
+    summary: null,
+    monthlyRevenue: [],
+    customerReport: [],
+  });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const [summaryRes, monthlyRes, customerRes] = await Promise.all([
+          api.get('/dashboard/summary'),
+          api.get('/analytics/monthly'),
+          api.get('/analytics/customer-report'),
+        ]);
+
+        const formattedMonthly = monthlyRes.data.data?.data?.map(item => {
+          const date = new Date(item.month);
+          return {
+            name: date.toLocaleDateString('en-US', { month: 'short' }),
+            total: item.totalRevenue,
+          };
+        }) || [];
+
+        const formattedCustomers = customerRes.data.data?.data?.slice(0, 5).map(c => ({
+          name: c.name?.split(' ')[0] || 'Unknown',
+          spent: c.totalSpent,
+        })) || [];
+
+        setData({
+          summary: summaryRes.data.data,
+          monthlyRevenue: formattedMonthly,
+          customerReport: formattedCustomers,
+        });
+      } catch (err) {
+        console.error(err);
+        setError('Failed to fetch analytics data');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex h-[80vh] items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-forest-green" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="p-4 bg-muted-red/10 border border-muted-red/20 rounded-2xl flex items-center gap-3 text-muted-red max-w-7xl mx-auto">
+        <AlertCircle className="w-5 h-5 shrink-0" />
+        <p>{error}</p>
+      </div>
+    );
+  }
+
+  const { summary } = data;
+
   return (
     <motion.div
       variants={pageVariants}
       initial="initial"
       animate="animate"
       exit="exit"
-      className="max-w-7xl mx-auto space-y-8"
+      className="max-w-7xl mx-auto space-y-6 min-w-0"
     >
-      <header className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight text-neutral-900">Analytics</h1>
-          <p className="text-neutral-500 mt-1">Deep insights into your business performance.</p>
+      <header className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-off-white rounded-2xl p-4 md:p-6 pb-2 border border-soft-stone">
+        <div className="flex items-center gap-3">
+          <div className="text-forest-green">
+            <BarChart3 className="w-6 h-6" />
+          </div>
+          <div>
+            <h1 className="text-xl font-bold tracking-tight text-neutral-900">Analytics</h1>
+            <p className="text-[12px] text-neutral-500">Track your business growth</p>
+          </div>
         </div>
-        <select className="px-4 py-2 bg-off-white border border-soft-stone rounded-xl text-sm font-medium focus:outline-none focus:border-sage-green shadow-sm">
-          <option>Last 6 Months</option>
-          <option>This Year</option>
-          <option>Last 30 Days</option>
-        </select>
       </header>
 
       {/* KPI Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 px-4 md:px-6 bg-off-white pt-2">
         {[
-          { title: 'Total Revenue', value: '₹10,55,000', change: '+24%', icon: Wallet, color: 'text-emerald' },
-          { title: 'Total Customers', value: '1,248', change: '+12%', icon: Users, color: 'text-muted-indigo' },
-          { title: 'Items Sold', value: '14,592', change: '+18%', icon: Package, color: 'text-forest-green' },
-          { title: 'Avg Order Value', value: '₹845', change: '+5%', icon: TrendingUp, color: 'text-sage-green' }
+          { title: 'Total Revenue', value: `₹${summary?.totalRevenue?.toLocaleString() || 0}`, change: 'Overall', icon: Wallet, iconColor: 'text-emerald', iconBg: 'bg-emerald/10' },
+          { title: 'Total Bills', value: summary?.totalBills || 0, change: 'Lifetime', icon: ReceiptText, iconColor: 'text-[#64748b]', iconBg: 'bg-[#f1f5f9]' },
+          { title: 'Customers', value: summary?.topCustomers?.length || 0, change: 'Active', icon: Users, iconColor: 'text-purple-500', iconBg: 'bg-purple-50' },
+          { title: 'Avg. Bill Value', value: `₹${summary?.totalBills ? Math.round(summary.totalRevenue / summary.totalBills).toLocaleString() : 0}`, change: 'Per Order', icon: TrendingUp, iconColor: 'text-emerald', iconBg: 'bg-emerald/10' }
         ].map((kpi, idx) => (
-          <motion.div key={idx} variants={listItemVariants} initial="hidden" animate="show" transition={{ delay: idx * 0.1 }} className="bg-off-white rounded-3xl p-6 shadow-[var(--shadow-soft)] border border-soft-stone/50">
-            <div className="flex justify-between items-start mb-4">
-              <div className={`p-3 rounded-xl bg-warm-ivory border border-soft-stone/50 ${kpi.color}`}>
-                <kpi.icon className="w-5 h-5" />
-              </div>
-              <span className="text-emerald text-sm font-medium px-2 py-1 bg-emerald/10 rounded-lg">{kpi.change}</span>
+          <motion.div key={idx} variants={listItemVariants} initial="hidden" animate="show" transition={{ delay: idx * 0.1 }} className="bg-off-white rounded-[16px] p-5 border border-soft-stone shadow-sm">
+            <div className="flex items-center gap-2 mb-3">
+              <kpi.icon className={`w-4 h-4 ${kpi.iconColor}`} />
+              <h3 className="text-[13px] font-bold text-neutral-700">{kpi.title}</h3>
             </div>
-            <h3 className="text-sm font-medium text-neutral-500 mb-1">{kpi.title}</h3>
-            <div className="text-2xl font-bold text-neutral-900">{kpi.value}</div>
+            <div className="text-xl md:text-[28px] font-bold text-neutral-900 mb-2">{kpi.value}</div>
+            <span className="text-[#22c55e] text-[11px] font-bold flex items-center gap-1">
+              <span className="text-neutral-400 font-medium">{kpi.change}</span>
+            </span>
           </motion.div>
         ))}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 px-4 md:px-6 bg-off-white pb-6 rounded-b-2xl">
         {/* Main Revenue Chart */}
-        <div className="lg:col-span-2 bg-off-white rounded-3xl p-6 shadow-[var(--shadow-soft)] border border-soft-stone/50">
-          <h3 className="text-lg font-semibold mb-6">Revenue Growth (Last 6 Months)</h3>
-          <div className="h-80 w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={monthlyRevenue} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-                <defs>
-                  <linearGradient id="colorTotalMonth" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="var(--color-emerald)" stopOpacity={0.3}/>
-                    <stop offset="95%" stopColor="var(--color-emerald)" stopOpacity={0}/>
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--color-soft-stone)" />
-                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#888', fontSize: 12}} dy={10} />
-                <YAxis axisLine={false} tickLine={false} tick={{fill: '#888', fontSize: 12}} tickFormatter={(val) => `₹${val/1000}k`} />
-                <Tooltip 
-                  contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: 'var(--shadow-hover)' }}
-                  formatter={(value) => [`₹${value.toLocaleString()}`, 'Revenue']}
-                />
-                <Area type="monotone" dataKey="total" stroke="var(--color-emerald)" strokeWidth={3} fillOpacity={1} fill="url(#colorTotalMonth)" />
-              </AreaChart>
-            </ResponsiveContainer>
+        <div className="bg-off-white rounded-[16px] p-5 border border-soft-stone shadow-sm">
+          <div className="flex items-center justify-between mb-8">
+            <h3 className="text-[14px] font-bold text-neutral-900">Revenue Overview</h3>
+            <button className="text-[#4ade80]"><Plus className="w-5 h-5" strokeWidth={3} /></button>
+          </div>
+          <div className="h-56 w-full">
+            {data.monthlyRevenue.length > 0 ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={data.monthlyRevenue} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
+                  <defs>
+                    <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="var(--color-emerald)" stopOpacity={0.6}/>
+                      <stop offset="95%" stopColor="var(--color-emerald)" stopOpacity={0}/>
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--color-soft-stone)" />
+                  <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: 'var(--color-neutral-600)', fontSize: 10}} dy={10} />
+                  <YAxis axisLine={false} tickLine={false} tick={{fill: 'var(--color-neutral-600)', fontSize: 10}} tickFormatter={(val) => `₹${val >= 1000 ? val/1000 + 'K' : val}`} />
+                  <Tooltip 
+                    contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+                    formatter={(value) => [`₹${value.toLocaleString()}`, 'Revenue']}
+                  />
+                  <Area type="monotone" dataKey="total" stroke="#4ade80" strokeWidth={2} fillOpacity={1} fill="url(#colorRevenue)" activeDot={{ r: 4, fill: '#4ade80', stroke: '#fff', strokeWidth: 2 }} dot={{ r: 2, fill: '#4ade80', strokeWidth: 0 }} />
+                </AreaChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="flex h-full items-center justify-center text-neutral-400">No revenue data available</div>
+            )}
           </div>
         </div>
 
-        {/* Category Breakdown */}
-        <div className="bg-off-white rounded-3xl p-6 shadow-[var(--shadow-soft)] border border-soft-stone/50 flex flex-col">
-          <h3 className="text-lg font-semibold mb-2">Sales by Category</h3>
-          <div className="flex-1 w-full flex items-center justify-center min-h-[250px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={categorySales}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={60}
-                  outerRadius={80}
-                  paddingAngle={5}
-                  dataKey="value"
-                >
-                  {categorySales.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip 
-                  contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: 'var(--shadow-soft)' }}
-                />
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
-          <div className="grid grid-cols-2 gap-4 mt-4">
-            {categorySales.map((cat, idx) => (
-              <div key={idx} className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full" style={{ backgroundColor: COLORS[idx % COLORS.length] }}></div>
-                <span className="text-sm font-medium text-neutral-600">{cat.name}</span>
+        {/* Top Customers (Replaced Payment Methods) */}
+        <div className="bg-off-white rounded-[16px] p-5 border border-soft-stone shadow-sm flex flex-col">
+          <h3 className="text-[14px] font-bold text-neutral-900 mb-6">Top Customers by Spending</h3>
+          <div className="flex-1 w-full flex flex-col">
+            {data.customerReport.length > 0 ? (
+              <div className="h-56 w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={data.customerReport} layout="vertical" margin={{ top: 0, right: 20, left: 0, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="var(--color-soft-stone)" />
+                    <XAxis type="number" hide />
+                    <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{fill: 'var(--color-neutral-600)', fontSize: 12}} width={80} />
+                    <Tooltip 
+                      cursor={{fill: 'var(--color-warm-ivory)'}}
+                      contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: 'var(--shadow-soft)' }}
+                      formatter={(value) => [`₹${value.toLocaleString()}`, 'Spent']}
+                    />
+                    <Bar dataKey="spent" radius={[0, 8, 8, 0]} barSize={24}>
+                      {data.customerReport.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={index === 0 ? 'var(--color-forest-green)' : 'var(--color-sage-green)'} />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
               </div>
-            ))}
+            ) : (
+              <div className="flex h-full items-center justify-center text-neutral-400 pb-10">No customer data available</div>
+            )}
           </div>
         </div>
       </div>

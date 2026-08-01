@@ -1,33 +1,67 @@
-'use client';
+"use client";
 
-import { motion } from 'framer-motion';
-import { pageVariants } from '@/utils/animations';
-import { ArrowLeft, Printer, Share2, Download, CheckCircle2 } from 'lucide-react';
-import Link from 'next/link';
-import { use } from 'react';
+import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import { pageVariants } from "@/utils/animations";
+import { ArrowLeft, CheckCircle2, Loader2, AlertCircle } from "lucide-react";
+import Link from "next/link";
+import { use } from "react";
+import api from "@/services/api";
 
 export default function BillDetails({ params }) {
   // In Next.js 15, params is a Promise, so we must unwrap it using React.use()
   const resolvedParams = use(params);
   const billId = resolvedParams.id;
 
-  const mockBill = {
-    id: billId,
-    date: 'Oct 24, 2026',
-    time: '02:30 PM',
-    customer: { name: 'Rahul Sharma', phone: '+91 98765 43210' },
-    status: 'Paid',
-    method: 'UPI',
-    items: [
-      { name: 'Aashirvaad Atta 5kg', qty: 1, price: 250, total: 250 },
-      { name: 'Fortune Sunflower Oil 1L', qty: 2, price: 140, total: 280 },
-      { name: 'Tata Salt 1kg', qty: 1, price: 25, total: 25 },
-      { name: 'Maggi Noodles 4-Pack', qty: 1, price: 56, total: 56 },
-    ],
-    subtotal: 611,
-    tax: 30.55,
-    total: 641.55,
-  };
+  const [bill, setBill] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    const fetchBill = async () => {
+      try {
+        setLoading(true);
+        const response = await api.get(`/bills/${billId}`);
+        setBill(response.data.data.bill);
+      } catch (err) {
+        console.error(err);
+        setError("Failed to fetch bill details");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchBill();
+  }, [billId]);
+
+  if (loading) {
+    return (
+      <div className="flex h-[80vh] items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-forest-green" />
+      </div>
+    );
+  }
+
+  if (error || !bill) {
+    return (
+      <div className="max-w-4xl mx-auto space-y-8 min-w-0">
+        <div className="p-4 bg-muted-red/10 border border-muted-red/20 rounded-2xl flex items-center gap-3 text-muted-red">
+          <AlertCircle className="w-5 h-5 shrink-0" />
+          <p>{error || "Bill not found"}</p>
+        </div>
+      </div>
+    );
+  }
+
+  const date = new Date(bill.createdAt);
+  const displayDate = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  const displayTime = date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+
+  // Assume items is an array of { productName, quantity, price, total }
+  // Subtotal is totalAmount / 1.05 if 5% tax was assumed, but let's just use totalAmount
+  // Usually tax is part of bill, if not we just show total
+  
+  const subtotal = bill.items.reduce((acc, item) => acc + (item.price * item.quantity), 0);
+  const tax = bill.totalAmount - subtotal; // Simple assumption if totalAmount > subtotal, else tax is 0
 
   return (
     <motion.div
@@ -35,28 +69,24 @@ export default function BillDetails({ params }) {
       initial="initial"
       animate="animate"
       exit="exit"
-      className="max-w-4xl mx-auto space-y-8"
+      className="max-w-4xl mx-auto space-y-8 min-w-0"
     >
       <header className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Link href="/bills" className="p-2 bg-off-white rounded-xl border border-soft-stone hover:bg-soft-stone/50 transition-colors">
+          <Link
+            href="/bills"
+            className="p-2 bg-off-white rounded-xl border border-soft-stone hover:bg-soft-stone/50 transition-colors"
+          >
             <ArrowLeft className="w-5 h-5 text-neutral-600" />
           </Link>
           <div>
-            <h1 className="text-3xl font-bold tracking-tight text-neutral-900">Bill {mockBill.id}</h1>
-            <p className="text-neutral-500 mt-1">{mockBill.date} at {mockBill.time}</p>
+            <h1 className="text-3xl font-bold tracking-tight text-neutral-900">
+              Bill {bill.billNumber || bill._id.substring(bill._id.length - 6).toUpperCase()}
+            </h1>
+            <p className="text-neutral-500 mt-1">
+              {displayDate} at {displayTime}
+            </p>
           </div>
-        </div>
-        <div className="flex gap-3">
-          <button className="flex items-center gap-2 px-4 py-2 border border-soft-stone rounded-xl text-sm font-medium hover:bg-warm-ivory transition-colors">
-            <Printer className="w-4 h-4" /> Print
-          </button>
-          <button className="flex items-center gap-2 px-4 py-2 border border-soft-stone rounded-xl text-sm font-medium hover:bg-warm-ivory transition-colors">
-            <Share2 className="w-4 h-4" /> Share
-          </button>
-          <button className="flex items-center gap-2 px-4 py-2 bg-forest-green text-warm-ivory rounded-xl text-sm font-medium hover:bg-forest-green/90 shadow-md shadow-forest-green/20 transition-colors">
-            <Download className="w-4 h-4" /> Download PDF
-          </button>
         </div>
       </header>
 
@@ -65,22 +95,30 @@ export default function BillDetails({ params }) {
         <div className="md:col-span-2 bg-off-white rounded-[24px] p-8 shadow-[var(--shadow-soft)] border border-soft-stone relative">
           {/* Status Badge */}
           <div className="absolute top-8 right-8">
-            <div className="flex items-center gap-2 px-3 py-1.5 bg-emerald/10 text-emerald rounded-full text-sm font-medium">
+            <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium ${
+              bill.status === 'paid' ? 'bg-emerald/10 text-emerald' : 'bg-yellow-500/10 text-yellow-700'
+            }`}>
               <CheckCircle2 className="w-4 h-4" />
-              {mockBill.status}
+              {bill.status}
             </div>
           </div>
 
           <div className="mb-10">
-            <h2 className="text-sm font-medium text-neutral-500 uppercase tracking-wider mb-1">Billed To</h2>
-            <p className="text-lg font-semibold text-neutral-900">{mockBill.customer.name}</p>
-            <p className="text-neutral-500">{mockBill.customer.phone}</p>
+            <h2 className="text-sm font-medium text-neutral-500 uppercase tracking-wider mb-1">
+              Billed To
+            </h2>
+            <p className="text-lg font-semibold text-neutral-900">
+              {bill.customer?.name || "Walk-in Customer"}
+            </p>
+            {bill.customer?.phone && (
+              <p className="text-neutral-500">{bill.customer.phone}</p>
+            )}
           </div>
 
           <div className="w-full">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="border-b border-soft-stone/80 text-sm text-neutral-500">
+                <tr className="border-b border-soft-stone text-sm text-neutral-600">
                   <th className="pb-4 font-medium">Item Description</th>
                   <th className="pb-4 font-medium text-center">Qty</th>
                   <th className="pb-4 font-medium text-right">Price</th>
@@ -88,12 +126,16 @@ export default function BillDetails({ params }) {
                 </tr>
               </thead>
               <tbody className="text-neutral-700">
-                {mockBill.items.map((item, idx) => (
-                  <tr key={idx} className="border-b border-soft-stone/40">
-                    <td className="py-4 font-medium">{item.name}</td>
-                    <td className="py-4 text-center">{item.qty}</td>
-                    <td className="py-4 text-right">₹{item.price.toFixed(2)}</td>
-                    <td className="py-4 text-right font-semibold text-neutral-900">₹{item.total.toFixed(2)}</td>
+                {bill.items?.map((item, idx) => (
+                  <tr key={idx} className="border-b border-soft-stone">
+                    <td className="py-4 font-medium">{item.productName}</td>
+                    <td className="py-4 text-center">{item.quantity}</td>
+                    <td className="py-4 text-right">
+                      ₹{item.price.toFixed(2)}
+                    </td>
+                    <td className="py-4 text-right font-semibold text-neutral-900">
+                      ₹{(item.price * item.quantity).toFixed(2)}
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -104,15 +146,19 @@ export default function BillDetails({ params }) {
             <div className="w-64 space-y-3">
               <div className="flex justify-between text-neutral-500">
                 <span>Subtotal</span>
-                <span>₹{mockBill.subtotal.toFixed(2)}</span>
+                <span>₹{subtotal.toFixed(2)}</span>
               </div>
               <div className="flex justify-between text-neutral-500">
-                <span>Tax (5%)</span>
-                <span>₹{mockBill.tax.toFixed(2)}</span>
+                <span>Tax</span>
+                <span>₹{Math.max(0, tax).toFixed(2)}</span>
               </div>
               <div className="flex justify-between items-center pt-3 border-t border-soft-stone">
-                <span className="font-medium text-neutral-900 text-lg">Total</span>
-                <span className="text-2xl font-bold text-forest-green">₹{mockBill.total.toFixed(2)}</span>
+                <span className="font-medium text-neutral-900 text-lg">
+                  Total
+                </span>
+                <span className="text-2xl font-bold text-forest-green">
+                  ₹{bill.totalAmount.toFixed(2)}
+                </span>
               </div>
             </div>
           </div>
@@ -125,15 +171,19 @@ export default function BillDetails({ params }) {
             <div className="space-y-4">
               <div>
                 <p className="text-sm text-neutral-500 mb-1">Method</p>
-                <p className="font-medium">{mockBill.method}</p>
+                <p className="font-medium capitalize">{bill.paymentMethod || 'Not specified'}</p>
               </div>
               <div>
                 <p className="text-sm text-neutral-500 mb-1">Transaction ID</p>
-                <p className="font-medium font-mono text-sm">UPI9876543210ABC</p>
+                <p className="font-medium font-mono text-sm">
+                  {bill._id.toUpperCase()}
+                </p>
               </div>
               <div>
                 <p className="text-sm text-neutral-500 mb-1">Date</p>
-                <p className="font-medium">{mockBill.date}, {mockBill.time}</p>
+                <p className="font-medium">
+                  {displayDate}, {displayTime}
+                </p>
               </div>
             </div>
           </div>
