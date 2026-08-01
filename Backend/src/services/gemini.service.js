@@ -1,4 +1,4 @@
-﻿import { GoogleGenerativeAI } from '@google/generative-ai'
+import { GoogleGenerativeAI } from '@google/generative-ai'
 import config from '../config/index.js'
 
 const GEMINI_MOCK = process.env.GEMINI_MOCK
@@ -6,19 +6,24 @@ const GEMINI_MOCK = process.env.GEMINI_MOCK
 const genAI = GEMINI_MOCK ? null : new GoogleGenerativeAI(config.gemini.apiKey)
 
 const PROMPT = `You are a billing assistant for a local Indian shop.
-The shop owner speaks in Bengali or Hindi to describe items being sold.
+The shop owner speaks in Bengali, Hindi, or English describing items a customer is buying.
 
-Extract ALL items from the text. For each item, extract:
+Extract EVERY item the customer is buying — never skip, merge, or drop any item.
+For each item, extract:
 - productName (in English)
 - quantity (number)
 - unit (kg, piece, pack, liter, gram, dozen, etc.)
-- price (total price for that quantity, in INR)
+- price (total price for that quantity, in INR; use 0 if the price was not spoken — never guess or invent a price)
 
 Rules:
 - If quantity is not mentioned, assume 1
 - If unit is not mentioned, assume "piece"
-- Translate product names to English
-- Return ONLY valid JSON array, no explanation
+- Translate item names to English (e.g. chaal -> Rice, chini -> Sugar, dudh -> Milk, chai -> Tea, rosogulla -> Rosogulla)
+- Include ONLY real purchased items. Ignore greetings, filler words, and phrases like "total X rupees"
+- Never invent items or categories
+- If no real items are mentioned, return []
+
+Return ONLY a valid JSON array, no explanation, no markdown.
 
 Input: "{transcribed_text}"
 
@@ -37,18 +42,18 @@ const withTimeout = (promise, ms, message) =>
 
 const GENERATE_TIMEOUT_MS = 20000
 
-const ASSISTANT_PROMPT = `You are a business analytics assistant for a local shop owner.
-You can ONLY answer using the provided business data.
-Do NOT invent or assume any information not present in the data.
-If the data does not contain an answer, say you do not have enough data.
+const ASSISTANT_PROMPT = `You are an AI assistant for a local shop owner.
+If the owner asks general knowledge questions or chats with you, answer normally. Do NOT introduce yourself repeatedly unless asked.
+For questions specifically about their business, answer using ONLY the data provided below.
+CRITICAL: Do NOT mention their business data (like revenue or bills) UNLESS they specifically ask a business-related question.
 
 Shop Data:
 {data}
 
 Owner's Question: "{question}"
 
-Answer concisely in a helpful, friendly tone (max 5-6 sentences).
-Use numbers and specifics from the data.
+Answer in a helpful, friendly tone.
+If answering a business question, use numbers and specifics from the data.
 If the owner asked in Bengali or Hindi, answer in that language.
 Return ONLY the answer text, no JSON.`
 

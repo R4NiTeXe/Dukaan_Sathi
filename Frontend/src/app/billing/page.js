@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { pageVariants, cardHover, listItemVariants } from "@/utils/animations";
 import {
@@ -37,9 +37,40 @@ export default function VoiceBilling() {
   const [extractedItems, setExtractedItems] = useState([]);
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState("");
+  const [micError, setMicError] = useState("");
+  const [extractError, setExtractError] = useState("");
 
   const SpeechRecognition = typeof window !== 'undefined' ? window.SpeechRecognition || window.webkitSpeechRecognition : null;
   const recognitionRef = useRef(null);
+  const latestTranscriptRef = useRef("");
+  const pendingExtractRef = useRef(false);
+
+  const extractItemsFromTranscript = useCallback(async (text) => {
+    const source = (text ?? "").trim();
+    if (!source) {
+      pendingExtractRef.current = false;
+      setExtractError("No speech captured. Try speaking again or type the items manually.");
+      return;
+    }
+
+    setIsExtracting(true);
+    setExtractError("");
+    try {
+      const response = await api.post("/billing/extract", { transcript: source });
+      if (response.data.success) {
+        if (!response.data.data.items || response.data.data.items.length === 0) {
+          setExtractError("No items could be recognized. Try speaking item names clearly.");
+        } else {
+          setExtractedItems(response.data.data.items);
+        }
+      }
+    } catch (err) {
+      console.error(err);
+      setExtractError(err.response?.data?.message || "Failed to extract items from voice");
+    } finally {
+      setIsExtracting(false);
+    }
+  }, []);
 
   useEffect(() => {
     if (SpeechRecognition && !recognitionRef.current) {
@@ -53,10 +84,30 @@ export default function VoiceBilling() {
         for (let i = 0; i < event.results.length; ++i) {
           currentTrans += event.results[i][0].transcript;
         }
+        latestTranscriptRef.current = currentTrans;
         setTranscript(currentTrans);
+        setMicError("");
       };
 
-      recognition.onend = () => setIsRecording(false);
+      recognition.onerror = (event) => {
+        const messages = {
+          'not-allowed': 'Microphone permission was denied. Allow mic access and try again.',
+          'service-not-allowed': 'Microphone access is blocked in your browser settings.',
+          'no-speech': 'No speech detected. Please speak louder or check your microphone.',
+          'audio-capture': 'No microphone found. Check that a microphone is connected.',
+          'network': 'Speech recognition service could not be reached. Check your internet connection.',
+          'aborted': '',
+        };
+        setMicError(messages[event.error] || `Speech recognition error: ${event.error}`);
+      };
+
+      recognition.onend = () => {
+        setIsRecording(false);
+        if (pendingExtractRef.current) {
+          pendingExtractRef.current = false;
+          extractItemsFromTranscript(latestTranscriptRef.current);
+        }
+      };
       recognitionRef.current = recognition;
 
       // Auto-start if navigated with ?autoStart=true
@@ -65,15 +116,19 @@ export default function VoiceBilling() {
         if (urlParams.get('autoStart') === 'true') {
           // Small delay to ensure UI is ready
           setTimeout(() => {
-            recognition.start();
-            setIsRecording(true);
-            // Clean up URL so it doesn't auto-start on refresh
-            window.history.replaceState({}, document.title, window.location.pathname);
+            try {
+              recognition.start();
+              setIsRecording(true);
+              // Clean up URL so it doesn't auto-start on refresh
+              window.history.replaceState({}, document.title, window.location.pathname);
+            } catch (err) {
+              setMicError("Could not start microphone. Check permissions and try again.");
+            }
           }, 500);
         }
       }
     }
-  }, [SpeechRecognition, user?.preferredLanguage]);
+  }, [SpeechRecognition, user?.preferredLanguage, extractItemsFromTranscript]);
 
   const handleLanguageChange = (value) => {
     setLanguage(value);
@@ -89,32 +144,21 @@ export default function VoiceBilling() {
     }
 
     if (isRecording) {
+      pendingExtractRef.current = true;
       recognitionRef.current?.stop();
-      setIsRecording(false);
-      extractItemsFromTranscript();
     } else {
       setTranscript("");
       setExtractedItems([]);
       setSaveError("");
-      recognitionRef.current?.start();
-      setIsRecording(true);
-    }
-  };
-
-  const extractItemsFromTranscript = async () => {
-    if (!transcript.trim()) return;
-    
-    setIsExtracting(true);
-    try {
-      const response = await api.post("/billing/extract", { transcript: transcript.trim() });
-      if (response.data.success) {
-        setExtractedItems(response.data.data.items);
+      setExtractError("");
+      setMicError("");
+      latestTranscriptRef.current = "";
+      try {
+        recognitionRef.current?.start();
+        setIsRecording(true);
+      } catch (err) {
+        setMicError("Could not start microphone. Check permissions and try again.");
       }
-    } catch (err) {
-      console.error(err);
-      alert(err.response?.data?.message || "Failed to extract items from voice");
-    } finally {
-      setIsExtracting(false);
     }
   };
 
@@ -150,6 +194,16 @@ export default function VoiceBilling() {
 
   const removeItem = (idxToRemove) => {
     setExtractedItems(prev => prev.filter((_, idx) => idx !== idxToRemove));
+  };
+
+  const updateItem = (idx, field, value) => {
+    setExtractedItems(prev => prev.map((item, i) => {
+      if (i !== idx) return item;
+      return {
+        ...item,
+        [field]: field === 'productName' ? value : Number(value) || 0,
+      };
+    }));
   };
 
   const total = extractedItems.reduce((acc, item) => acc + (item.price * item.quantity), 0);
@@ -215,6 +269,12 @@ export default function VoiceBilling() {
             {isRecording ? "Listening..." : "Tap to speak"}
           </p>
 
+          {micError && !isRecording && (
+            <p className="mt-3 px-4 py-2 bg-muted-red/10 border border-muted-red/20 rounded-xl text-muted-red text-sm text-center max-w-xs">
+              {micError}
+            </p>
+          )}
+
           <div className="mt-4 flex items-center gap-2 z-10">
             <label htmlFor="voice-lang" className="text-sm text-neutral-500">
               Language:
@@ -244,13 +304,18 @@ export default function VoiceBilling() {
             />
             {!isRecording && transcript && (
               <button 
-                onClick={extractItemsFromTranscript}
+                onClick={() => extractItemsFromTranscript(transcript)}
                 disabled={isExtracting}
                 className="w-full mt-2 py-2 bg-sage-green text-forest-green rounded-xl font-medium hover:bg-sage-green/80 transition-colors flex justify-center items-center gap-2"
               >
                 {isExtracting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
                 {isExtracting ? "Extracting..." : "Extract Items"}
               </button>
+            )}
+            {extractError && (
+              <p className="mt-2 px-4 py-2 bg-muted-red/10 border border-muted-red/20 rounded-xl text-muted-red text-sm text-center">
+                {extractError}
+              </p>
             )}
           </div>
         </motion.div>
@@ -293,9 +358,26 @@ export default function VoiceBilling() {
                         <p className="font-semibold text-neutral-800">
                           {item.productName || item.name}
                         </p>
-                        <p className="text-sm text-neutral-500">
-                          Qty: {item.quantity}
-                        </p>
+                        <div className="flex items-center gap-2 mt-1.5">
+                          <label className="text-xs text-neutral-400">Qty</label>
+                          <input
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            value={item.quantity}
+                            onChange={(e) => updateItem(idx, 'quantity', e.target.value)}
+                            className="w-16 px-2 py-1 bg-off-white border border-soft-stone rounded-lg text-sm text-neutral-700 focus:outline-none focus:border-sage-green"
+                          />
+                          <label className="text-xs text-neutral-400">Price</label>
+                          <input
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            value={item.price}
+                            onChange={(e) => updateItem(idx, 'price', e.target.value)}
+                            className="w-20 px-2 py-1 bg-off-white border border-soft-stone rounded-lg text-sm text-neutral-700 focus:outline-none focus:border-sage-green"
+                          />
+                        </div>
                       </div>
                       <div className="flex items-center gap-4">
                         <span className="font-semibold">₹{(item.price * item.quantity).toFixed(2)}</span>
