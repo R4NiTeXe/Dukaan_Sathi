@@ -9,8 +9,8 @@ import {
   ReceiptText, 
   Users, 
   Package, 
-  BarChart3, 
-  MessageSquareSparkles, 
+  BarChart, 
+  BotMessageSquare, 
   Settings 
 } from 'lucide-react';
 
@@ -20,8 +20,8 @@ const navItems = [
   { name: 'Bills', href: '/bills', icon: ReceiptText },
   { name: 'Customers', href: '/customers', icon: Users },
   { name: 'Products', href: '/products', icon: Package },
-  { name: 'Analytics', href: '/analytics', icon: BarChart3 },
-  { name: 'AI Advisor', href: '/advisor', icon: MessageSquareSparkles },
+  { name: 'Analytics', href: '/analytics', icon: BarChart },
+  { name: 'AI Advisor', href: '/advisor', icon: BotMessageSquare },
 ];
 
 export default function Sidebar() {

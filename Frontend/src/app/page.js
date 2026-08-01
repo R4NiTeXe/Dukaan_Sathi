@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { pageVariants, cardHover, listVariants, listItemVariants } from '@/utils/animations';
-import { TrendingUp, Users, Receipt, AlertCircle } from 'lucide-react';
+import { TrendingUp, Users, Receipt, AlertCircle, BotMessageSquare } from 'lucide-react';
 import { 
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   BarChart, Bar, Cell
@@ -135,7 +135,7 @@ export default function Dashboard() {
           <AlertCircle className="w-64 h-64" />
         </div>
         <h3 className="text-lg font-semibold mb-2 flex items-center gap-2">
-          <MessageSquareSparkles className="w-5 h-5" />
+          <BotMessageSquare className="w-5 h-5" />
           AI Business Insight
         </h3>
         <p className="text-warm-ivory/90 max-w-2xl text-lg leading-relaxed">

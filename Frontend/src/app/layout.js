@@ -13,7 +13,7 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body className={`${inter.variable} font-sans antialiased bg-warm-ivory text-neutral-900 flex`}>
+      <body suppressHydrationWarning className={`${inter.variable} font-sans antialiased bg-warm-ivory text-neutral-900 flex`}>
         <Sidebar />
         <div className="flex-1 flex flex-col ml-64 min-h-screen">
           <Topbar />
