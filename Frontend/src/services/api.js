@@ -3,6 +3,7 @@ import axios from 'axios';
 const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1',
   headers: { 'Content-Type': 'application/json' },
+  withCredentials: true,
 });
 
 // Request interceptor for adding the auth token
@@ -22,17 +23,58 @@ api.interceptors.request.use(
   }
 );
 
-// Response interceptor to handle token expiration/refresh (optional, basic setup for now)
+// Silent refresh on 401: exchange the httpOnly refresh cookie for a new
+// access token and retry the original request once. Concurrent 401s share
+// a single refresh call.
+let refreshPromise = null;
+
+const refreshSession = () => {
+  if (!refreshPromise) {
+    refreshPromise = axios
+      .post(`${api.defaults.baseURL}/auth/refresh`, null, {
+        withCredentials: true,
+      })
+      .then((response) => {
+        const token = response.data?.data?.accessToken;
+        if (!token) {
+          throw new Error('Refresh response missing access token');
+        }
+        localStorage.setItem('accessToken', token);
+        return token;
+      })
+      .finally(() => {
+        refreshPromise = null;
+      });
+  }
+  return refreshPromise;
+};
+
+const clearSession = () => {
+  if (typeof window !== 'undefined') {
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('user');
+    window.location.href = '/login';
+  }
+};
+
 api.interceptors.response.use(
   (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      if (typeof window !== 'undefined') {
-        // Clear tokens and force logout if unauthorized
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('refreshToken');
-        localStorage.removeItem('user');
-        window.location.href = '/login';
+  async (error) => {
+    const original = error.config;
+    if (
+      error.response?.status === 401 &&
+      original &&
+      !original._retried &&
+      typeof window !== 'undefined'
+    ) {
+      original._retried = true;
+      try {
+        const token = await refreshSession();
+        original.headers.Authorization = `Bearer ${token}`;
+        return api(original);
+      } catch (refreshError) {
+        clearSession();
+        return Promise.reject(refreshError);
       }
     }
     return Promise.reject(error);

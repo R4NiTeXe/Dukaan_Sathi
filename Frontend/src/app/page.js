@@ -82,7 +82,7 @@ export default function Dashboard() {
         <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-neutral-900">
           Good morning, {user?.name?.split(' ')[0] || 'Store Owner'}!
         </h1>
-        <p className="text-neutral-500 mt-2 text-lg">Here's what's happening at your shop today.</p>
+        <p className="text-neutral-500 mt-2 text-lg">Here&apos;s what&apos;s happening at your shop today.</p>
       </header>
 
       {error && (
@@ -101,7 +101,7 @@ export default function Dashboard() {
       >
         <motion.div variants={listItemVariants} whileHover="hover" className="bg-off-white rounded-3xl p-6 shadow-[var(--shadow-soft)] border border-soft-stone">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-sm font-medium text-neutral-500">Today's Revenue</h3>
+            <h3 className="text-sm font-medium text-neutral-500">Today&apos;s Revenue</h3>
             <div className="p-2 bg-emerald/10 rounded-xl"><TrendingUp className="w-5 h-5 text-emerald" /></div>
           </div>
           <div className="text-3xl md:text-4xl font-bold tracking-tight mb-2">₹{data.summary.todayRevenue?.toLocaleString() || 0}</div>

@@ -80,7 +80,7 @@ export default function AIAdvisor() {
 
         <div className="px-6 py-4 mt-4">
           <p className="text-sm text-neutral-500 leading-relaxed">
-            I am connected directly to your shop's database. Ask me about your revenue, top customers, bestselling items, or get a daily summary.
+            I am connected directly to your shop&apos;s database. Ask me about your revenue, top customers, bestselling items, or get a daily summary.
           </p>
         </div>
 
@@ -106,7 +106,7 @@ export default function AIAdvisor() {
             </div>
             
             <h2 className="text-xl font-bold text-neutral-900 mb-2">Namaste! 👋</h2>
-            <p className="text-[13px] text-neutral-500 mb-10">I'm here to help you grow your business smarter.</p>
+            <p className="text-[13px] text-neutral-500 mb-10">I&apos;m here to help you grow your business smarter.</p>
             
             <div className="w-full max-w-lg text-left">
               <p className="text-[13px] font-bold text-neutral-800 mb-3 px-1">Try asking me</p>

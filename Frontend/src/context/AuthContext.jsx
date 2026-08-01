@@ -38,9 +38,9 @@ export function AuthProvider({ children }) {
     try {
       const response = await api.post('/auth/login', credentials);
       if (response.data.success) {
-        const { user, accessToken, refreshToken } = response.data.data;
+        const { user, accessToken } = response.data.data;
+        // The refresh token lives in an httpOnly cookie set by the backend
         localStorage.setItem('accessToken', accessToken);
-        localStorage.setItem('refreshToken', refreshToken);
         localStorage.setItem('user', JSON.stringify(user));
         setUser(user);
         router.push('/');
@@ -76,7 +76,6 @@ export function AuthProvider({ children }) {
       console.error('Logout error', e);
     } finally {
       localStorage.removeItem('accessToken');
-      localStorage.removeItem('refreshToken');
       localStorage.removeItem('user');
       setUser(null);
       router.push('/login');

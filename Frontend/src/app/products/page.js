@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { pageVariants, listItemVariants } from '@/utils/animations';
 import { Search, Plus, Edit2, AlertCircle, Loader2 } from 'lucide-react';
@@ -15,7 +15,7 @@ export default function ProductsList() {
   const [search, setSearch] = useState('');
   const [stats, setStats] = useState({ total: 0, lowStock: 0, value: 0 });
 
-  const fetchProducts = async () => {
+  const fetchProducts = useCallback(async () => {
     try {
       setLoading(true);
       // Fetching up to 50 products initially, search term applied
@@ -37,7 +37,7 @@ export default function ProductsList() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [search]);
 
   useEffect(() => {
     // Debounce search slightly
@@ -45,7 +45,7 @@ export default function ProductsList() {
       fetchProducts();
     }, 300);
     return () => clearTimeout(timer);
-  }, [search]);
+  }, [fetchProducts]);
 
   const getStatus = (stock) => {
     if (stock <= 0) return { label: 'Out of Stock', classes: 'bg-muted-red/10 text-muted-red' };
@@ -64,7 +64,7 @@ export default function ProductsList() {
       <header className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-neutral-900">Products Inventory</h1>
-          <p className="text-neutral-500 mt-1">Manage your store's items and stock levels.</p>
+          <p className="text-neutral-500 mt-1">Manage your store&apos;s items and stock levels.</p>
         </div>
         <button 
           onClick={() => setIsModalOpen(true)}

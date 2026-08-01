@@ -35,12 +35,19 @@ services:
       - key: RATE_LIMIT_MAX
         value: 300
 
-static_sites:
-  - type: static
+  - type: web
     name: ai-billing-frontend
+    runtime: node
     rootDirectory: Frontend
+    plan: free
     buildCommand: npm install && npm run build
-    publishPath: dist
+    startCommand: npm start
     envVars:
-      - key: VITE_API_URL
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3000
+      - key: NEXT_PUBLIC_API_URL
         value: https://ai-billing-backend.onrender.com/api/v1
+      - key: CORS_ORIGIN
+        value: https://ai-billing-frontend.onrender.com
