@@ -154,3 +154,15 @@ src/
 ├── helpers/            bill numbers (atomic counter), customer stats, stats
 └── utils/              ApiError, ApiResponse, asyncHandler, logger (dated files)
 ```
+
+## Deploy (Render, via render.yaml)
+
+1. In the **backend** service dashboard, set these env vars (all `sync: false` in render.yaml):
+   `MONGODB_URI`, `JWT_SECRET`, `JWT_REFRESH_SECRET`, `GEMINI_API_KEY`,
+   `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET`.
+   Optional: `CORS_ORIGIN` (comma-separated origins; defaults to allow-all) and `RATE_LIMIT_MAX`.
+2. In the **frontend** service dashboard, set `BACKEND_API_URL` to the deployed backend
+   URL, e.g. `https://your-backend.onrender.com`. The build fails with a clear error
+   if it is missing.
+3. The frontend calls the API through a same-origin proxy (`/api/v1/*` in
+   `next.config.mjs`) — no CORS setup and no hardcoded public URLs needed.

@@ -5,6 +5,7 @@ services:
     plan: free
     buildCommand: npm install
     startCommand: npm start
+    healthCheckPath: /health
     envVars:
       - key: NODE_ENV
         value: production
@@ -47,7 +48,7 @@ services:
         value: production
       - key: PORT
         value: 3000
-      - key: NEXT_PUBLIC_API_URL
-        value: https://ai-billing-backend.onrender.com/api/v1
+      - key: BACKEND_API_URL
+        sync: false
       - key: CORS_ORIGIN
         value: https://ai-billing-frontend.onrender.com
