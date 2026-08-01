@@ -4,8 +4,8 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { pageVariants, listItemVariants } from '@/utils/animations';
 import { 
-  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  BarChart, Bar, Cell
+  XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
+  BarChart, Bar, Cell, PieChart, Pie
 } from 'recharts';
 import { TrendingUp, Users, ReceiptText, Wallet, Plus, BarChart3, Loader2, AlertCircle } from 'lucide-react';
 import api from '@/services/api';
@@ -99,10 +99,10 @@ export default function AnalyticsDashboard() {
       {/* KPI Overview */}
       <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 px-4 md:px-6 bg-off-white pt-2">
         {[
-          { title: 'Total Revenue', value: `₹${summary?.totalRevenue?.toLocaleString() || 0}`, change: 'Overall', icon: Wallet, iconColor: 'text-emerald', iconBg: 'bg-emerald/10' },
           { title: 'Total Bills', value: summary?.totalBills || 0, change: 'Lifetime', icon: ReceiptText, iconColor: 'text-[#64748b]', iconBg: 'bg-[#f1f5f9]' },
           { title: 'Customers', value: summary?.topCustomers?.length || 0, change: 'Active', icon: Users, iconColor: 'text-purple-500', iconBg: 'bg-purple-50' },
-          { title: 'Avg. Bill Value', value: `₹${summary?.totalBills ? Math.round(summary.totalRevenue / summary.totalBills).toLocaleString() : 0}`, change: 'Per Order', icon: TrendingUp, iconColor: 'text-emerald', iconBg: 'bg-emerald/10' }
+          { title: 'Avg. Bill Value', value: `₹${summary?.totalBills ? Math.round(summary.totalRevenue / summary.totalBills).toLocaleString() : 0}`, change: 'Per Order', icon: TrendingUp, iconColor: 'text-emerald', iconBg: 'bg-emerald/10' },
+          { title: 'Unpaid Bills', value: summary?.unpaidBills || 0, change: 'Pending', icon: AlertCircle, iconColor: 'text-muted-red', iconBg: 'bg-muted-red/10' }
         ].map((kpi, idx) => (
           <motion.div key={idx} variants={listItemVariants} initial="hidden" animate="show" transition={{ delay: idx * 0.1 }} className="bg-off-white rounded-[16px] p-5 border border-soft-stone shadow-sm">
             <div className="flex items-center gap-2 mb-3">
@@ -118,34 +118,38 @@ export default function AnalyticsDashboard() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 px-4 md:px-6 bg-off-white pb-6 rounded-b-2xl">
-        {/* Main Revenue Chart */}
-        <div className="bg-off-white rounded-[16px] p-5 border border-soft-stone shadow-sm">
-          <div className="flex items-center justify-between mb-8">
-            <h3 className="text-[14px] font-bold text-neutral-900">Revenue Overview</h3>
-            <button className="text-[#4ade80]"><Plus className="w-5 h-5" strokeWidth={3} /></button>
-          </div>
-          <div className="h-56 w-full">
-            {data.monthlyRevenue.length > 0 ? (
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={data.monthlyRevenue} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
-                  <defs>
-                    <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="var(--color-emerald)" stopOpacity={0.6}/>
-                      <stop offset="95%" stopColor="var(--color-emerald)" stopOpacity={0}/>
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--color-soft-stone)" />
-                  <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: 'var(--color-neutral-600)', fontSize: 10}} dy={10} />
-                  <YAxis axisLine={false} tickLine={false} tick={{fill: 'var(--color-neutral-600)', fontSize: 10}} tickFormatter={(val) => `₹${val >= 1000 ? val/1000 + 'K' : val}`} />
-                  <Tooltip 
-                    contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
-                    formatter={(value) => [`₹${value.toLocaleString()}`, 'Revenue']}
-                  />
-                  <Area type="monotone" dataKey="total" stroke="#4ade80" strokeWidth={2} fillOpacity={1} fill="url(#colorRevenue)" activeDot={{ r: 4, fill: '#4ade80', stroke: '#fff', strokeWidth: 2 }} dot={{ r: 2, fill: '#4ade80', strokeWidth: 0 }} />
-                </AreaChart>
-              </ResponsiveContainer>
+        {/* Payment Mode Analysis */}
+        <div className="bg-off-white rounded-[16px] p-5 border border-soft-stone shadow-sm flex flex-col">
+          <h3 className="text-[14px] font-bold text-neutral-900 mb-6">Payment Mode Analysis</h3>
+          <div className="flex-1 w-full flex flex-col">
+            {summary?.paymentModes?.length > 0 ? (
+              <div className="h-56 w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={summary.paymentModes}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={60}
+                      outerRadius={80}
+                      paddingAngle={5}
+                      dataKey="total"
+                      nameKey="_id"
+                    >
+                      {summary.paymentModes.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={index % 2 === 0 ? 'var(--color-forest-green)' : 'var(--color-sage-green)'} />
+                      ))}
+                    </Pie>
+                    <Tooltip 
+                      formatter={(value) => [`₹${value.toLocaleString()}`, 'Total']}
+                      labelFormatter={(label, payload) => payload?.[0]?.payload?._id || label}
+                      contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: 'var(--shadow-soft)' }}
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
             ) : (
-              <div className="flex h-full items-center justify-center text-neutral-400">No revenue data available</div>
+              <div className="flex h-full items-center justify-center text-neutral-400 pb-10">No payment data available</div>
             )}
           </div>
         </div>

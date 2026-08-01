@@ -19,12 +19,15 @@ vi.mock('@/services/api', () => ({
 import api from '@/services/api';
 
 const Probe = ({ onResult }) => {
-  const { user, login, logout } = useAuth();
+  const { user, login, logout, register } = useAuth();
   const runLogin = async () => onResult(await login({ email: 'a@b.com', password: 'secret123' }));
+  const runRegister = async () =>
+    onResult(await register({ ownerName: 'Ravi', email: 'a@b.com', password: 'secret123' }));
   return (
     <div>
       <span data-testid="user">{user ? user.ownerName : 'none'}</span>
       <button onClick={runLogin}>login</button>
+      <button onClick={runRegister}>register</button>
       <button onClick={logout}>logout</button>
     </div>
   );
@@ -79,6 +82,24 @@ describe('AuthContext', () => {
       message: 'Invalid email or password',
     });
     expect(localStorage.getItem('accessToken')).toBeNull();
+  });
+
+  it('stores the session and routes to profile setup after a successful register', async () => {
+    api.post.mockResolvedValueOnce({
+      data: {
+        success: true,
+        data: { user: { ownerName: 'Ravi' }, accessToken: 'reg456' },
+      },
+    });
+
+    renderApp();
+
+    screen.getByText('register').click();
+    await waitFor(() => expect(screen.getByTestId('user')).toHaveTextContent('Ravi'));
+
+    expect(localStorage.getItem('accessToken')).toBe('reg456');
+    expect(localStorage.getItem('refreshToken')).toBeNull();
+    expect(push).toHaveBeenCalledWith('/profile?setup=1');
   });
 
   it('clears the session on logout', async () => {

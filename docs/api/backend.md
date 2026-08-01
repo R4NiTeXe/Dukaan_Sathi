@@ -69,13 +69,12 @@ Body:
 
 | Method | Path | Notes |
 |---|---|---|
-| GET | `/customers` | Query: `page`, `limit` (≤50), `search` (name/phone) → `{ customers, pagination }` |
-| POST | `/customers` | Body: `{ name, phone?, address? }` |
+| GET | `/customers` | Query: `page`, `limit` (≤50), `search` (customer number) → `{ customers, pagination }` |
+| POST | `/customers` | Body: `{}` — number auto-assigned as `CUST-<userId>-NNN` |
 | GET | `/customers/:id` | **404** if not found |
-| PUT | `/customers/:id` | Body: any subset of the above |
 | DELETE | `/customers/:id` | **200** → `{ deletedCustomerId }` |
 
-Customer `totalPurchases` / `lastPurchase` are recalculated whenever a linked bill is saved, updated, or deleted.
+Customer `totalPurchases` is recalculated whenever a linked bill is saved, updated, or deleted.
 
 ---
 
@@ -83,8 +82,8 @@ Customer `totalPurchases` / `lastPurchase` are recalculated whenever a linked bi
 
 | Method | Path | Notes |
 |---|---|---|
-| GET | `/products` | Query: `page`, `limit`, `search` (name/category) → `{ products, pagination }` |
-| POST | `/products` | Body: `{ name, price, unit?, category?, stock? }` |
+| GET | `/products` | Query: `page`, `limit`, `search` (name) → `{ products, pagination }` |
+| POST | `/products` | Body: `{ name, price, unit?, stock? }` |
 | GET | `/products/:id` | **404** if not found |
 | PUT | `/products/:id` | Body: any subset |
 | DELETE | `/products/:id` | **200** → `{ deletedProductId }` |
@@ -118,7 +117,7 @@ PUT body: `{ items?, paymentMethod?, paymentStatus?, customerId? }` (empty strin
 **200** → `{ data: [{ productName, totalRevenue, totalQuantity, timesSold }] }` sorted by revenue
 
 ### GET /analytics/customer-report
-**200** → `{ data: [{ customerId, name, phone, billCount, totalSpent, lastPurchase }] }`
+**200** → `{ data: [{ customerId, customerNumber, billCount, totalSpent }] }`
 
 ---
 

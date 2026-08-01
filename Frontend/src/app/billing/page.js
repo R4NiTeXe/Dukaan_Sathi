@@ -14,8 +14,23 @@ import {
   ReceiptText,
 } from "lucide-react";
 import api from "@/services/api";
+import { useAuth } from "@/context/AuthContext";
+
+const LANG_MAP = {
+  en: "en-IN",
+  hi: "hi-IN",
+  bn: "bn-BD",
+};
+
+const LANGUAGE_OPTIONS = [
+  { value: "en", label: "English" },
+  { value: "hi", label: "Hindi" },
+  { value: "bn", label: "Bengali" },
+];
 
 export default function VoiceBilling() {
+  const { user } = useAuth();
+  const [language, setLanguage] = useState(user?.preferredLanguage || "en");
   const [isRecording, setIsRecording] = useState(false);
   const [transcript, setTranscript] = useState("");
   const [isExtracting, setIsExtracting] = useState(false);
@@ -31,7 +46,7 @@ export default function VoiceBilling() {
       const recognition = new SpeechRecognition();
       recognition.continuous = true;
       recognition.interimResults = true;
-      recognition.lang = 'en-IN'; // Can be adjusted based on user preference
+      recognition.lang = LANG_MAP[user?.preferredLanguage] || 'en-IN';
 
       recognition.onresult = (event) => {
         let currentTrans = '';
@@ -43,8 +58,29 @@ export default function VoiceBilling() {
 
       recognition.onend = () => setIsRecording(false);
       recognitionRef.current = recognition;
+
+      // Auto-start if navigated with ?autoStart=true
+      if (typeof window !== 'undefined') {
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('autoStart') === 'true') {
+          // Small delay to ensure UI is ready
+          setTimeout(() => {
+            recognition.start();
+            setIsRecording(true);
+            // Clean up URL so it doesn't auto-start on refresh
+            window.history.replaceState({}, document.title, window.location.pathname);
+          }, 500);
+        }
+      }
     }
-  }, [SpeechRecognition]);
+  }, [SpeechRecognition, user?.preferredLanguage]);
+
+  const handleLanguageChange = (value) => {
+    setLanguage(value);
+    if (recognitionRef.current) {
+      recognitionRef.current.lang = LANG_MAP[value] || 'en-IN';
+    }
+  };
 
   const toggleRecording = () => {
     if (!SpeechRecognition) {
@@ -178,6 +214,25 @@ export default function VoiceBilling() {
           <p className="mt-8 text-neutral-500 font-medium">
             {isRecording ? "Listening..." : "Tap to speak"}
           </p>
+
+          <div className="mt-4 flex items-center gap-2 z-10">
+            <label htmlFor="voice-lang" className="text-sm text-neutral-500">
+              Language:
+            </label>
+            <select
+              id="voice-lang"
+              value={language}
+              onChange={(e) => handleLanguageChange(e.target.value)}
+              disabled={isRecording}
+              className="px-3 py-1.5 bg-warm-ivory border border-soft-stone rounded-lg text-sm focus:outline-none focus:border-sage-green transition-all text-neutral-700 disabled:opacity-60"
+            >
+              {LANGUAGE_OPTIONS.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
+          </div>
 
           <div className="w-full mt-6">
             <textarea

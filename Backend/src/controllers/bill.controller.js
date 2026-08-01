@@ -45,7 +45,7 @@ const listBills = asyncHandler(async (req, res) => {
       .sort({ [sortField]: sortDirection })
       .skip((page - 1) * limit)
       .limit(limit)
-      .populate('customerId', 'name phone')
+      .populate('customerId', 'customerNumber')
       .select(
         'billNumber items totalAmount paymentMethod paymentStatus customerId createdAt'
       )
@@ -67,7 +67,7 @@ const getBillById = asyncHandler(async (req, res) => {
   }
 
   const bill = await Bill.findOne({ _id: req.params.id, userId: req.user._id })
-    .populate('customerId', 'name phone address')
+    .populate('customerId', 'customerNumber')
     .lean()
   if (!bill) {
     throw new ApiError(404, 'Bill not found')

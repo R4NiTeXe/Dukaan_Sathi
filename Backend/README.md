@@ -43,7 +43,7 @@ npm run dev
 |---|---|
 | `npm start` | Run the server |
 | `npm run dev` | Run with nodemon auto-reload |
-| `npm test` | Lint + run the full test suite (65 tests) |
+| `npm test` | Lint + run the full test suite (64 tests) |
 | `npm run test:watch` | Re-run tests on file changes |
 | `npm run lint` | ESLint check |
 | `npm run format` | Prettier formatting |
@@ -63,8 +63,8 @@ Base URL: `/api/v1` — all routes except `auth/login`, `auth/register`, `/healt
 | PUT | `/auth/profile` | Update profile (multipart, optional `upiQrCode` image) |
 | POST | `/billing/extract` | Voice text -> items via Gemini |
 | POST | `/billing/save` | Save a bill |
-| GET/POST | `/customers` | List / create customers (`?search=`) |
-| GET/PUT/DELETE | `/customers/:id` | Get / update / delete customer |
+| GET/POST | `/customers` | List / create customers (auto CUST numbers, `?search=`) |
+| GET/DELETE | `/customers/:id` | Get / delete customer |
 | GET/POST | `/products` | List / create products |
 | GET/PUT/DELETE | `/products/:id` | Get / update / delete product |
 | GET | `/bills` | List with `search`, `startDate`, `endDate`, `paymentMethod`, `paymentStatus`, `sortBy`, `sortOrder`, `page`, `limit` |

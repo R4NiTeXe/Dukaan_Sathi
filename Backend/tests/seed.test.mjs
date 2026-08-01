@@ -19,15 +19,17 @@ after(async () => {
   await dropTestDb(server.dbName)
 })
 
-test('seeded shop has 3 customers', async () => {
+test('seeded shop has 3 customers with auto numbers', async () => {
   const r = await request(baseUrl, 'GET', '/api/v1/customers?limit=50', {
     token: seeded.token,
   })
   assert.equal(r.status, 200)
   assert.equal(r.json.data.pagination.total, 3)
-  const names = r.json.data.customers.map((c) => c.name)
-  assert.ok(names.includes('Ravi Kumar'))
-  assert.ok(names.includes('Mohan Das'))
+  const numbers = r.json.data.customers.map((c) => c.customerNumber)
+  for (const n of seeded.customerNumbers) {
+    assert.ok(numbers.includes(n))
+  }
+  assert.match(numbers[0], /^CUST-[0-9a-f]{24}-\d{3}$/)
 })
 
 test('seeded shop has 5 products', async () => {
@@ -68,9 +70,9 @@ test('customers carry purchase stats from seeded bills', async () => {
   const r = await request(baseUrl, 'GET', '/api/v1/customers?limit=50', {
     token: seeded.token,
   })
-  const ravi = r.json.data.customers.find((c) => c.name === 'Ravi Kumar')
-  assert.ok(ravi.totalPurchases >= 1)
-  assert.ok(ravi.lastPurchase)
+  const withBills = r.json.data.customers.find((c) => c.totalPurchases >= 1)
+  assert.ok(withBills)
+  assert.ok(withBills.customerNumber.startsWith('CUST-'))
 })
 
 const todayStamp = () => {

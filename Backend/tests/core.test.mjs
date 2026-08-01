@@ -34,10 +34,10 @@ after(async () => {
 test('create customer', async () => {
   const r = await request(baseUrl, 'POST', '/api/v1/customers', {
     token,
-    body: { name: 'Rahul', phone: '9876543210' },
+    body: {},
   })
   assert.equal(r.status, 201)
-  assert.equal(r.json.data.customer.name, 'Rahul')
+  assert.match(r.json.data.customer.customerNumber, /^CUST-[0-9a-f]{24}-\d{3}$/)
   customerId = r.json.data.customer._id
 })
 
@@ -45,8 +45,9 @@ test('list customers with search', async () => {
   const r = await request(baseUrl, 'GET', '/api/v1/customers', { token })
   assert.equal(r.status, 200)
   assert.equal(r.json.data.customers.length, 1)
+  assert.ok(r.json.data.customers[0].customerNumber.startsWith('CUST-'))
 
-  const s = await request(baseUrl, 'GET', '/api/v1/customers?search=rah', {
+  const s = await request(baseUrl, 'GET', '/api/v1/customers?search=001', {
     token,
   })
   assert.equal(s.json.data.customers.length, 1)
@@ -55,15 +56,6 @@ test('list customers with search', async () => {
     token,
   })
   assert.equal(empty.json.data.customers.length, 0)
-})
-
-test('update customer', async () => {
-  const r = await request(baseUrl, 'PUT', `/api/v1/customers/${customerId}`, {
-    token,
-    body: { phone: '9998887770' },
-  })
-  assert.equal(r.status, 200)
-  assert.equal(r.json.data.customer.phone, '9998887770')
 })
 
 test('create product', async () => {
@@ -102,7 +94,6 @@ test('save bill updates customer stats', async () => {
   const c = await request(baseUrl, 'GET', '/api/v1/customers', { token })
   const customer = c.json.data.customers.find((x) => x._id === customerId)
   assert.equal(customer.totalPurchases, 1)
-  assert.ok(customer.lastPurchase)
 })
 
 test('bill numbers increment sequentially', async () => {
@@ -175,7 +166,7 @@ test('analytics customer-report includes customer details', async () => {
     token,
   })
   assert.equal(r.status, 200)
-  assert.equal(r.json.data.data[0].name, 'Rahul')
+  assert.match(r.json.data.data[0].customerNumber, /^CUST-/)
   assert.equal(r.json.data.data[0].totalSpent, 200)
 })
 
@@ -184,6 +175,12 @@ test('search finds bills, products and customers', async () => {
   assert.equal(r.status, 200)
   assert.ok(r.json.data.bills.length >= 1)
   assert.equal(r.json.data.products[0].name, 'Rice')
+
+  const byNumber = await request(baseUrl, 'GET', '/api/v1/search?q=001', {
+    token,
+  })
+  assert.equal(byNumber.status, 200)
+  assert.ok(byNumber.json.data.customers.length >= 1)
 })
 
 test('delete bill returns 404 on second delete', async () => {

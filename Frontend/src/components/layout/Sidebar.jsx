@@ -10,7 +10,8 @@ import {
   Users, 
   Package,
   BarChart,
-  BotMessageSquare
+  BotMessageSquare,
+  Settings
 } from 'lucide-react';
 
 const navItems = [
@@ -21,6 +22,7 @@ const navItems = [
   { name: 'Products', href: '/products', icon: Package },
   { name: 'Analytics', href: '/analytics', icon: BarChart },
   { name: 'AI Advisor', href: '/advisor', icon: BotMessageSquare },
+  { name: 'Profile', href: '/profile', icon: Settings },
 ];
 
 export default function Sidebar() {

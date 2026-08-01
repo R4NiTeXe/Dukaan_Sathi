@@ -108,11 +108,8 @@ export default function BillDetails({ params }) {
               Billed To
             </h2>
             <p className="text-lg font-semibold text-neutral-900">
-              {bill.customer?.name || "Walk-in Customer"}
+              {bill.customer?.customerNumber || "Walk-in Customer"}
             </p>
-            {bill.customer?.phone && (
-              <p className="text-neutral-500">{bill.customer.phone}</p>
-            )}
           </div>
 
           <div className="w-full">

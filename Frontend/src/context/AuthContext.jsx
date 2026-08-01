@@ -58,8 +58,12 @@ export function AuthProvider({ children }) {
     try {
       const response = await api.post('/auth/register', userData);
       if (response.data.success) {
-        // Automatically log them in after registration (if backend doesn't return tokens on register)
-        return await login({ email: userData.email, password: userData.password });
+        const { user, accessToken } = response.data.data;
+        localStorage.setItem('accessToken', accessToken);
+        localStorage.setItem('user', JSON.stringify(user));
+        setUser(user);
+        router.push('/profile?setup=1');
+        return { success: true };
       }
     } catch (error) {
       return { 
@@ -67,6 +71,20 @@ export function AuthProvider({ children }) {
         message: error.response?.data?.message || 'Registration failed.' 
       };
     }
+  };
+
+  const refreshProfile = async () => {
+    try {
+      const response = await api.get('/auth/profile');
+      if (response.data.success) {
+        localStorage.setItem('user', JSON.stringify(response.data.data.user));
+        setUser(response.data.data.user);
+        return response.data.data.user;
+      }
+    } catch (error) {
+      console.error('Failed to refresh profile', error);
+    }
+    return null;
   };
 
   const logout = async () => {
@@ -83,7 +101,7 @@ export function AuthProvider({ children }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, register, logout, refreshProfile }}>
       {!loading && children}
     </AuthContext.Provider>
   );

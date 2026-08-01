@@ -12,10 +12,6 @@ const productSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
-    category: {
-      type: String,
-      trim: true,
-    },
     price: {
       type: Number,
       required: true,
@@ -37,6 +33,5 @@ const productSchema = new mongoose.Schema(
 )
 
 productSchema.index({ userId: 1, name: 1 })
-productSchema.index({ userId: 1, category: 1 })
 
 export const Product = mongoose.model('Product', productSchema)

@@ -7,26 +7,14 @@ const customerSchema = new mongoose.Schema(
       ref: 'User',
       required: true,
     },
-    name: {
+    customerNumber: {
       type: String,
       required: true,
-      trim: true,
-    },
-    phone: {
-      type: String,
-      trim: true,
-    },
-    address: {
-      type: String,
       trim: true,
     },
     totalPurchases: {
       type: Number,
       default: 0,
-    },
-    lastPurchase: {
-      type: Date,
-      default: null,
     },
   },
   {
@@ -34,7 +22,6 @@ const customerSchema = new mongoose.Schema(
   }
 )
 
-customerSchema.index({ userId: 1, name: 1 })
-customerSchema.index({ userId: 1, phone: 1 })
+customerSchema.index({ userId: 1, customerNumber: 1 })
 
 export const Customer = mongoose.model('Customer', customerSchema)

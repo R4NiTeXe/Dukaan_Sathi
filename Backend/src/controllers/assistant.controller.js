@@ -133,7 +133,7 @@ const fetchCustomers = async (userId) => {
     {
       $project: {
         _id: 0,
-        name: '$customer.name',
+        customerNumber: '$customer.customerNumber',
         billCount: 1,
         totalSpent: 1,
       },

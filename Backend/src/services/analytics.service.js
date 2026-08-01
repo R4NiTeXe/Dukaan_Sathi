@@ -66,7 +66,7 @@ export const dashboardSummary = async (userId) => {
               paymentMethod: 1,
               paymentStatus: 1,
               createdAt: 1,
-              customer: { $ifNull: ['$customer.name', null] },
+              customer: { $ifNull: ['$customer.customerNumber', null] },
             },
           },
         ],
@@ -93,12 +93,24 @@ export const dashboardSummary = async (userId) => {
           {
             $project: {
               _id: 1,
-              name: '$customer.name',
-              phone: '$customer.phone',
+              customerNumber: '$customer.customerNumber',
               totalSpent: 1,
               billCount: 1,
             },
           },
+        ],
+        paymentModes: [
+          {
+            $group: {
+              _id: '$paymentMethod',
+              total: { $sum: '$totalAmount' },
+              count: { $sum: 1 },
+            },
+          },
+        ],
+        unpaidBills: [
+          { $match: { paymentStatus: 'pending' } },
+          { $count: 'count' },
         ],
       },
     },
@@ -112,6 +124,8 @@ export const dashboardSummary = async (userId) => {
     billsThisWeek: result.billsThisWeek[0]?.count || 0,
     recentBills: result.recentBills || [],
     topCustomers: result.topCustomers || [],
+    paymentModes: result.paymentModes || [],
+    unpaidBills: result.unpaidBills?.[0]?.count || 0,
   }
 }
 
@@ -169,8 +183,7 @@ export const customerReport = async (userId) => {
       $project: {
         _id: 0,
         customerId: '$_id',
-        name: '$customer.name',
-        phone: '$customer.phone',
+        customerNumber: '$customer.customerNumber',
         billCount: 1,
         totalSpent: 1,
         lastPurchase: 1,

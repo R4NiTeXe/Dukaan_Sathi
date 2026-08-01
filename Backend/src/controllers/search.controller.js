@@ -24,19 +24,19 @@ const searchAll = asyncHandler(async (req, res) => {
       .lean(),
     Product.find({
       userId: req.user._id,
-      $or: [{ name: regex }, { category: regex }],
+      name: regex,
     })
       .sort({ createdAt: -1 })
       .limit(5)
-      .select('name category price unit')
+      .select('name price unit')
       .lean(),
     Customer.find({
       userId: req.user._id,
-      $or: [{ name: regex }, { phone: regex }],
+      customerNumber: regex,
     })
       .sort({ createdAt: -1 })
       .limit(5)
-      .select('name phone totalPurchases')
+      .select('customerNumber totalPurchases')
       .lean(),
   ])
 

@@ -8,7 +8,6 @@ import api from '@/services/api';
 export default function AddProductModal({ isOpen, onClose, onProductAdded }) {
   const [formData, setFormData] = useState({
     name: '',
-    category: 'Grocery',
     unit: 'kg',
     price: '',
     stock: ''
@@ -31,7 +30,7 @@ export default function AddProductModal({ isOpen, onClose, onProductAdded }) {
       const response = await api.post('/products', payload);
       if (response.data.success) {
         if (onProductAdded) onProductAdded();
-        setFormData({ name: '', category: 'Grocery', unit: 'kg', price: '', stock: '' });
+        setFormData({ name: '', unit: 'kg', price: '', stock: '' });
         onClose();
       }
     } catch (err) {
@@ -69,33 +68,18 @@ export default function AddProductModal({ isOpen, onClose, onProductAdded }) {
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-1.5">
-            <label className="text-sm font-medium text-neutral-700">Category</label>
-            <select 
-              value={formData.category}
-              onChange={e => setFormData({...formData, category: e.target.value})}
-              className="w-full px-4 py-2.5 bg-off-white border border-soft-stone rounded-xl text-sm focus:outline-none focus:border-sage-green transition-all text-neutral-700"
-            >
-              <option value="Grocery">Grocery</option>
-              <option value="Dairy">Dairy</option>
-              <option value="Snacks">Snacks</option>
-              <option value="Beverages">Beverages</option>
-            </select>
-          </div>
-          <div className="space-y-1.5">
-            <label className="text-sm font-medium text-neutral-700">Unit</label>
-            <select 
-              value={formData.unit}
-              onChange={e => setFormData({...formData, unit: e.target.value})}
-              className="w-full px-4 py-2.5 bg-off-white border border-soft-stone rounded-xl text-sm focus:outline-none focus:border-sage-green transition-all text-neutral-700"
-            >
-              <option value="kg">kg</option>
-              <option value="L">Litre</option>
-              <option value="pcs">Piece</option>
-              <option value="pkt">Packet</option>
-            </select>
-          </div>
+        <div className="space-y-1.5">
+          <label className="text-sm font-medium text-neutral-700">Unit</label>
+          <select 
+            value={formData.unit}
+            onChange={e => setFormData({...formData, unit: e.target.value})}
+            className="w-full px-4 py-2.5 bg-off-white border border-soft-stone rounded-xl text-sm focus:outline-none focus:border-sage-green transition-all text-neutral-700"
+          >
+            <option value="kg">kg</option>
+            <option value="L">Litre</option>
+            <option value="pcs">Piece</option>
+            <option value="pkt">Packet</option>
+          </select>
         </div>
 
         <div className="grid grid-cols-2 gap-4">

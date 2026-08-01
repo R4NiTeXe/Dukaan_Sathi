@@ -9,6 +9,5 @@ export const refreshCustomerStats = async (customerId) => {
 
   await Customer.findByIdAndUpdate(customerId, {
     totalPurchases: summary?.totalPurchases || 0,
-    lastPurchase: summary?.lastPurchase || null,
   })
 }

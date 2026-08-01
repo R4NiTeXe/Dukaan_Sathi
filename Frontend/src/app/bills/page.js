@@ -43,7 +43,7 @@ export default function BillsList() {
           <p className="text-neutral-500 mt-1">Manage and track your transactions.</p>
         </div>
         <button 
-          onClick={() => router.push('/pos')}
+          onClick={() => router.push('/billing?autoStart=true')}
           className="px-5 py-2.5 bg-forest-green text-warm-ivory rounded-xl font-medium shadow-md shadow-forest-green/20 hover:bg-forest-green/90 transition-colors"
         >
           Create New Bill
@@ -93,7 +93,7 @@ export default function BillsList() {
                       className="border-b border-soft-stone hover:bg-warm-ivory/50 transition-colors group cursor-pointer"
                     >
                       <td className="py-4 pl-4 font-medium text-neutral-700">{bill.billNumber || bill._id.substring(bill._id.length - 6).toUpperCase()}</td>
-                      <td className="py-4 text-neutral-900">{bill.customer?.name || 'Walk-in'}</td>
+                      <td className="py-4 text-neutral-900">{bill.customer?.customerNumber || 'Walk-in'}</td>
                       <td className="py-4 text-neutral-500 text-sm">{new Date(bill.createdAt).toLocaleDateString()}</td>
                       <td className="py-4 font-semibold text-neutral-900">₹{bill.totalAmount}</td>
                       <td className="py-4">

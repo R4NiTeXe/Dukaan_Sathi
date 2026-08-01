@@ -1,17 +1,16 @@
 import mongoose from 'mongoose'
 import { Customer } from '../models/Customer.model.js'
-import {
-  createCustomerSchema,
-  updateCustomerSchema,
-} from '../validators/customer.validator.js'
+import { generateCustomerNumber } from '../helpers/customerNumber.helper.js'
 import ApiError from '../utils/ApiError.js'
 import ApiResponse from '../utils/ApiResponse.js'
 import asyncHandler from '../utils/asyncHandler.js'
 
 const createCustomer = asyncHandler(async (req, res) => {
-  const validated = createCustomerSchema.parse(req.body)
-
-  const customer = await Customer.create({ ...validated, userId: req.user._id })
+  const customerNumber = await generateCustomerNumber(req.user._id)
+  const customer = await Customer.create({
+    customerNumber,
+    userId: req.user._id,
+  })
 
   return res
     .status(201)
@@ -25,10 +24,7 @@ const listCustomers = asyncHandler(async (req, res) => {
 
   const filter = { userId: req.user._id }
   if (search) {
-    filter.$or = [
-      { name: { $regex: search, $options: 'i' } },
-      { phone: { $regex: search, $options: 'i' } },
-    ]
+    filter.customerNumber = { $regex: search, $options: 'i' }
   }
 
   const [customers, total] = await Promise.all([
@@ -36,7 +32,7 @@ const listCustomers = asyncHandler(async (req, res) => {
       .sort({ createdAt: -1 })
       .skip((page - 1) * limit)
       .limit(limit)
-      .select('name phone address totalPurchases lastPurchase')
+      .select('customerNumber totalPurchases createdAt')
       .lean(),
     Customer.countDocuments(filter),
   ])
@@ -57,29 +53,14 @@ const getCustomer = asyncHandler(async (req, res) => {
   const customer = await Customer.findOne({
     _id: req.params.id,
     userId: req.user._id,
-  }).lean()
+  })
+    .select('customerNumber totalPurchases createdAt')
+    .lean()
   if (!customer) {
     throw new ApiError(404, 'Customer not found')
   }
 
   return res.status(200).json(new ApiResponse(200, { customer }))
-})
-
-const updateCustomer = asyncHandler(async (req, res) => {
-  const validated = updateCustomerSchema.parse(req.body)
-
-  const customer = await Customer.findOneAndUpdate(
-    { _id: req.params.id, userId: req.user._id },
-    { $set: validated },
-    { new: true, runValidators: true }
-  ).lean()
-  if (!customer) {
-    throw new ApiError(404, 'Customer not found')
-  }
-
-  return res
-    .status(200)
-    .json(new ApiResponse(200, { customer }, 'Customer updated'))
 })
 
 const deleteCustomer = asyncHandler(async (req, res) => {
@@ -102,10 +83,4 @@ const deleteCustomer = asyncHandler(async (req, res) => {
     )
 })
 
-export {
-  createCustomer,
-  listCustomers,
-  getCustomer,
-  updateCustomer,
-  deleteCustomer,
-}
+export { createCustomer, listCustomers, getCustomer, deleteCustomer }

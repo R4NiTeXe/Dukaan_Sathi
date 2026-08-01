@@ -1,17 +1,11 @@
 import { request } from '../helpers/server.mjs'
 
-const CUSTOMERS = [
-  { name: 'Ravi Kumar', phone: '9800000001' },
-  { name: 'Sita Devi', phone: '9800000002' },
-  { name: 'Mohan Das', phone: '9800000003' },
-]
-
 const PRODUCTS = [
-  { name: 'Rice', price: 100, unit: 'kg', category: 'grains' },
-  { name: 'Sugar', price: 50, unit: 'kg', category: 'groceries' },
-  { name: 'Tea', price: 30, unit: 'pack', category: 'beverages' },
-  { name: 'Milk', price: 60, unit: 'liter', category: 'dairy' },
-  { name: 'Salt', price: 20, unit: 'pack', category: 'groceries' },
+  { name: 'Rice', price: 100, unit: 'kg' },
+  { name: 'Sugar', price: 50, unit: 'kg' },
+  { name: 'Tea', price: 30, unit: 'pack' },
+  { name: 'Milk', price: 60, unit: 'liter' },
+  { name: 'Salt', price: 20, unit: 'pack' },
 ]
 
 const ITEMS = [
@@ -22,7 +16,7 @@ const ITEMS = [
 
 export const seedShop = async (
   baseUrl,
-  { email = 'seed@test.com', bills = 10 } = {}
+  { email = 'seed@test.com', bills = 10, customers = 3 } = {}
 ) => {
   const reg = await request(baseUrl, 'POST', '/api/v1/auth/register', {
     body: {
@@ -36,12 +30,14 @@ export const seedShop = async (
   const token = reg.json.data.accessToken
 
   const customerIds = []
-  for (const c of CUSTOMERS) {
+  const customerNumbers = []
+  for (let i = 0; i < customers; i++) {
     const r = await request(baseUrl, 'POST', '/api/v1/customers', {
       token,
-      body: c,
+      body: {},
     })
     customerIds.push(r.json.data.customer._id)
+    customerNumbers.push(r.json.data.customer.customerNumber)
   }
 
   const productIds = []
@@ -70,9 +66,9 @@ export const seedShop = async (
   return {
     token,
     customerIds,
+    customerNumbers,
     productIds,
     billIds,
-    customers: CUSTOMERS,
     products: PRODUCTS,
   }
 }

@@ -25,10 +25,7 @@ const listProducts = asyncHandler(async (req, res) => {
 
   const filter = { userId: req.user._id }
   if (search) {
-    filter.$or = [
-      { name: { $regex: search, $options: 'i' } },
-      { category: { $regex: search, $options: 'i' } },
-    ]
+    filter.name = { $regex: search, $options: 'i' }
   }
 
   const [products, total] = await Promise.all([
@@ -36,7 +33,7 @@ const listProducts = asyncHandler(async (req, res) => {
       .sort({ createdAt: -1 })
       .skip((page - 1) * limit)
       .limit(limit)
-      .select('name category price unit stock')
+      .select('name price unit stock')
       .lean(),
     Product.countDocuments(filter),
   ])
