@@ -122,13 +122,15 @@ export default function ProfilePage() {
       initial="initial"
       animate="animate"
       exit="exit"
-      className="max-w-2xl mx-auto space-y-8 min-w-0"
+      className="max-w-6xl mx-auto space-y-8 min-w-0"
     >
-      <header>
-        <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-neutral-900">
-          Shop Profile
-        </h1>
-        <p className="text-neutral-500 mt-1">Manage your shop and payment details.</p>
+      <header className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-neutral-900">
+            Shop Profile
+          </h1>
+          <p className="text-neutral-500 mt-1">Manage your shop and payment details.</p>
+        </div>
       </header>
 
       {setupMode && !user?.upiQrCode && (
@@ -154,112 +156,71 @@ export default function ProfilePage() {
         </div>
       )}
 
-      <form onSubmit={handleSave} className="bg-off-white rounded-[24px] p-6 md:p-8 shadow-[var(--shadow-soft)] border border-soft-stone space-y-5">
-        <h2 className="text-lg font-bold text-neutral-900 flex items-center gap-2">
-          <Store className="w-5 h-5 text-forest-green" /> Shop Details
-        </h2>
-
-        <div className="space-y-1.5">
-          <label className="text-sm font-medium text-neutral-700">Owner Name</label>
-          <input
-            type="text"
-            required
-            value={form.ownerName || ''}
-            onChange={(e) => set('ownerName', e.target.value)}
-            className="w-full px-4 py-2.5 bg-warm-ivory border border-soft-stone rounded-xl text-sm focus:outline-none focus:border-sage-green focus:ring-1 focus:ring-sage-green transition-all"
-          />
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-          <div className="space-y-1.5">
-            <label className="text-sm font-medium text-neutral-700">Shop Name</label>
-            <input
-              type="text"
-              required
-              value={form.shopName || ''}
-              onChange={(e) => set('shopName', e.target.value)}
-              className="w-full px-4 py-2.5 bg-warm-ivory border border-soft-stone rounded-xl text-sm focus:outline-none focus:border-sage-green focus:ring-1 focus:ring-sage-green transition-all"
-            />
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        
+        {/* Left Column: Summary & QR */}
+        <div className="lg:col-span-1 space-y-8">
+          {/* Profile Summary Card */}
+          <div className="bg-gradient-to-b from-forest-green to-[#1e293b] rounded-[24px] p-6 shadow-lg border border-soft-stone flex flex-col items-center text-center text-warm-ivory relative overflow-hidden">
+             <div className="absolute top-0 right-0 p-4 opacity-10">
+               <Store className="w-24 h-24" />
+             </div>
+             <div className="w-24 h-24 rounded-full bg-warm-ivory text-forest-green flex items-center justify-center text-4xl font-bold mb-4 shadow-xl border-4 border-white/20 relative z-10">
+               {form?.shopName ? form.shopName.charAt(0).toUpperCase() : <Store className="w-10 h-10" />}
+             </div>
+             <h2 className="text-2xl font-bold mb-1 relative z-10">{form.shopName || 'Your Shop'}</h2>
+             <p className="text-sm text-warm-ivory/80 mb-4 relative z-10">{form.ownerName || 'Owner'}</p>
+             <span className="px-4 py-1.5 bg-white/20 backdrop-blur-sm rounded-full text-xs font-semibold uppercase tracking-wider relative z-10 border border-white/10">
+               {form.shopType || 'Shop'}
+             </span>
           </div>
 
-          <div className="space-y-1.5">
-            <label className="text-sm font-medium text-neutral-700">Shop Type</label>
-            <select
-              value={form.shopType || 'grocery'}
-              onChange={(e) => set('shopType', e.target.value)}
-              className="w-full px-4 py-2.5 bg-warm-ivory border border-soft-stone rounded-xl text-sm focus:outline-none focus:border-sage-green transition-all text-neutral-700"
-            >
-              {SHOP_TYPES.map((t) => (
-                <option key={t.value} value={t.value}>
-                  {t.label}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
+          {/* QR Code Section */}
+          <div className="bg-off-white rounded-[24px] p-6 shadow-[var(--shadow-soft)] border border-soft-stone flex flex-col">
+            <h2 className="text-lg font-bold text-neutral-900 flex items-center gap-2 mb-6">
+              <QrCode className="w-5 h-5 text-forest-green" /> UPI QR Code
+            </h2>
 
-        <div className="space-y-1.5">
-          <label className="text-sm font-medium text-neutral-700 flex items-center gap-1.5">
-            <MapPin className="w-4 h-4 text-neutral-400" /> Shop Address (optional)
-          </label>
-          <input
-            type="text"
-            value={form.shopAddress || ''}
-            onChange={(e) => set('shopAddress', e.target.value)}
-            placeholder="123 Street, City"
-            className="w-full px-4 py-2.5 bg-warm-ivory border border-soft-stone rounded-xl text-sm focus:outline-none focus:border-sage-green focus:ring-1 focus:ring-sage-green transition-all"
-          />
-        </div>
-
-        <div className="space-y-1.5">
-          <label className="text-sm font-medium text-neutral-700 flex items-center gap-1.5">
-            <Languages className="w-4 h-4 text-neutral-400" /> Preferred Language
-          </label>
-          <select
-            value={form.preferredLanguage || 'en'}
-            onChange={(e) => set('preferredLanguage', e.target.value)}
-            className="w-full px-4 py-2.5 bg-warm-ivory border border-soft-stone rounded-xl text-sm focus:outline-none focus:border-sage-green transition-all text-neutral-700"
-          >
-            {LANGUAGES.map((l) => (
-              <option key={l.value} value={l.value}>
-                {l.label}
-              </option>
-            ))}
-          </select>
-          <p className="text-xs text-neutral-400">
-            Used as the default language for voice billing.
-          </p>
-        </div>
-
-        <div className="pt-2">
-          <button
-            type="submit"
-            disabled={loading}
-            className="px-6 py-2.5 bg-forest-green text-warm-ivory rounded-xl font-medium shadow-md shadow-forest-green/20 hover:bg-forest-green/90 transition-colors flex items-center gap-2 disabled:opacity-70"
-          >
-            {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-            Save Changes
-          </button>
-        </div>
-      </form>
-
-      <div className="bg-off-white rounded-[24px] p-6 md:p-8 shadow-[var(--shadow-soft)] border border-soft-stone">
-        <h2 className="text-lg font-bold text-neutral-900 flex items-center gap-2 mb-4">
-          <QrCode className="w-5 h-5 text-forest-green" /> UPI QR Code
-        </h2>
-
-        {user?.upiQrCode ? (
-          <div className="flex flex-col sm:flex-row items-center gap-6">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={user.upiQrCode}
-              alt="UPI QR code"
-              className="w-40 h-40 rounded-2xl border border-soft-stone object-contain bg-warm-ivory"
-            />
-            <div className="flex flex-col gap-3">
-              <label className="inline-flex items-center gap-2 px-4 py-2.5 bg-sage-green text-forest-green rounded-xl font-medium hover:bg-sage-green/80 transition-colors cursor-pointer">
-                <Upload className="w-4 h-4" />
-                Replace QR
+            {user?.upiQrCode ? (
+              <div className="flex flex-col items-center gap-6">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={user.upiQrCode}
+                  alt="UPI QR code"
+                  className="w-48 h-48 rounded-2xl border-2 border-sage-green/30 object-contain bg-warm-ivory p-2 shadow-sm"
+                />
+                <div className="flex gap-3 w-full">
+                  <label className="flex-1 flex justify-center items-center gap-2 px-4 py-2.5 bg-sage-green text-forest-green rounded-xl font-medium hover:bg-sage-green/80 transition-colors cursor-pointer text-sm">
+                    <Upload className="w-4 h-4" />
+                    Replace
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={handleQrUpload}
+                      disabled={qrUploading}
+                    />
+                  </label>
+                  <button
+                    onClick={handleQrRemove}
+                    disabled={qrUploading}
+                    className="flex-1 flex justify-center items-center gap-2 px-4 py-2.5 bg-muted-red/10 text-muted-red rounded-xl font-medium hover:bg-muted-red/20 transition-colors disabled:opacity-70 text-sm"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                    Remove
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <label className="flex flex-col items-center justify-center gap-3 p-8 border-2 border-dashed border-soft-stone rounded-2xl cursor-pointer hover:border-sage-green hover:bg-sage-green/5 transition-colors h-48">
+                {qrUploading ? (
+                  <Loader2 className="w-8 h-8 animate-spin text-forest-green" />
+                ) : (
+                  <QrCode className="w-10 h-10 text-neutral-300" />
+                )}
+                <span className="text-sm text-neutral-500 text-center px-4">
+                  {qrUploading ? 'Uploading...' : 'Click to upload your UPI QR code'}
+                </span>
                 <input
                   type="file"
                   accept="image/*"
@@ -268,35 +229,101 @@ export default function ProfilePage() {
                   disabled={qrUploading}
                 />
               </label>
-              <button
-                onClick={handleQrRemove}
-                disabled={qrUploading}
-                className="inline-flex items-center gap-2 px-4 py-2.5 bg-muted-red/10 text-muted-red rounded-xl font-medium hover:bg-muted-red/20 transition-colors disabled:opacity-70"
+            )}
+          </div>
+        </div>
+
+        {/* Right Column: Form */}
+        <div className="lg:col-span-2">
+          <form onSubmit={handleSave} className="bg-off-white rounded-[24px] p-6 md:p-8 shadow-[var(--shadow-soft)] border border-soft-stone space-y-6">
+            <h2 className="text-lg font-bold text-neutral-900 flex items-center gap-2 mb-2">
+              <Store className="w-5 h-5 text-forest-green" /> Shop Details
+            </h2>
+
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium text-neutral-700">Owner Name</label>
+              <input
+                type="text"
+                required
+                value={form.ownerName || ''}
+                onChange={(e) => set('ownerName', e.target.value)}
+                className="w-full px-4 py-3 bg-warm-ivory border border-soft-stone rounded-xl text-sm focus:outline-none focus:border-sage-green focus:ring-1 focus:ring-sage-green transition-all"
+              />
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium text-neutral-700">Shop Name</label>
+                <input
+                  type="text"
+                  required
+                  value={form.shopName || ''}
+                  onChange={(e) => set('shopName', e.target.value)}
+                  className="w-full px-4 py-3 bg-warm-ivory border border-soft-stone rounded-xl text-sm focus:outline-none focus:border-sage-green focus:ring-1 focus:ring-sage-green transition-all"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium text-neutral-700">Shop Type</label>
+                <select
+                  value={form.shopType || 'grocery'}
+                  onChange={(e) => set('shopType', e.target.value)}
+                  className="w-full px-4 py-3 bg-warm-ivory border border-soft-stone rounded-xl text-sm focus:outline-none focus:border-sage-green transition-all text-neutral-700"
+                >
+                  {SHOP_TYPES.map((t) => (
+                    <option key={t.value} value={t.value}>
+                      {t.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium text-neutral-700 flex items-center gap-1.5">
+                <MapPin className="w-4 h-4 text-neutral-400" /> Shop Address (optional)
+              </label>
+              <input
+                type="text"
+                value={form.shopAddress || ''}
+                onChange={(e) => set('shopAddress', e.target.value)}
+                placeholder="123 Street, City"
+                className="w-full px-4 py-3 bg-warm-ivory border border-soft-stone rounded-xl text-sm focus:outline-none focus:border-sage-green focus:ring-1 focus:ring-sage-green transition-all"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium text-neutral-700 flex items-center gap-1.5">
+                <Languages className="w-4 h-4 text-neutral-400" /> Preferred Language
+              </label>
+              <select
+                value={form.preferredLanguage || 'en'}
+                onChange={(e) => set('preferredLanguage', e.target.value)}
+                className="w-full px-4 py-3 bg-warm-ivory border border-soft-stone rounded-xl text-sm focus:outline-none focus:border-sage-green transition-all text-neutral-700"
               >
-                <Trash2 className="w-4 h-4" />
-                Remove QR
+                {LANGUAGES.map((l) => (
+                  <option key={l.value} value={l.value}>
+                    {l.label}
+                  </option>
+                ))}
+              </select>
+              <p className="text-xs text-neutral-400 pt-1">
+                Used as the default language for voice billing.
+              </p>
+            </div>
+
+            <div className="pt-4 mt-4 border-t border-soft-stone/50">
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full sm:w-auto px-8 py-3 bg-forest-green text-warm-ivory rounded-xl font-medium shadow-md shadow-forest-green/20 hover:bg-forest-green/90 transition-colors flex items-center justify-center gap-2 disabled:opacity-70"
+              >
+                {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                Save Changes
               </button>
             </div>
-          </div>
-        ) : (
-          <label className="flex flex-col items-center justify-center gap-3 p-8 border-2 border-dashed border-soft-stone rounded-2xl cursor-pointer hover:border-sage-green hover:bg-sage-green/5 transition-colors">
-            {qrUploading ? (
-              <Loader2 className="w-8 h-8 animate-spin text-forest-green" />
-            ) : (
-              <QrCode className="w-10 h-10 text-neutral-300" />
-            )}
-            <span className="text-sm text-neutral-500">
-              {qrUploading ? 'Uploading...' : 'Click to upload your UPI QR code'}
-            </span>
-            <input
-              type="file"
-              accept="image/*"
-              className="hidden"
-              onChange={handleQrUpload}
-              disabled={qrUploading}
-            />
-          </label>
-        )}
+          </form>
+        </div>
       </div>
     </motion.div>
   );

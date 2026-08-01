@@ -3,7 +3,8 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { pageVariants, listVariants, listItemVariants } from '@/utils/animations';
-import { TrendingUp, Users, Receipt, AlertCircle, BotMessageSquare, Loader2 } from 'lucide-react';
+import { Receipt, AlertCircle, BotMessageSquare, Loader2 } from 'lucide-react';
+import Link from 'next/link';
 import { 
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   BarChart, Bar, Cell
@@ -91,45 +92,34 @@ export default function Dashboard() {
           <p>{error}</p>
         </div>
       )}
-
-      {/* KPI Cards */}
-      <motion.div 
-        variants={listVariants}
-        initial="hidden"
-        animate="show"
-        className="grid grid-cols-1 md:grid-cols-3 gap-6"
-      >
-        <motion.div variants={listItemVariants} whileHover="hover" className="bg-off-white rounded-3xl p-6 shadow-[var(--shadow-soft)] border border-soft-stone">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-sm font-medium text-neutral-500">Today&apos;s Revenue</h3>
-            <div className="p-2 bg-emerald/10 rounded-xl"><TrendingUp className="w-5 h-5 text-emerald" /></div>
+      {/* Cool Action Banners */}
+      <motion.div variants={listVariants} initial="hidden" animate="show" className="mb-8 grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* AI Action */}
+        <motion.div variants={listItemVariants} className="bg-gradient-to-br from-forest-green to-sage-green rounded-[24px] p-6 md:p-8 text-warm-ivory shadow-lg relative overflow-hidden flex flex-col justify-between min-h-[220px]">
+          <div className="absolute -top-4 -right-4 opacity-10 transform rotate-12">
+            <BotMessageSquare className="w-40 h-40" />
           </div>
-          <div className="text-3xl md:text-4xl font-bold tracking-tight mb-2">₹{data.summary.todayRevenue?.toLocaleString() || 0}</div>
-          <div className="text-sm text-emerald flex items-center font-medium">
-            Overview <span className="text-neutral-400 font-normal ml-2">from today</span>
+          <div className="relative z-10">
+            <h2 className="text-2xl font-bold mb-2">Need Business Advice?</h2>
+            <p className="text-warm-ivory/80 max-w-[85%] text-sm md:text-base">Your AI advisor is ready to analyze your latest shop data and give you personalized recommendations.</p>
           </div>
+          <Link href="/advisor" className="relative z-10 mt-6 bg-warm-ivory text-forest-green text-sm font-bold px-6 py-3 rounded-xl w-max shadow-md hover:shadow-xl hover:scale-105 transition-all">
+            Chat with AI
+          </Link>
         </motion.div>
 
-        <motion.div variants={listItemVariants} whileHover="hover" className="bg-off-white rounded-3xl p-6 shadow-[var(--shadow-soft)] border border-soft-stone">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-sm font-medium text-neutral-500">Total Bills Generated</h3>
-            <div className="p-2 bg-sage-green/10 rounded-xl"><Receipt className="w-5 h-5 text-forest-green" /></div>
+        {/* Voice Billing Action */}
+        <motion.div variants={listItemVariants} className="bg-gradient-to-br from-[#1e293b] to-[#0f172a] rounded-[24px] p-6 md:p-8 text-white shadow-lg relative overflow-hidden flex flex-col justify-between min-h-[220px]">
+          <div className="absolute -bottom-8 -right-8 opacity-10 transform -rotate-12">
+            <Receipt className="w-48 h-48" />
           </div>
-          <div className="text-3xl md:text-4xl font-bold tracking-tight mb-2">{data.summary.totalBills || 0}</div>
-          <div className="text-sm text-neutral-500 flex items-center">
-            {data.summary.billsThisWeek || 0} this week
+          <div className="relative z-10">
+            <h2 className="text-2xl font-bold mb-2">Generate a New Bill</h2>
+            <p className="text-white/70 max-w-[85%] text-sm md:text-base">Use our advanced Voice AI feature to quickly extract items, quantities, and prices from speech.</p>
           </div>
-        </motion.div>
-
-        <motion.div variants={listItemVariants} whileHover="hover" className="bg-off-white rounded-3xl p-6 shadow-[var(--shadow-soft)] border border-soft-stone">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-sm font-medium text-neutral-500">Active Customers</h3>
-            <div className="p-2 bg-muted-indigo/10 rounded-xl"><Users className="w-5 h-5 text-muted-indigo" /></div>
-          </div>
-          <div className="text-3xl md:text-4xl font-bold tracking-tight mb-2">{data.summary.topCustomers?.length || 0}</div>
-          <div className="text-sm text-emerald flex items-center font-medium">
-            Returning <span className="text-neutral-400 font-normal ml-2">customers</span>
-          </div>
+          <Link href="/billing" className="relative z-10 mt-6 bg-[#2dd4bf]/20 border border-[#2dd4bf]/30 text-[#2dd4bf] text-sm font-bold px-6 py-3 rounded-xl w-max shadow-md hover:bg-[#2dd4bf]/30 hover:scale-105 transition-all">
+            Start Voice Billing
+          </Link>
         </motion.div>
       </motion.div>
 

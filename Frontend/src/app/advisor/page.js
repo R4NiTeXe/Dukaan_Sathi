@@ -4,8 +4,8 @@ import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { pageVariants } from '@/utils/animations';
 import { 
-  BotMessageSquare, Send, Sparkles, User, 
-  FileText, TrendingUp, Users, AlertTriangle, Plus 
+  BotMessageSquare, Send, Bot, User, 
+  FileText, TrendingUp, Users, AlertTriangle, Plus, Trash2
 } from 'lucide-react';
 import api from '@/services/api';
 
@@ -69,7 +69,7 @@ export default function AIAdvisor() {
         <div className="p-6 pb-2">
           <div className="flex items-center gap-3">
             <div className="text-purple-600">
-              <Sparkles className="w-6 h-6 fill-current" />
+              <Bot className="w-6 h-6 fill-current" />
             </div>
             <div>
               <h2 className="font-bold text-neutral-900 leading-none">AI Assistant</h2>
@@ -96,7 +96,18 @@ export default function AIAdvisor() {
 
       {/* Main Chat Area */}
       <div className="flex-1 flex flex-col relative bg-off-white">
-        
+
+        {messages.length > 0 && (
+          <div className="flex items-center justify-end px-6 py-3 border-b border-soft-stone/50 bg-off-white">
+            <button
+              onClick={() => setMessages([])}
+              className="text-xs font-semibold text-muted-red flex items-center gap-1.5 px-3 py-1.5 hover:bg-muted-red/10 rounded-lg transition-colors"
+            >
+              <Trash2 className="w-4 h-4" /> Clear Chat
+            </button>
+          </div>
+        )}
+
         {messages.length === 0 ? (
           /* Empty State / Welcome Screen */
           <div className="flex-1 flex flex-col items-center justify-center p-8 text-center relative">
@@ -105,7 +116,9 @@ export default function AIAdvisor() {
               <BotMessageSquare className="w-full h-full text-sage-green/40 absolute z-10 drop-shadow-md" strokeWidth={1} />
             </div>
             
-            <h2 className="text-xl font-bold text-neutral-900 mb-2">Namaste! 👋</h2>
+            <h2 className="text-xl font-bold text-neutral-900 mb-2 flex items-center justify-center gap-2">
+              Namaste! <Bot className="w-6 h-6 text-sage-green" />
+            </h2>
             <p className="text-[13px] text-neutral-500 mb-10">I&apos;m here to help you grow your business smarter.</p>
             
             <div className="w-full max-w-lg text-left">
@@ -144,7 +157,7 @@ export default function AIAdvisor() {
                   ) : (
                     <div className="flex gap-3">
                       <div className="w-8 h-8 rounded-full bg-forest-green flex items-center justify-center shrink-0 mt-1">
-                        <Sparkles className="w-4 h-4 text-warm-ivory" />
+                        <Bot className="w-4 h-4 text-warm-ivory" />
                       </div>
                       <div className="px-5 py-3 rounded-2xl rounded-tl-sm bg-warm-ivory border border-soft-stone text-neutral-800 shadow-sm text-[14px] prose prose-sm max-w-none">
                         {msg.content.split('\n').map((line, i) => (
@@ -160,7 +173,7 @@ export default function AIAdvisor() {
             {isTyping && (
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex gap-3 max-w-[80%]">
                 <div className="w-8 h-8 rounded-full bg-forest-green text-warm-ivory flex items-center justify-center shrink-0 mt-1">
-                  <Sparkles className="w-4 h-4" />
+                  <Bot className="w-4 h-4" />
                 </div>
                 <div className="px-5 py-4 rounded-2xl rounded-tl-sm bg-warm-ivory border border-soft-stone text-neutral-500 flex gap-1 items-center shadow-sm">
                   <span className="w-1.5 h-1.5 bg-neutral-300 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
