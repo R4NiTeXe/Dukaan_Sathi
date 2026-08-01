@@ -8,10 +8,9 @@ import {
   Mic, 
   ReceiptText, 
   Users, 
-  Package, 
-  BarChart, 
-  BotMessageSquare, 
-  Settings 
+  Package,
+  BarChart,
+  BotMessageSquare
 } from 'lucide-react';
 
 const navItems = [
@@ -64,15 +63,6 @@ export default function Sidebar() {
           );
         })}
       </nav>
-
-      <div className="px-4 mt-auto">
-        <Link href="/settings" className={`flex items-center px-4 py-3 rounded-xl transition-colors ${
-          pathname === '/settings' ? 'text-forest-green font-medium bg-sage-green/10' : 'text-neutral-500 hover:text-neutral-900 hover:bg-soft-stone/50'
-        }`}>
-          <Settings className="w-5 h-5 mr-3" strokeWidth={2} />
-          Settings
-        </Link>
-      </div>
     </aside>
   );
 }

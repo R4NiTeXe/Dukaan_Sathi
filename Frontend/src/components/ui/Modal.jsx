@@ -38,7 +38,7 @@ export default function Modal({ isOpen, onClose, title, children }) {
               className="w-full max-w-lg bg-warm-ivory rounded-[24px] shadow-[var(--shadow-hover)] border border-soft-stone overflow-hidden pointer-events-auto flex flex-col max-h-[90vh]"
             >
               {/* Header */}
-              <div className="flex items-center justify-between px-6 py-4 border-b border-soft-stone/50 bg-off-white/50">
+              <div className="flex items-center justify-between px-6 py-4 border-b border-soft-stone bg-off-white/50">
                 <h2 className="text-lg font-bold text-neutral-900">{title}</h2>
                 <button 
                   onClick={onClose}
