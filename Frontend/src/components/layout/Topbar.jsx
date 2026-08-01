@@ -5,10 +5,11 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  Search, Bell, User, Menu, X,
+  Search, Bell, User, Menu, X, LogOut,
   LayoutDashboard, Mic, ReceiptText, Users as UsersIcon, Package, BarChart, BotMessageSquare
 } from 'lucide-react';
 import ThemeToggle from '@/components/layout/ThemeToggle';
+import { useAuth } from '@/context/AuthContext';
 
 const navItems = [
   { name: 'Dashboard', href: '/', icon: LayoutDashboard },
@@ -22,7 +23,9 @@ const navItems = [
 
 export default function Topbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
   const pathname = usePathname();
+  const { logout, user } = useAuth();
 
   // Close mobile menu when route changes
   useEffect(() => {
@@ -40,6 +43,19 @@ export default function Topbar() {
       document.body.style.overflow = 'unset';
     };
   }, [isMobileMenuOpen]);
+
+  // Close profile dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (!e.target.closest('#profile-menu-container')) {
+        setIsProfileOpen(false);
+      }
+    };
+    if (isProfileOpen) {
+      document.addEventListener('click', handleClickOutside);
+    }
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, [isProfileOpen]);
 
   return (
     <>
@@ -69,9 +85,42 @@ export default function Topbar() {
         <div className="flex items-center gap-2 md:gap-4 ml-4 md:ml-6">
           <ThemeToggle />
 
-          <button className="w-9 h-9 md:w-10 md:h-10 rounded-full bg-sage-green/20 border border-sage-green/30 flex items-center justify-center text-forest-green font-medium shadow-sm hover:shadow-md transition-shadow">
-            <User className="h-4 w-4 md:h-5 md:w-5" />
-          </button>
+          <div id="profile-menu-container" className="relative">
+            <button 
+              onClick={() => setIsProfileOpen(!isProfileOpen)}
+              className="w-9 h-9 md:w-10 md:h-10 rounded-full bg-sage-green/20 border border-sage-green/30 flex items-center justify-center text-forest-green font-medium shadow-sm hover:shadow-md transition-shadow focus:outline-none"
+            >
+              {user?.ownerName ? user.ownerName.charAt(0).toUpperCase() : <User className="h-4 w-4 md:h-5 md:w-5" />}
+            </button>
+
+            {/* Profile Dropdown */}
+            <AnimatePresence>
+              {isProfileOpen && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                  transition={{ duration: 0.15, ease: "easeOut" }}
+                  className="absolute right-0 mt-3 w-56 bg-warm-ivory border border-soft-stone rounded-2xl shadow-[var(--shadow-medium)] overflow-hidden z-50 py-2"
+                >
+                  <div className="px-4 py-3 border-b border-soft-stone bg-off-white/50 mb-1">
+                    <p className="text-sm font-semibold text-neutral-900 truncate">{user?.ownerName || 'Shop Owner'}</p>
+                    <p className="text-xs text-neutral-500 truncate mt-0.5">{user?.email || 'admin@shop.com'}</p>
+                  </div>
+                  <button 
+                    onClick={() => {
+                      setIsProfileOpen(false);
+                      logout();
+                    }}
+                    className="w-full flex items-center px-4 py-2.5 text-sm text-red-600 hover:bg-red-50/50 transition-colors"
+                  >
+                    <LogOut className="w-4 h-4 mr-3" />
+                    Sign Out
+                  </button>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
         </div>
       </header>
 

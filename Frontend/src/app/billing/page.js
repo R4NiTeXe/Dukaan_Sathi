@@ -35,7 +35,7 @@ export default function VoiceBilling() {
 
       recognition.onresult = (event) => {
         let currentTrans = '';
-        for (let i = event.resultIndex; i < event.results.length; ++i) {
+        for (let i = 0; i < event.results.length; ++i) {
           currentTrans += event.results[i][0].transcript;
         }
         setTranscript(currentTrans);
@@ -90,10 +90,13 @@ export default function VoiceBilling() {
     try {
       const payload = {
         items: extractedItems.map(item => ({
-          productName: item.productName,
-          quantity: item.quantity,
-          price: item.price
-        }))
+          productName: item.productName || item.name, // Fallback if name is returned
+          quantity: item.quantity || 1,
+          unit: item.unit || 'piece',
+          price: item.price || 0
+        })),
+        paymentMethod: 'cash', // Default to cash for voice billing
+        paymentStatus: 'paid'
       };
       const response = await api.post("/billing/save", payload);
       if (response.data.success) {
@@ -233,7 +236,7 @@ export default function VoiceBilling() {
                     >
                       <div>
                         <p className="font-semibold text-neutral-800">
-                          {item.productName}
+                          {item.productName || item.name}
                         </p>
                         <p className="text-sm text-neutral-500">
                           Qty: {item.quantity}
