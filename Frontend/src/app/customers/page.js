@@ -1,8 +1,10 @@
 'use client';
 
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { pageVariants, listItemVariants } from '@/utils/animations';
 import { Search, Filter, Mail, Phone, MoreHorizontal } from 'lucide-react';
+import AddCustomerModal from '@/components/modals/AddCustomerModal';
 
 const mockCustomers = [
   { id: 'C-001', name: 'Rahul Sharma', phone: '+91 98765 43210', email: 'rahul.s@example.com', orders: 12, spent: 4500, lastVisit: 'Today' },
@@ -12,6 +14,8 @@ const mockCustomers = [
 ];
 
 export default function CustomersList() {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
   return (
     <motion.div
       variants={pageVariants}
@@ -25,7 +29,10 @@ export default function CustomersList() {
           <h1 className="text-3xl font-bold tracking-tight text-neutral-900">Customers</h1>
           <p className="text-neutral-500 mt-1">Manage your customer relationships and history.</p>
         </div>
-        <button className="px-5 py-2.5 bg-forest-green text-warm-ivory rounded-xl font-medium shadow-md shadow-forest-green/20 hover:bg-forest-green/90 transition-colors">
+        <button 
+          onClick={() => setIsModalOpen(true)}
+          className="px-5 py-2.5 bg-forest-green text-warm-ivory rounded-xl font-medium shadow-md shadow-forest-green/20 hover:bg-forest-green/90 transition-colors"
+        >
           Add Customer
         </button>
       </header>
@@ -97,6 +104,8 @@ export default function CustomersList() {
         </div>
         
       </div>
+
+      <AddCustomerModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
     </motion.div>
   );
 }

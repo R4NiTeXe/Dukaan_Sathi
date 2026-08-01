@@ -1,8 +1,10 @@
 'use client';
 
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { pageVariants, listItemVariants } from '@/utils/animations';
 import { Search, Plus, Edit2, AlertCircle } from 'lucide-react';
+import AddProductModal from '@/components/modals/AddProductModal';
 
 const mockProducts = [
   { id: 'P-001', name: 'Aashirvaad Atta', category: 'Grocery', price: 250, stock: 45, unit: '5kg', status: 'In Stock' },
@@ -13,6 +15,8 @@ const mockProducts = [
 ];
 
 export default function ProductsList() {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
   return (
     <motion.div
       variants={pageVariants}
@@ -26,7 +30,10 @@ export default function ProductsList() {
           <h1 className="text-3xl font-bold tracking-tight text-neutral-900">Products Inventory</h1>
           <p className="text-neutral-500 mt-1">Manage your store's items and stock levels.</p>
         </div>
-        <button className="flex items-center gap-2 px-5 py-2.5 bg-forest-green text-warm-ivory rounded-xl font-medium shadow-md shadow-forest-green/20 hover:bg-forest-green/90 transition-colors">
+        <button 
+          onClick={() => setIsModalOpen(true)}
+          className="flex items-center gap-2 px-5 py-2.5 bg-forest-green text-warm-ivory rounded-xl font-medium shadow-md shadow-forest-green/20 hover:bg-forest-green/90 transition-colors"
+        >
           <Plus className="w-4 h-4" /> Add Product
         </button>
       </header>
@@ -110,6 +117,8 @@ export default function ProductsList() {
           </table>
         </div>
       </div>
+
+      <AddProductModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
     </motion.div>
   );
 }
