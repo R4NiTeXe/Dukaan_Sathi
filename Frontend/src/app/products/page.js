@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { pageVariants, listItemVariants } from '@/utils/animations';
-import { Search, AlertCircle, Loader2, PackageOpen, TrendingDown } from 'lucide-react';
+import { Search, AlertCircle, Loader2, PackageOpen, TrendingDown, Sparkles } from 'lucide-react';
 import api from '@/services/api';
 
 export default function ProductsList() {
@@ -52,9 +52,13 @@ export default function ProductsList() {
       className="max-w-6xl mx-auto space-y-8 min-w-0"
     >
       <header className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div>
+        <div className="flex flex-col gap-2">
           <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-neutral-900">Products Inventory</h1>
-          <p className="text-neutral-500 mt-1">Manage your store&apos;s items and stock levels.</p>
+          <p className="text-neutral-500 mt-0.5">Manage your store&apos;s items and stock levels.</p>
+          <p className="text-xs text-neutral-400 flex items-center gap-1.5">
+            <Sparkles className="w-3.5 h-3.5 text-sage-green" />
+            Items sold more than 15 times in a month are auto-added to your inventory.
+          </p>
         </div>
       </header>
 
@@ -119,13 +123,14 @@ export default function ProductsList() {
                   <th className="pb-4 font-medium pl-4">Product Name</th>
                   <th className="pb-4 font-medium text-right">Price</th>
                   <th className="pb-4 font-medium text-right">Stock</th>
+                  <th className="pb-4 font-medium text-right">Sold (30d)</th>
                   <th className="pb-4 font-medium pl-8">Status</th>
                 </tr>
               </thead>
               <tbody>
                 {products.length === 0 ? (
                   <tr>
-                    <td colSpan="4" className="text-center py-8 text-neutral-500">
+                    <td colSpan="5" className="text-center py-8 text-neutral-500">
                       No products found.
                     </td>
                   </tr>
@@ -142,11 +147,20 @@ export default function ProductsList() {
                         className="border-b border-soft-stone hover:bg-warm-ivory/50 transition-colors group"
                       >
                         <td className="py-4 pl-4">
-                          <div className="font-semibold text-neutral-900">{product.name}</div>
+                          <div className="font-semibold text-neutral-900 flex items-center gap-2">
+                            {product.name}
+                            {product.autoAdded && (
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-sage-green/10 text-sage-green border border-sage-green/20">
+                                <Sparkles className="w-2.5 h-2.5" />
+                                Auto-added
+                              </span>
+                            )}
+                          </div>
                           <div className="text-xs text-neutral-400 mt-0.5">{product.unit}</div>
                         </td>
                         <td className="py-4 text-right font-medium text-neutral-900">₹{product.price}</td>
                         <td className="py-4 text-right font-medium text-neutral-700">{product.stock}</td>
+                        <td className="py-4 text-right font-medium text-neutral-700">{product.monthlySold}×</td>
                         <td className="py-4 pl-8">
                           <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${status.classes}`}>
                             {status.label}

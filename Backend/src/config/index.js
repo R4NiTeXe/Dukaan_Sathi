@@ -54,6 +54,11 @@ const loginThrottle = {
   windowMs: parseInt(env.LOGIN_WINDOW_MS, 10) || 15 * 60 * 1000,
 }
 
+const productAutoAdd = {
+  threshold: parseInt(env.PRODUCT_AUTO_ADD_THRESHOLD, 10) || 15,
+  windowDays: parseInt(env.PRODUCT_AUTO_ADD_WINDOW_DAYS, 10) || 30,
+}
+
 const cors = {
   origins: env.CORS_ORIGIN ? env.CORS_ORIGIN.split(',') : true,
 }
@@ -95,6 +100,7 @@ export default {
   cookie,
   rateLimit,
   loginThrottle,
+  productAutoAdd,
   cors,
   validateEnv,
 }
