@@ -46,6 +46,7 @@ export default function VoiceBilling() {
   const pendingExtractRef = useRef(false);
   const manualStopRef = useRef(false);
   const finalTranscriptRef = useRef("");
+  const interimTranscriptRef = useRef("");
   const lastResultIndexRef = useRef(0);
   const seenResultsRef = useRef(0);
   const languageRef = useRef(language);
@@ -115,14 +116,17 @@ export default function VoiceBilling() {
       recognition.lang = LANG_MAP[user?.preferredLanguage] || 'en-IN';
 
       recognition.onresult = (event) => {
-        // Fresh results array after a session restart → restart the scan.
-        if (event.results.length < seenResultsRef.current) {
+        // Fresh results array after a session restart: resultIndex resets to 0,
+        // which can never happen mid-session (indices below our cursor are final
+        // and finals never change). The length check covers the reverse edge.
+        if (event.resultIndex < lastResultIndexRef.current || event.results.length < seenResultsRef.current) {
           lastResultIndexRef.current = 0;
+          seenResultsRef.current = 0;
         }
         seenResultsRef.current = event.results.length;
 
         let interim = "";
-        for (let i = Math.max(event.resultIndex, lastResultIndexRef.current); i < event.results.length; ++i) {
+        for (let i = event.resultIndex; i < event.results.length; ++i) {
           const result = event.results[i];
           if (result.isFinal) {
             finalTranscriptRef.current += ` ${result[0].transcript}`;
@@ -131,6 +135,7 @@ export default function VoiceBilling() {
             interim += result[0].transcript;
           }
         }
+        interimTranscriptRef.current = interim;
         const combined = `${finalTranscriptRef.current} ${interim}`.trim();
         latestTranscriptRef.current = combined;
         setTranscript(combined);
@@ -161,6 +166,12 @@ export default function VoiceBilling() {
         } else {
           // Session ended on its own (tab switch, silence, service hiccup) —
           // restart after a beat so speech is never silently lost.
+          // Preserve any speech that was still interim (never finalized).
+          if (interimTranscriptRef.current.trim()) {
+            finalTranscriptRef.current += ` ${interimTranscriptRef.current}`;
+            interimTranscriptRef.current = "";
+            setTranscript(finalTranscriptRef.current.trim());
+          }
           setIsReconnecting(true);
           setTimeout(() => {
             try {
@@ -221,6 +232,7 @@ export default function VoiceBilling() {
       setMicError("");
       latestTranscriptRef.current = "";
       finalTranscriptRef.current = "";
+      interimTranscriptRef.current = "";
       lastResultIndexRef.current = 0;
       seenResultsRef.current = 0;
       try {
