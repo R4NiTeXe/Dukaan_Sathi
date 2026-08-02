@@ -19,7 +19,7 @@ import { useAuth } from "@/context/AuthContext";
 const LANG_MAP = {
   en: "en-IN",
   hi: "hi-IN",
-  bn: "bn-BD",
+  bn: "bn-IN",
 };
 
 const LANGUAGE_OPTIONS = [
@@ -137,7 +137,7 @@ export default function VoiceBilling() {
           }
         }
         interimTranscriptRef.current = interim;
-        const combined = `${finalTranscriptRef.current} ${interim}`.trim();
+        const combined = cleanTranscript(`${finalTranscriptRef.current} ${interim}`.trim());
         latestTranscriptRef.current = combined;
         setTranscript(combined);
         setMicError("");
@@ -173,8 +173,9 @@ export default function VoiceBilling() {
           // and let the user tap the mic to continue adding items.
           if (interimTranscriptRef.current.trim()) {
             finalTranscriptRef.current += ` ${interimTranscriptRef.current}`;
+            finalTranscriptRef.current = cleanTranscript(finalTranscriptRef.current);
             interimTranscriptRef.current = "";
-            setTranscript(finalTranscriptRef.current.trim());
+            setTranscript(finalTranscriptRef.current);
           }
           pausedRef.current = true;
           setIsPaused(true);
