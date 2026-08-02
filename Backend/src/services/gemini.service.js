@@ -15,7 +15,7 @@ For each item, extract:
 - productName (in English)
 - quantity (number of units)
 - unit (kg, piece, pack, liter, gram, dozen, etc.)
-- price (price PER UNIT in INR — the price of ONE unit; if the owner spoke a total for several units, divide it by the quantity; use 0 if the price was not spoken — never guess or invent a price)
+- price (INR) — the TOTAL price the owner said for that item line (e.g. "2 kg rice 120 rupees" means price = 120; "rice 50 rupees" means price = 50). If the owner EXPLICITLY said a per-unit price (e.g. "rice 120 rupees per kilo"), set price to that unit value AND set "pricePerUnit": true. NEVER divide, multiply, or compute — copy the spoken number exactly as-is. Use 0 if no price was spoken — never guess or invent a price)
 
 Rules:
 - If quantity is not mentioned, assume 1
@@ -30,7 +30,7 @@ Return ONLY a valid JSON array, no explanation, no markdown.
 Input: "{transcribed_text}"
 
 Output format:
-[{"productName": "...", "quantity": ..., "unit": "...", "price": ...}]`
+[{"productName": "...", "quantity": ..., "unit": "...", "price": ..., "pricePerUnit": false}]`
 
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
 
@@ -118,6 +118,7 @@ export const extractBillItems = async (transcript, language = 'en') => {
             : 'piece',
         price:
           typeof item.price === 'number' && item.price >= 0 ? item.price : 0,
+        pricePerUnit: item.pricePerUnit === true,
       }))
       .filter((item) => item.price > 0 || item.quantity > 0)
   } catch (error) {

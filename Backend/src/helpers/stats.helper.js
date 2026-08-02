@@ -30,7 +30,15 @@ export const topProductsByRevenue = async (userId, limit) => {
     {
       $group: {
         _id: '$items.productName',
-        totalRevenue: { $sum: { $multiply: ['$items.price', '$items.quantity'] } },
+        totalRevenue: {
+          $sum: {
+            $cond: [
+              { $eq: ['$items.pricePerUnit', true] },
+              { $multiply: ['$items.price', '$items.quantity'] },
+              '$items.price',
+            ],
+          },
+        },
         totalQuantity: { $sum: '$items.quantity' },
         timesSold: { $sum: 1 },
       },

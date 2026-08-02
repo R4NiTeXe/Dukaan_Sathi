@@ -50,7 +50,8 @@ export default function VoiceBilling() {
   const lastResultIndexRef = useRef(0);
   const seenResultsRef = useRef(0);
   const languageRef = useRef(language);
-  const [isReconnecting, setIsReconnecting] = useState(false);
+  const pausedRef = useRef(false);
+  const [isPaused, setIsPaused] = useState(false);
 
   useEffect(() => {
     languageRef.current = language;
@@ -140,7 +141,7 @@ export default function VoiceBilling() {
         latestTranscriptRef.current = combined;
         setTranscript(combined);
         setMicError("");
-        setIsReconnecting(false);
+        setIsPaused(false);
       };
 
       recognition.onerror = (event) => {
@@ -159,30 +160,24 @@ export default function VoiceBilling() {
         setIsRecording(false);
         if (manualStopRef.current) {
           manualStopRef.current = false;
+          pausedRef.current = false;
+          setIsPaused(false);
           if (pendingExtractRef.current) {
             pendingExtractRef.current = false;
             extractItemsFromTranscript(latestTranscriptRef.current);
           }
         } else {
-          // Session ended on its own (tab switch, silence, service hiccup) —
-          // restart after a beat so speech is never silently lost.
-          // Preserve any speech that was still interim (never finalized).
+          // Session ended on its own (silence, tab switch, service hiccup).
+          // Never auto-restart — that re-captures leftover mic audio and
+          // duplicates the last phrase on mobile. Keep the transcript safe
+          // and let the user tap the mic to continue adding items.
           if (interimTranscriptRef.current.trim()) {
             finalTranscriptRef.current += ` ${interimTranscriptRef.current}`;
             interimTranscriptRef.current = "";
             setTranscript(finalTranscriptRef.current.trim());
           }
-          setIsReconnecting(true);
-          setTimeout(() => {
-            try {
-              recognition.start();
-              setIsRecording(true);
-              setIsReconnecting(false);
-            } catch {
-              setIsReconnecting(false);
-              // Give up quietly; any transcript captured so far stays visible.
-            }
-          }, 300);
+          pausedRef.current = true;
+          setIsPaused(true);
         }
       };
       recognitionRef.current = recognition;
@@ -225,16 +220,22 @@ export default function VoiceBilling() {
       pendingExtractRef.current = true;
       recognitionRef.current?.stop();
     } else {
-      setTranscript("");
-      setExtractedItems([]);
-      setSaveError("");
-      setExtractError("");
-      setMicError("");
-      latestTranscriptRef.current = "";
-      finalTranscriptRef.current = "";
-      interimTranscriptRef.current = "";
-      lastResultIndexRef.current = 0;
-      seenResultsRef.current = 0;
+      // Continuing after a paused session keeps the accumulated transcript;
+      // a fresh session clears everything.
+      if (!pausedRef.current) {
+        setTranscript("");
+        setExtractedItems([]);
+        setSaveError("");
+        setExtractError("");
+        setMicError("");
+        latestTranscriptRef.current = "";
+        finalTranscriptRef.current = "";
+        interimTranscriptRef.current = "";
+        lastResultIndexRef.current = 0;
+        seenResultsRef.current = 0;
+      }
+      pausedRef.current = false;
+      setIsPaused(false);
       try {
         recognitionRef.current?.start();
         setIsRecording(true);
@@ -255,7 +256,8 @@ export default function VoiceBilling() {
           productName: item.productName || item.name, // Fallback if name is returned
           quantity: item.quantity || 1,
           unit: item.unit || 'piece',
-          price: item.price || 0
+          price: item.price || 0,
+          pricePerUnit: item.pricePerUnit === true
         })),
         paymentMethod: 'cash', // Default to cash for voice billing
         paymentStatus: 'paid'
@@ -263,6 +265,7 @@ export default function VoiceBilling() {
       const response = await api.post("/billing/save", payload);
       if (response.data.success) {
         alert("Bill saved successfully!");
+        pausedRef.current = false;
         setTranscript("");
         setExtractedItems([]);
       }
@@ -288,7 +291,10 @@ export default function VoiceBilling() {
     }));
   };
 
-  const total = extractedItems.reduce((acc, item) => acc + (item.price * item.quantity), 0);
+  const lineTotal = (item) =>
+    item.pricePerUnit ? item.price * item.quantity : item.price;
+
+  const total = extractedItems.reduce((acc, item) => acc + lineTotal(item), 0);
 
   return (
     <motion.div
@@ -348,8 +354,14 @@ export default function VoiceBilling() {
           </button>
 
           <p className="mt-8 text-neutral-500 font-medium">
-            {isReconnecting ? "Reconnecting..." : isRecording ? "Listening..." : "Tap to speak"}
+            {isRecording ? "Listening..." : isPaused ? "Mic paused — tap to continue" : "Tap to speak"}
           </p>
+
+          {isPaused && !isRecording && (
+            <p className="mt-3 px-4 py-2 bg-amber-100/70 border border-amber-200 rounded-xl text-amber-700 text-sm text-center max-w-xs">
+              Recording stopped on its own. Your transcript is safe — tap the mic to keep adding items to this bill.
+            </p>
+          )}
 
           {micError && !isRecording && (
             <p className="mt-3 px-4 py-2 bg-muted-red/10 border border-muted-red/20 rounded-xl text-muted-red text-sm text-center max-w-xs">
@@ -459,10 +471,13 @@ export default function VoiceBilling() {
                             onChange={(e) => updateItem(idx, 'price', e.target.value)}
                             className="w-20 px-2 py-1 bg-off-white border border-soft-stone rounded-lg text-sm text-neutral-700 focus:outline-none focus:border-sage-green"
                           />
+                          {item.pricePerUnit && (
+                            <span className="text-[10px] text-neutral-400">per {item.unit}</span>
+                          )}
                         </div>
                       </div>
                       <div className="flex items-center gap-4">
-                        <span className="font-semibold">₹{(item.price * item.quantity).toFixed(2)}</span>
+                        <span className="font-semibold">₹{lineTotal(item).toFixed(2)}</span>
                         <button 
                           onClick={() => removeItem(idx)}
                           className="text-neutral-300 hover:text-muted-red transition-opacity"

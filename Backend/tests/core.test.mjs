@@ -76,7 +76,7 @@ test('save bill updates customer stats', async () => {
     },
   })
   assert.equal(r.status, 201)
-  assert.equal(r.json.data.bill.totalAmount, 400)
+  assert.equal(r.json.data.bill.totalAmount, 200)
   assert.match(r.json.data.bill.billNumber, /^BILL-\d{8}-\d{3}$/)
   billId = r.json.data.bill._id
 
@@ -89,11 +89,20 @@ test('bill numbers increment sequentially', async () => {
   const r = await request(baseUrl, 'POST', '/api/v1/billing/save', {
     token,
     body: {
-      items: [{ productName: 'Sugar', quantity: 1, unit: 'kg', price: 50 }],
+      items: [
+        {
+          productName: 'Sugar',
+          quantity: 2,
+          unit: 'kg',
+          price: 40,
+          pricePerUnit: true,
+        },
+      ],
       paymentMethod: 'cash',
     },
   })
   assert.equal(r.status, 201)
+  assert.equal(r.json.data.bill.totalAmount, 80)
   assert.match(r.json.data.bill.billNumber, /^BILL-\d{8}-002$/)
 })
 
@@ -147,7 +156,7 @@ test('analytics customer-report includes customer details', async () => {
   })
   assert.equal(r.status, 200)
   assert.match(r.json.data.data[0].customerNumber, /^CUST-/)
-  assert.equal(r.json.data.data[0].totalSpent, 400)
+  assert.equal(r.json.data.data[0].totalSpent, 200)
 })
 
 test('dashboard summary aggregates correctly', async () => {
@@ -156,8 +165,8 @@ test('dashboard summary aggregates correctly', async () => {
   })
   assert.equal(r.status, 200)
   assert.equal(r.json.data.totalBills, 3)
-  assert.equal(r.json.data.totalRevenue, 480)
-  assert.equal(r.json.data.todayRevenue, 480)
+  assert.equal(r.json.data.totalRevenue, 310)
+  assert.equal(r.json.data.todayRevenue, 310)
   assert.ok(r.json.data.recentBills.length >= 1)
 })
 
@@ -182,7 +191,7 @@ test('analytics top-products ranks by revenue', async () => {
   })
   assert.equal(r.status, 200)
   assert.equal(r.json.data.data[0].productName, 'Rice')
-  assert.equal(r.json.data.data[0].totalRevenue, 400)
+  assert.equal(r.json.data.data[0].totalRevenue, 200)
   assert.equal(r.json.data.data[1].productName, 'Sugar')
-  assert.equal(r.json.data.data[1].totalRevenue, 50)
+  assert.equal(r.json.data.data[1].totalRevenue, 80)
 })

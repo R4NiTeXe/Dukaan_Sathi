@@ -60,7 +60,12 @@ export default function BillDetails({ params }) {
   // Subtotal is totalAmount / 1.05 if 5% tax was assumed, but let's just use totalAmount
   // Usually tax is part of bill, if not we just show total
   
-  const subtotal = bill.items.reduce((acc, item) => acc + (item.price * item.quantity), 0);
+  const lineTotal = (item) =>
+    item.pricePerUnit ? item.price * item.quantity : item.price;
+  const unitPrice = (item) =>
+    item.pricePerUnit ? item.price : item.price / item.quantity;
+
+  const subtotal = bill.items.reduce((acc, item) => acc + lineTotal(item), 0);
   const tax = bill.totalAmount - subtotal; // Simple assumption if totalAmount > subtotal, else tax is 0
 
   return (
@@ -128,10 +133,10 @@ export default function BillDetails({ params }) {
                     <td className="py-4 font-medium">{item.productName}</td>
                     <td className="py-4 text-center">{item.quantity}</td>
                     <td className="py-4 text-right">
-                      ₹{item.price.toFixed(2)}
+                      ₹{unitPrice(item).toFixed(2)}
                     </td>
                     <td className="py-4 text-right font-semibold text-neutral-900">
-                      ₹{(item.price * item.quantity).toFixed(2)}
+                      ₹{lineTotal(item).toFixed(2)}
                     </td>
                   </tr>
                 ))}

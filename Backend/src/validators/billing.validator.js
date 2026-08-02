@@ -5,6 +5,7 @@ export const billItemSchema = z.object({
   quantity: z.number().positive('Quantity must be positive'),
   unit: z.string().min(1, 'Unit is required'),
   price: z.number().nonnegative('Price cannot be negative'),
+  pricePerUnit: z.boolean().optional(),
 })
 
 export const extractResponseSchema = z

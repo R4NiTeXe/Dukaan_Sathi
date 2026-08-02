@@ -25,6 +25,7 @@ const billSchema = new mongoose.Schema(
         quantity: { type: Number, required: true, min: 0 },
         unit: { type: String, required: true, default: 'piece' },
         price: { type: Number, required: true, min: 0 },
+        pricePerUnit: { type: Boolean, default: false },
       },
     ],
     totalAmount: {
