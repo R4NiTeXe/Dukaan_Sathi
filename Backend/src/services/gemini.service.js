@@ -47,6 +47,9 @@ If the owner asks general knowledge questions or chats with you, answer normally
 For questions specifically about their business, answer using ONLY the data provided below.
 CRITICAL: Do NOT mention their business data (like revenue or bills) UNLESS they specifically ask a business-related question.
 
+Today's date is {current_date}.
+IMPORTANT: For any question about the date, day, time, or "today", use the date above — never guess, invent, or answer from your training data.
+
 Shop Data:
 {data}
 
@@ -130,12 +133,17 @@ export const askAssistant = async (question, data) => {
     throw new Error('Gemini unavailable (test mock)')
   }
   const model = genAI.getGenerativeModel({ model: config.gemini.model })
+  const today = new Date().toLocaleDateString('en-GB', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  })
   const result = await generateWithRetry(
     model,
-    ASSISTANT_PROMPT.replace('{data}', JSON.stringify(data)).replace(
-      '{question}',
-      question
-    )
+    ASSISTANT_PROMPT.replace('{current_date}', today)
+      .replace('{data}', JSON.stringify(data))
+      .replace('{question}', question)
   )
   return result.response.text().trim()
 }
