@@ -137,6 +137,15 @@ export default function AIAdvisor() {
                   </button>
                 ))}
               </div>
+              <div className="mt-4 p-3.5 bg-sage-green/5 border border-sage-green/20 rounded-[14px]">
+                <p className="text-[11px] font-bold text-neutral-800 mb-1.5 uppercase tracking-wide">What I can do</p>
+                <ul className="text-[12px] text-neutral-600 leading-relaxed list-disc list-inside space-y-1">
+                  <li>Answer from your live data - sales, bills, products and customers</li>
+                  <li>Today&apos;s summary, top products, best customers, weekly compare and monthly trends</li>
+                  <li>Reply in Bengali, Hindi or English - ask in any of them</li>
+                  <li>General questions and today&apos;s date - no guesswork</li>
+                </ul>
+              </div>
             </div>
           </div>
         ) : (
