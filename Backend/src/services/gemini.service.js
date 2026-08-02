@@ -148,18 +148,28 @@ export const askAssistant = async (question, data) => {
   return result.response.text().trim()
 }
 
+let lastGeminiPing = { at: 0, ok: false }
+const GEMINI_PING_TTL_MS = 10 * 60 * 1000
+
 export const pingGemini = async () => {
   if (GEMINI_MOCK === 'ok') return true
   if (GEMINI_MOCK === 'fail') return false
+  if (Date.now() - lastGeminiPing.at < GEMINI_PING_TTL_MS) {
+    return lastGeminiPing.ok
+  }
   try {
     const model = genAI.getGenerativeModel({ model: config.gemini.model })
     await withTimeout(
-      model.generateContent('Reply with exactly: OK'),
+      model.countTokens({
+        contents: [{ role: 'user', parts: [{ text: 'ping' }] }],
+      }),
       5000,
       'Gemini ping timed out'
     )
+    lastGeminiPing = { at: Date.now(), ok: true }
     return true
   } catch {
+    lastGeminiPing = { at: Date.now(), ok: false }
     return false
   }
 }
