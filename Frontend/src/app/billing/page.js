@@ -39,6 +39,8 @@ export default function VoiceBilling() {
   const [saveError, setSaveError] = useState("");
   const [micError, setMicError] = useState("");
   const [extractError, setExtractError] = useState("");
+  const [paymentMethod, setPaymentMethod] = useState("cash");
+  const [paymentStatus, setPaymentStatus] = useState("paid");
 
   const SpeechRecognition = typeof window !== 'undefined' ? window.SpeechRecognition || window.webkitSpeechRecognition : null;
   const recognitionRef = useRef(null);
@@ -260,8 +262,8 @@ export default function VoiceBilling() {
           price: item.price || 0,
           pricePerUnit: item.pricePerUnit === true
         })),
-        paymentMethod: 'cash', // Default to cash for voice billing
-        paymentStatus: 'paid'
+        paymentMethod,
+        paymentStatus
       };
       const response = await api.post("/billing/save", payload);
       if (response.data.success) {
@@ -269,6 +271,8 @@ export default function VoiceBilling() {
         pausedRef.current = false;
         setTranscript("");
         setExtractedItems([]);
+        setPaymentMethod("cash");
+        setPaymentStatus("paid");
       }
     } catch (err) {
       console.error(err);
@@ -401,7 +405,7 @@ export default function VoiceBilling() {
               <button 
                 onClick={() => extractItemsFromTranscript(transcript)}
                 disabled={isExtracting}
-                className="w-full mt-2 py-2 bg-sage-green text-forest-green rounded-xl font-medium hover:bg-sage-green/80 transition-colors flex justify-center items-center gap-2"
+                className="w-full mt-2 py-2.5 bg-forest-green text-warm-ivory rounded-xl font-medium shadow-md shadow-forest-green/20 hover:bg-forest-green/90 transition-all flex justify-center items-center gap-2"
               >
                 {isExtracting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
                 {isExtracting ? "Extracting..." : "Extract Items"}
@@ -508,6 +512,50 @@ export default function VoiceBilling() {
 
                   {saveError && (
                     <p className="text-muted-red text-sm mb-4 text-center">{saveError}</p>
+                  )}
+
+                  <div className="grid grid-cols-2 gap-4 mb-6">
+                    <div>
+                      <label className="block text-xs font-medium text-neutral-500 mb-1.5 uppercase tracking-wider">Payment Mode</label>
+                      <select 
+                        value={paymentMethod}
+                        onChange={(e) => setPaymentMethod(e.target.value)}
+                        className="w-full p-2.5 bg-off-white border border-soft-stone rounded-xl text-sm focus:outline-none focus:border-sage-green focus:ring-1 focus:ring-sage-green transition-all"
+                      >
+                        <option value="cash">Cash</option>
+                        <option value="upi">UPI</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-neutral-500 mb-1.5 uppercase tracking-wider">Status</label>
+                      <select 
+                        value={paymentStatus}
+                        onChange={(e) => setPaymentStatus(e.target.value)}
+                        className="w-full p-2.5 bg-off-white border border-soft-stone rounded-xl text-sm focus:outline-none focus:border-sage-green focus:ring-1 focus:ring-sage-green transition-all"
+                      >
+                        <option value="paid">Paid</option>
+                        <option value="pending">Unpaid (Pending)</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  {paymentMethod === 'upi' && (
+                    <div className="mb-6">
+                      {user?.upiQrCode ? (
+                        <div className="flex flex-col items-center justify-center p-4 bg-white rounded-xl shadow-sm border border-soft-stone">
+                          <img 
+                            src={user.upiQrCode} 
+                            alt="Shop UPI QR Code" 
+                            className="w-32 h-32 object-contain"
+                          />
+                          <p className="text-[10px] font-bold text-neutral-500 uppercase tracking-widest mt-3">Scan to Pay</p>
+                        </div>
+                      ) : (
+                        <p className="text-muted-indigo text-xs text-center p-3 bg-muted-indigo/10 rounded-lg border border-muted-indigo/20">
+                          No UPI QR code found. You can upload one in your Profile settings!
+                        </p>
+                      )}
+                    </div>
                   )}
 
                   <div className="flex gap-4">

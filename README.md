@@ -23,7 +23,7 @@
 
 <br/>
 
-[🚀 Live Demo](#-quick-start) · [📖 API Docs](#-api-documentation) · [🐛 Report Bug](https://github.com/R4NiTeXe/AI-Billing/issues) · [💡 Request Feature](https://github.com/R4NiTeXe/AI-Billing/issues)
+[🚀 Live Demo](https://dukaansathi-ai.vercel.app/) · [📖 API Docs](#-api-documentation) · [🐛 Report Bug](https://github.com/R4NiTeXe/AI-Billing/issues) · [💡 Request Feature](https://github.com/R4NiTeXe/AI-Billing/issues)
 
 <br/>
 
@@ -1015,11 +1015,9 @@ This project is licensed under the **MIT License**.
 ## 👤 Author
 
 <div align="center">
-
-**R4NiTeXe**
-
-[![GitHub](https://img.shields.io/badge/GitHub-R4NiTeXe-181717?style=for-the-badge&logo=github)](https://github.com/R4NiTeXe)
-
+| **R4NiTeXe** | **Pritam Maji** |
+| :---: | :---: |
+| [![GitHub](https://img.shields.io/badge/GitHub-R4NiTeXe-181717?style=for-the-badge&logo=github)](https://github.com/R4NiTeXe) | [![GitHub](https://img.shields.io/badge/GitHub-pritamroman07--droid-181717?style=for-the-badge&logo=github)](https://github.com/pritamroman07-droid) |
 </div>
 
 ---
