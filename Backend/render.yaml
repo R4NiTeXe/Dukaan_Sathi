@@ -50,5 +50,3 @@ services:
         value: 3000
       - key: BACKEND_API_URL
         sync: false
-      - key: CORS_ORIGIN
-        value: https://ai-billing-frontend.onrender.com
