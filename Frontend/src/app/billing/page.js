@@ -44,6 +44,9 @@ export default function VoiceBilling() {
   const recognitionRef = useRef(null);
   const latestTranscriptRef = useRef("");
   const pendingExtractRef = useRef(false);
+  const manualStopRef = useRef(false);
+  const finalTranscriptRef = useRef("");
+  const lastResultIndexRef = useRef(0);
 
   const extractItemsFromTranscript = useCallback(async (text) => {
     const source = (text ?? "").trim();
@@ -80,12 +83,19 @@ export default function VoiceBilling() {
       recognition.lang = LANG_MAP[user?.preferredLanguage] || 'en-IN';
 
       recognition.onresult = (event) => {
-        let currentTrans = '';
-        for (let i = 0; i < event.results.length; ++i) {
-          currentTrans += event.results[i][0].transcript;
+        let interim = "";
+        for (let i = lastResultIndexRef.current; i < event.results.length; ++i) {
+          const result = event.results[i];
+          if (result.isFinal) {
+            finalTranscriptRef.current += result[0].transcript;
+            lastResultIndexRef.current = i + 1;
+          } else {
+            interim = result[0].transcript;
+          }
         }
-        latestTranscriptRef.current = currentTrans;
-        setTranscript(currentTrans);
+        const combined = `${finalTranscriptRef.current} ${interim}`.trim();
+        latestTranscriptRef.current = combined;
+        setTranscript(combined);
         setMicError("");
       };
 
@@ -103,9 +113,21 @@ export default function VoiceBilling() {
 
       recognition.onend = () => {
         setIsRecording(false);
-        if (pendingExtractRef.current) {
-          pendingExtractRef.current = false;
-          extractItemsFromTranscript(latestTranscriptRef.current);
+        if (manualStopRef.current) {
+          manualStopRef.current = false;
+          if (pendingExtractRef.current) {
+            pendingExtractRef.current = false;
+            extractItemsFromTranscript(latestTranscriptRef.current);
+          }
+        } else {
+          // Session ended on its own (tab switch, service hiccup) —
+          // restart immediately so speech is never silently lost.
+          try {
+            recognition.start();
+            setIsRecording(true);
+          } catch {
+            // Give up quietly; any transcript captured so far stays visible.
+          }
         }
       };
       recognitionRef.current = recognition;
@@ -144,6 +166,7 @@ export default function VoiceBilling() {
     }
 
     if (isRecording) {
+      manualStopRef.current = true;
       pendingExtractRef.current = true;
       recognitionRef.current?.stop();
     } else {
@@ -153,6 +176,8 @@ export default function VoiceBilling() {
       setExtractError("");
       setMicError("");
       latestTranscriptRef.current = "";
+      finalTranscriptRef.current = "";
+      lastResultIndexRef.current = 0;
       try {
         recognitionRef.current?.start();
         setIsRecording(true);
