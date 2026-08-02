@@ -21,7 +21,7 @@ const jwt = {
   secret: env.JWT_SECRET,
   refreshSecret: env.JWT_REFRESH_SECRET || env.JWT_SECRET,
   expiry: env.JWT_EXPIRY || '7d',
-  refreshExpiry: env.JWT_REFRESH_EXPIRY || '30d',
+  refreshExpiry: env.JWT_REFRESH_EXPIRY || '15d',
 }
 
 const gemini = {
@@ -40,7 +40,7 @@ const cookie = {
   httpOnly: true,
   secure: server.isProduction,
   sameSite: 'lax',
-  maxAge: 30 * 24 * 60 * 60 * 1000,
+  maxAge: 15 * 24 * 60 * 60 * 1000,
   path: '/',
 }
 

@@ -12,6 +12,20 @@ import {
 import api from '@/services/api';
 import { useAuth } from '@/context/AuthContext';
 
+const getGreeting = () => {
+  const hour = new Date().getHours();
+  if (hour >= 5 && hour < 12) return 'Good morning';
+  if (hour >= 12 && hour < 17) return 'Good afternoon';
+  if (hour >= 17 && hour < 21) return 'Good evening';
+  return 'Good night';
+};
+
+const SLOGANS = {
+  en: 'Smart billing, in your own language',
+  hi: 'अपनी भाषा में स्मार्ट बिलिंग',
+  bn: 'আপনার ভাষায় স্মার্ট বিলিং',
+};
+
 export default function Dashboard() {
   const { user } = useAuth();
   const [data, setData] = useState({
@@ -81,9 +95,14 @@ export default function Dashboard() {
     >
       <header className="mb-6 md:mb-10">
         <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-neutral-900">
-          Good morning, {user?.name?.split(' ')[0] || 'Store Owner'}!
+          {getGreeting()}, {user?.ownerName?.split(' ')[0] || 'Store Owner'}!
         </h1>
-        <p className="text-neutral-500 mt-2 text-lg">Here&apos;s what&apos;s happening at your shop today.</p>
+        <div className="mt-3 flex items-center gap-3">
+          <span className="h-px w-8 bg-sage-green" aria-hidden="true" />
+          <p className="text-neutral-500 text-sm md:text-base">
+            {SLOGANS[user?.preferredLanguage] || SLOGANS.en}
+          </p>
+        </div>
       </header>
 
       {error && (
