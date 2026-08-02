@@ -61,10 +61,14 @@ api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const original = error.config;
+    // A 401 from the public auth endpoints means bad credentials, not an
+    // expired session — surface it directly instead of refreshing + reloading.
+    const isAuthEndpoint = /\/auth\/(login|register|refresh)$/.test(original?.url || '');
     if (
       error.response?.status === 401 &&
       original &&
       !original._retried &&
+      !isAuthEndpoint &&
       typeof window !== 'undefined'
     ) {
       original._retried = true;
