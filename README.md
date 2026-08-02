@@ -1015,9 +1015,11 @@ This project is licensed under the **MIT License**.
 ## 👤 Author
 
 <div align="center">
-| **R4NiTeXe** | **Pritam Maji** |
-| :---: | :---: |
-| [![GitHub](https://img.shields.io/badge/GitHub-R4NiTeXe-181717?style=for-the-badge&logo=github)](https://github.com/R4NiTeXe) | [![GitHub](https://img.shields.io/badge/GitHub-pritamroman07--droid-181717?style=for-the-badge&logo=github)](https://github.com/pritamroman07-droid) |
+  <br>
+  <b>R4NiTeXe</b> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <b>Pritam Maji</b>
+  <br><br>
+  <a href="https://github.com/R4NiTeXe"><img src="https://img.shields.io/badge/GitHub-R4NiTeXe-181717?style=for-the-badge&logo=github" alt="R4NiTeXe"></a> &nbsp;&nbsp;&nbsp; <a href="https://github.com/pritamroman07-droid"><img src="https://img.shields.io/badge/GitHub-pritamroman07--droid-181717?style=for-the-badge&logo=github" alt="Pritam Maji"></a>
+  <br><br>
 </div>
 
 ---
