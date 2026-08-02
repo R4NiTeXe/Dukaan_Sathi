@@ -6,19 +6,21 @@ const GEMINI_MOCK = process.env.GEMINI_MOCK
 const genAI = GEMINI_MOCK ? null : new GoogleGenerativeAI(config.gemini.apiKey)
 
 const PROMPT = `You are a billing assistant for a local Indian shop.
-The shop owner speaks in Bengali, Hindi, or English describing items a customer is buying.
+The shop owner describes items a customer is buying in Bengali, Hindi, or English.
+
+The owner spoke in {language} (bn = Bengali, hi = Hindi, en = English). Interpret quantity words and item names in that language (e.g. ek/dui/tin, do/teen/dos = 1/2/3; chaal -> Rice, chini -> Sugar, dudh -> Milk, chai -> Tea, aata/atta -> Atta, sabun -> Soap).
 
 Extract EVERY item the customer is buying — never skip, merge, or drop any item.
 For each item, extract:
 - productName (in English)
-- quantity (number)
+- quantity (number of units)
 - unit (kg, piece, pack, liter, gram, dozen, etc.)
-- price (total price for that quantity, in INR; use 0 if the price was not spoken — never guess or invent a price)
+- price (price PER UNIT in INR — the price of ONE unit; if the owner spoke a total for several units, divide it by the quantity; use 0 if the price was not spoken — never guess or invent a price)
 
 Rules:
 - If quantity is not mentioned, assume 1
 - If unit is not mentioned, assume "piece"
-- Translate item names to English (e.g. chaal -> Rice, chini -> Sugar, dudh -> Milk, chai -> Tea, rosogulla -> Rosogulla)
+- Translate item names to English
 - Include ONLY real purchased items. Ignore greetings, filler words, and phrases like "total X rupees"
 - Never invent items or categories
 - If no real items are mentioned, return []
@@ -79,14 +81,14 @@ const generateWithRetry = async (model, prompt, attempts = 3) => {
   throw new Error('Gemini request failed after retries')
 }
 
-export const extractBillItems = async (transcript) => {
+export const extractBillItems = async (transcript, language = 'en') => {
   if (GEMINI_MOCK === 'ok') {
     return [{ productName: 'Rice', quantity: 2, unit: 'kg', price: 200 }]
   }
   const model = genAI.getGenerativeModel({ model: config.gemini.model })
   const result = await generateWithRetry(
     model,
-    PROMPT.replace('{transcribed_text}', transcript)
+    PROMPT.replace('{transcribed_text}', transcript).replace('{language}', language)
   )
   const rawText = result.response.text().trim()
 

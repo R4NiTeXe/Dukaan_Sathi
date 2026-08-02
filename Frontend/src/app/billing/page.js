@@ -47,9 +47,38 @@ export default function VoiceBilling() {
   const manualStopRef = useRef(false);
   const finalTranscriptRef = useRef("");
   const lastResultIndexRef = useRef(0);
+  const seenResultsRef = useRef(0);
+  const languageRef = useRef(language);
+  const [isReconnecting, setIsReconnecting] = useState(false);
+
+  useEffect(() => {
+    languageRef.current = language;
+  }, [language]);
+
+  const cleanTranscript = (text) => {
+    const tokens = (text || "").split(/\s+/).filter(Boolean);
+    let changed = true;
+    while (changed) {
+      changed = false;
+      for (let w = 1; w <= 6 && !changed; w++) {
+        for (let i = 0; i + w * 2 <= tokens.length; i++) {
+          let match = true;
+          for (let k = 0; k < w; k++) {
+            if (tokens[i + k] !== tokens[i + w + k]) { match = false; break; }
+          }
+          if (match) {
+            tokens.splice(i + w, w);
+            changed = true;
+            break;
+          }
+        }
+      }
+    }
+    return tokens.join(" ");
+  };
 
   const extractItemsFromTranscript = useCallback(async (text) => {
-    const source = (text ?? "").trim();
+    const source = cleanTranscript(text ?? "").trim();
     if (!source) {
       pendingExtractRef.current = false;
       setExtractError("No speech captured. Try speaking again or type the items manually.");
@@ -59,7 +88,10 @@ export default function VoiceBilling() {
     setIsExtracting(true);
     setExtractError("");
     try {
-      const response = await api.post("/billing/extract", { transcript: source });
+      const response = await api.post("/billing/extract", {
+        transcript: source,
+        language: languageRef.current,
+      });
       if (response.data.success) {
         if (!response.data.data.items || response.data.data.items.length === 0) {
           setExtractError("No items could be recognized. Try speaking item names clearly.");
@@ -83,20 +115,27 @@ export default function VoiceBilling() {
       recognition.lang = LANG_MAP[user?.preferredLanguage] || 'en-IN';
 
       recognition.onresult = (event) => {
+        // Fresh results array after a session restart → restart the scan.
+        if (event.results.length < seenResultsRef.current) {
+          lastResultIndexRef.current = 0;
+        }
+        seenResultsRef.current = event.results.length;
+
         let interim = "";
-        for (let i = lastResultIndexRef.current; i < event.results.length; ++i) {
+        for (let i = Math.max(event.resultIndex, lastResultIndexRef.current); i < event.results.length; ++i) {
           const result = event.results[i];
           if (result.isFinal) {
-            finalTranscriptRef.current += result[0].transcript;
+            finalTranscriptRef.current += ` ${result[0].transcript}`;
             lastResultIndexRef.current = i + 1;
           } else {
-            interim = result[0].transcript;
+            interim += result[0].transcript;
           }
         }
         const combined = `${finalTranscriptRef.current} ${interim}`.trim();
         latestTranscriptRef.current = combined;
         setTranscript(combined);
         setMicError("");
+        setIsReconnecting(false);
       };
 
       recognition.onerror = (event) => {
@@ -120,14 +159,19 @@ export default function VoiceBilling() {
             extractItemsFromTranscript(latestTranscriptRef.current);
           }
         } else {
-          // Session ended on its own (tab switch, service hiccup) —
-          // restart immediately so speech is never silently lost.
-          try {
-            recognition.start();
-            setIsRecording(true);
-          } catch {
-            // Give up quietly; any transcript captured so far stays visible.
-          }
+          // Session ended on its own (tab switch, silence, service hiccup) —
+          // restart after a beat so speech is never silently lost.
+          setIsReconnecting(true);
+          setTimeout(() => {
+            try {
+              recognition.start();
+              setIsRecording(true);
+              setIsReconnecting(false);
+            } catch {
+              setIsReconnecting(false);
+              // Give up quietly; any transcript captured so far stays visible.
+            }
+          }, 300);
         }
       };
       recognitionRef.current = recognition;
@@ -178,6 +222,7 @@ export default function VoiceBilling() {
       latestTranscriptRef.current = "";
       finalTranscriptRef.current = "";
       lastResultIndexRef.current = 0;
+      seenResultsRef.current = 0;
       try {
         recognitionRef.current?.start();
         setIsRecording(true);
@@ -291,7 +336,7 @@ export default function VoiceBilling() {
           </button>
 
           <p className="mt-8 text-neutral-500 font-medium">
-            {isRecording ? "Listening..." : "Tap to speak"}
+            {isReconnecting ? "Reconnecting..." : isRecording ? "Listening..." : "Tap to speak"}
           </p>
 
           {micError && !isRecording && (

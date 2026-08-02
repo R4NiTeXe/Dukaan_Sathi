@@ -51,7 +51,7 @@ const fetchTopProducts = async (userId) => {
     {
       $group: {
         _id: '$items.productName',
-        totalRevenue: { $sum: '$items.price' },
+        totalRevenue: { $sum: { $multiply: ['$items.price', '$items.quantity'] } },
         totalQuantity: { $sum: '$items.quantity' },
         timesSold: { $sum: 1 },
       },

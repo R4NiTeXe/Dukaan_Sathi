@@ -20,7 +20,7 @@ before(async () => {
   server = await spawnServer({
     env: {
       LOGIN_MAX_FAILURES: '3',
-      LOGIN_WINDOW_MS: '1500',
+      LOGIN_WINDOW_MS: '5000',
     },
   })
   baseUrl = server.baseUrl
@@ -46,7 +46,7 @@ test('locks out after repeated failed logins and lifts after the window', async 
   const stillBlocked = await login('throttle@test.com', 'secret123')
   assert.equal(stillBlocked.status, 429)
 
-  await new Promise((resolve) => setTimeout(resolve, 1700))
+  await new Promise((resolve) => setTimeout(resolve, 5200))
 
   const afterWait = await login('throttle@test.com', 'secret123')
   assert.equal(afterWait.status, 200)

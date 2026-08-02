@@ -9,15 +9,17 @@ import ApiResponse from '../utils/ApiResponse.js'
 import asyncHandler from '../utils/asyncHandler.js'
 
 const extract = asyncHandler(async (req, res) => {
-  const { transcript } = req.body
+  const { transcript, language } = req.body
 
   if (!transcript || !transcript.trim()) {
     throw new ApiError(400, 'Transcript is required')
   }
 
+  const lang = ['en', 'hi', 'bn'].includes(language) ? language : 'en'
+
   let items
   try {
-    items = await extractBillItems(transcript.trim())
+    items = await extractBillItems(transcript.trim(), lang)
   } catch (error) {
     throw new ApiError(502, `AI extraction failed: ${error.message}`)
   }
