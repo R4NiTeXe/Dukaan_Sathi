@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { pageVariants } from '@/utils/animations';
 import { 
   BotMessageSquare, Send, Bot, User, 
-  FileText, TrendingUp, Users, AlertTriangle, Plus, Trash2
+  FileText, TrendingUp, Users, AlertTriangle, AlertCircle, Plus, Trash2, Sparkles
 } from 'lucide-react';
 import api from '@/services/api';
 import ReactMarkdown from 'react-markdown';
