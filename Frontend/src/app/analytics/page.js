@@ -140,7 +140,7 @@ export default function AnalyticsDashboard() {
                         innerRadius={50}
                         outerRadius={70}
                         paddingAngle={5}
-                        dataKey="count"
+                        dataKey="total"
                         nameKey="_id"
                       >
                         {summary.paymentModes.map((entry, index) => (
@@ -148,7 +148,7 @@ export default function AnalyticsDashboard() {
                         ))}
                       </Pie>
                       <Tooltip 
-                        formatter={(value, name, props) => [`${value} Bills (₹${props.payload.total.toLocaleString()})`, name.toUpperCase()]}
+                        formatter={(value, name, props) => [`₹${value.toLocaleString()} (${props.payload.count} Bills)`, name.toUpperCase()]}
                         labelFormatter={(label, payload) => payload?.[0]?.payload?._id?.toUpperCase() || label}
                         contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: 'var(--shadow-soft)' }}
                       />
