@@ -101,6 +101,17 @@ test('answers customer question', { timeout: 60000 }, async () => {
   assert.ok(r.json.data.answer.length > 0)
 })
 
+test('answers pending bills question', { timeout: 60000 }, async () => {
+  const r = await request(baseUrl, 'POST', '/api/v1/assistant/ask', {
+    token,
+    body: { question: 'Pending bills' },
+  })
+  assert.equal(r.status, 200, r.json?.message)
+  assert.equal(r.json.data.intent, 'pendingBills')
+  assert.ok(typeof r.json.data.data.pendingBills.count === 'number')
+  assert.ok(r.json.data.answer.length > 0)
+})
+
 test('answers Bengali question in Bengali', { timeout: 60000 }, async () => {
   const r = await request(baseUrl, 'POST', '/api/v1/assistant/ask', {
     token,

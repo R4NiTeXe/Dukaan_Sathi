@@ -30,6 +30,23 @@ export default function AIAdvisor() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
+  const getFriendlyError = (err) => {
+    if (!err.response) {
+      return "Couldn't reach the server. Please check your internet connection and try again.";
+    }
+    switch (err.response.status) {
+      case 502:
+      case 503:
+        return "The AI assistant is temporarily unavailable. Please try again in a moment.";
+      case 429:
+        return "Too many requests right now. Please wait a few seconds and try again.";
+      case 401:
+        return "Your session has expired. Please log in again.";
+      default:
+        return err.response?.data?.message || "Sorry, I encountered an error while processing your request.";
+    }
+  };
+
   useEffect(() => {
     scrollToBottom();
   }, [messages, isTyping]);
@@ -53,7 +70,7 @@ export default function AIAdvisor() {
       console.error(err);
       setMessages(prev => [...prev, { 
         role: 'ai', 
-        content: err.response?.data?.message || 'Sorry, I encountered an error while processing your request.'
+        content: getFriendlyError(err)
       }]);
     } finally {
       setIsTyping(false);
@@ -66,7 +83,7 @@ export default function AIAdvisor() {
       initial="initial"
       animate="animate"
       exit="exit"
-      className="max-w-6xl mx-auto h-[calc(100vh-120px)] flex flex-col md:flex-row bg-off-white rounded-[24px] md:rounded-[32px] shadow-[var(--shadow-soft)] border border-soft-stone overflow-hidden min-w-0"
+      className="max-w-6xl mx-auto h-[calc(100dvh-140px)] md:h-[calc(100vh-120px)] flex flex-col md:flex-row bg-off-white rounded-[24px] md:rounded-[32px] shadow-[var(--shadow-soft)] border border-soft-stone overflow-hidden min-w-0"
     >
       {/* Left Sidebar - Removed Recent Chats since there's no backend for it, kept clear layout */}
       <div className="hidden md:flex w-72 flex-col border-r border-soft-stone bg-warm-ivory">
@@ -83,8 +100,8 @@ export default function AIAdvisor() {
         </div>
 
         <div className="px-6 py-4 mt-4">
-          <p className="text-sm text-neutral-500 leading-relaxed">
-            I am connected directly to your shop&apos;s database. Ask me about your revenue, top customers, bestselling items, or get a daily summary.
+          <p className="text-sm text-neutral-600 leading-relaxed font-medium">
+            Your intelligent shop assistant, securely plugged into your live database. Gain insights into revenue, track top-performing products, and discover your best customers instantly.
           </p>
         </div>
 
@@ -99,11 +116,11 @@ export default function AIAdvisor() {
       </div>
 
       {/* Main Chat Area */}
-      <div className="flex-1 flex flex-col relative bg-off-white p-4 pb-0">
+      <div className="flex-1 flex flex-col relative bg-off-white p-4 pb-0 min-h-0">
         <AIStatusNotice type="advisor" />
 
         {messages.length > 0 && (
-          <div className="flex items-center justify-end px-6 py-3 border-b border-soft-stone/50 bg-off-white">
+          <div className="flex items-center justify-end px-6 py-3 border-b border-soft-stone/50 bg-off-white shrink-0">
             <button
               onClick={() => setMessages([])}
               className="text-xs font-semibold text-muted-red flex items-center gap-1.5 px-3 py-1.5 hover:bg-muted-red/10 rounded-lg transition-colors"
@@ -115,41 +132,55 @@ export default function AIAdvisor() {
 
         {messages.length === 0 ? (
           /* Empty State / Welcome Screen */
-          <div className="flex-1 flex flex-col items-center justify-center p-8 text-center relative">
-            <div className="w-32 h-32 mb-6 relative">
+          <div className="flex-1 flex flex-col items-center justify-center p-4 md:p-8 text-center relative overflow-y-auto min-h-0">
+            <div className="w-20 h-20 md:w-24 md:h-24 mb-6 relative shrink-0">
               <div className="absolute inset-0 bg-gradient-to-b from-transparent to-[#f5f3ef]/50 rounded-full blur-xl"></div>
               <BotMessageSquare className="w-full h-full text-sage-green/40 absolute z-10 drop-shadow-md" strokeWidth={1} />
             </div>
             
-            <h2 className="text-xl font-bold text-neutral-900 mb-2 flex items-center justify-center gap-2">
-              Namaste! <Bot className="w-6 h-6 text-sage-green" />
+            <h2 className="text-2xl font-bold text-neutral-900 mb-2 flex items-center justify-center gap-2">
+              Namaste! <Bot className="w-7 h-7 text-sage-green" />
             </h2>
-            <p className="text-[13px] text-neutral-500 mb-10">I&apos;m here to help you grow your business smarter.</p>
+            <p className="text-sm text-neutral-500 mb-8">I&apos;m here to help you grow your business smarter.</p>
             
-            <div className="w-full max-w-lg text-left">
-              <p className="text-[13px] font-bold text-neutral-800 mb-3 px-1">Try asking me</p>
+            <div className="w-full max-w-xl text-left">
+              
+              {/* Highlighted 'What I Can Do' Section */}
+              <div className="mb-8 p-6 bg-gradient-to-br from-forest-green/10 to-emerald/5 border-2 border-forest-green/20 rounded-[20px] shadow-sm relative overflow-hidden">
+                <div className="absolute -right-6 -top-6 w-32 h-32 bg-forest-green/10 rounded-full blur-3xl"></div>
+                <h3 className="text-sm font-extrabold text-forest-green mb-4 flex items-center gap-2 uppercase tracking-wider">
+                  <Sparkles className="w-5 h-5" /> What I Can Do For You
+                </h3>
+                <ul className="text-[13px] md:text-sm text-neutral-700 leading-relaxed list-disc list-inside space-y-2 font-medium">
+                  <li><span className="text-neutral-900 font-bold">Analyze live data:</span> Sales, bills, products, and customers.</li>
+                  <li><span className="text-neutral-900 font-bold">Generate reports:</span> Daily summaries, monthly trends, and performance.</li>
+                  <li><span className="text-neutral-900 font-bold">Multilingual support:</span> Converse smoothly in English, Hindi, or Bengali.</li>
+                </ul>
+                
+                <div className="mt-5 pt-4 border-t border-forest-green/15 relative z-10">
+                  <h4 className="text-xs font-bold text-neutral-800 uppercase tracking-widest mb-1.5 flex items-center gap-1.5">
+                    <AlertCircle className="w-3.5 h-3.5 text-muted-red" /> Limitations & Expectations
+                  </h4>
+                  <p className="text-xs text-neutral-600 leading-relaxed font-medium">
+                    Please do not expect me to execute administrative tasks. I cannot create or delete bills, alter your shop&apos;s database, or process payments. My purpose is strictly to provide analytical insights and answer questions based on your existing data.
+                  </p>
+                </div>
+              </div>
+
+              <p className="text-[13px] font-bold text-neutral-800 mb-3 px-1 uppercase tracking-wide">Try asking me</p>
               <div className="grid grid-cols-2 gap-3">
                 {presetQuestions.map((q, idx) => (
                   <button
                     key={idx}
                     onClick={() => handleSend(q.title)}
-                    className="flex items-center gap-3 p-3 bg-off-white border border-soft-stone rounded-[14px] hover:border-sage-green hover:shadow-sm transition-all text-left"
+                    className="flex items-center gap-3 p-3.5 bg-off-white border border-soft-stone rounded-[16px] hover:border-sage-green hover:shadow-sm transition-all text-left"
                   >
-                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${q.bg} ${q.color}`}>
-                      <q.icon className="w-4 h-4" />
+                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${q.bg} ${q.color}`}>
+                      <q.icon className="w-5 h-5" />
                     </div>
-                    <span className="text-[13px] font-semibold text-neutral-800 leading-tight">{q.title}</span>
+                    <span className="text-[13px] font-bold text-neutral-800 leading-tight">{q.title}</span>
                   </button>
                 ))}
-              </div>
-              <div className="mt-4 p-3.5 bg-sage-green/5 border border-sage-green/20 rounded-[14px]">
-                <p className="text-[11px] font-bold text-neutral-800 mb-1.5 uppercase tracking-wide">What I can do</p>
-                <ul className="text-[12px] text-neutral-600 leading-relaxed list-disc list-inside space-y-1">
-                  <li>Answer from your live data - sales, bills, products and customers</li>
-                  <li>Today&apos;s summary, top products, best customers, weekly compare and monthly trends</li>
-                  <li>Reply in Bengali, Hindi or English - ask in any of them</li>
-                  <li>General questions and today&apos;s date - no guesswork</li>
-                </ul>
               </div>
             </div>
           </div>
@@ -201,7 +232,7 @@ export default function AIAdvisor() {
         )}
 
         {/* Input Area */}
-        <div className="p-6 bg-off-white">
+        <div className="p-4 pb-28 md:pb-6 md:p-6 bg-off-white shrink-0 mt-auto">
           <form 
             onSubmit={(e) => { e.preventDefault(); handleSend(input); }}
             className="relative flex items-center w-full"

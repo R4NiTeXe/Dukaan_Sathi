@@ -23,7 +23,7 @@ const detectIntent = (question) => {
   const q = question.toLowerCase()
 
   if (
-    /best seller|best selling|top product|top selling|popular|bestseller|sell(s|ing)? the most|sold the most/.test(
+    /best seller|best selling|top product|top selling|popular|bestseller|sell(s|ing)? the most|sold the most|सबसे ज्यादा|सबसे अच्छा|बेस्ट सेलर|সবচেয়ে বেশি|সেরা|বেস্ট সেলার/.test(
       q
     )
   ) {
@@ -32,10 +32,13 @@ const detectIntent = (question) => {
   if (/compare|last week|previous week|versus|vs/.test(q)) {
     return 'weeklyCompare'
   }
-  if (/customer/.test(q)) {
+  if (/customer|ग्राहक|গ্রাহক/.test(q)) {
     return 'customers'
   }
-  if (/month|trend|this month|monthly/.test(q)) {
+  if (/pending|unpaid|due|बकाया|বকেয়া/.test(q)) {
+    return 'pendingBills'
+  }
+  if (/month|trend|this month|monthly|महीना|মাস/.test(q)) {
     return 'monthlyTrend'
   }
   if (/today|today's|aaj|आज|আজ/.test(q)) {
@@ -171,6 +174,41 @@ const fetchMonthlyTrend = async (userId) => {
   ])
 }
 
+const fetchUnpaidBills = async (userId) => {
+  const userIdObj = new mongoose.Types.ObjectId(userId)
+  const [result] = await Bill.aggregate([
+    { $match: { userId: userIdObj, paymentStatus: { $ne: 'paid' } } },
+    {
+      $facet: {
+        count: [{ $count: 'c' }],
+        totalAmount: [
+          { $group: { _id: null, total: { $sum: '$totalAmount' } } },
+        ],
+        recent: [
+          { $sort: { createdAt: -1 } },
+          { $limit: 5 },
+          {
+            $project: {
+              _id: 0,
+              billNumber: 1,
+              totalAmount: 1,
+              paymentMethod: 1,
+              paymentStatus: 1,
+              createdAt: 1,
+            },
+          },
+        ],
+      },
+    },
+  ])
+
+  return {
+    count: result?.count?.[0]?.c || 0,
+    totalAmount: result?.totalAmount?.[0]?.total || 0,
+    recent: result?.recent || [],
+  }
+}
+
 const fetchToday = async (userId) => {
   const userIdObj = new mongoose.Types.ObjectId(userId)
   const [result] = await Bill.aggregate([
@@ -249,6 +287,9 @@ const ask = asyncHandler(async (req, res) => {
     case 'customers':
       data = await fetchCustomers(userId)
       break
+    case 'pendingBills':
+      data = { pendingBills: await fetchUnpaidBills(userId) }
+      break
     case 'monthlyTrend':
       data = { monthlyTrend: await fetchMonthlyTrend(userId) }
       break
@@ -261,7 +302,7 @@ const ask = asyncHandler(async (req, res) => {
 
   let answer
   try {
-    answer = await askAssistant(question, data)
+    answer = await askAssistant(data, question, req.user)
   } catch (error) {
     throw new ApiError(502, `AI assistant failed: ${error.message}`)
   }
@@ -272,8 +313,16 @@ const ask = asyncHandler(async (req, res) => {
 })
 
 export const checkHealth = asyncHandler(async (req, res) => {
-  const isUp = await pingGemini()
-  res.status(200).json(new ApiResponse(200, { isUp }, 'AI Health Status'))
+  const ping = await pingGemini()
+  res
+    .status(200)
+    .json(
+      new ApiResponse(
+        200,
+        { isUp: ping.ok, model: ping.model, checkedAt: ping.checkedAt },
+        'AI Health Status'
+      )
+    )
 })
 
 export { ask }
