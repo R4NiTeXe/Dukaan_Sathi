@@ -182,6 +182,7 @@ export default function Dashboard() {
                     cursor={false}
                     contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: 'var(--shadow-hover)' }}
                     itemStyle={{ color: 'var(--color-forest-green)', fontWeight: 600 }}
+                    labelStyle={{ color: 'var(--color-neutral-800)', fontWeight: 'bold' }}
                   />
                   <Area type="monotone" dataKey="total" stroke="var(--color-forest-green)" strokeWidth={3} fillOpacity={1} fill="url(#colorTotal)" />
                 </AreaChart>
