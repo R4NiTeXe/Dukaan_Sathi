@@ -38,9 +38,7 @@ export default function ProductsList() {
   }, [fetchProducts]);
 
   const getStatus = (stock) => {
-    if (stock <= 0) return { label: 'Out of Stock', classes: 'bg-muted-red/10 text-muted-red' };
-    if (stock <= 10) return { label: 'Low Stock', classes: 'bg-yellow-500/10 text-yellow-700' };
-    return { label: 'In Stock', classes: 'bg-emerald/10 text-emerald' };
+    // Kept empty since status column is removed
   };
 
   return (
@@ -53,8 +51,8 @@ export default function ProductsList() {
     >
       <header className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div className="flex flex-col gap-2">
-          <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-neutral-900">Products Inventory</h1>
-          <p className="text-neutral-500 mt-0.5">Manage your store&apos;s items and stock levels.</p>
+          <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-neutral-900">Products Catalog</h1>
+          <p className="text-neutral-500 mt-0.5">Manage your store&apos;s items.</p>
           <p className="text-xs text-neutral-400 flex items-center gap-1.5">
             <Sparkles className="w-3.5 h-3.5 text-sage-green" />
             Items sold more than 15 times in a month are auto-added to your inventory.
@@ -122,21 +120,18 @@ export default function ProductsList() {
                 <tr className="border-b border-soft-stone text-sm text-neutral-600">
                   <th className="pb-4 font-medium pl-4">Product Name</th>
                   <th className="pb-4 font-medium text-right">Price</th>
-                  <th className="pb-4 font-medium text-right">Stock</th>
                   <th className="pb-4 font-medium text-right">Sold (30d)</th>
-                  <th className="pb-4 font-medium pl-8">Status</th>
                 </tr>
               </thead>
               <tbody>
                 {products.length === 0 ? (
                   <tr>
-                    <td colSpan="5" className="text-center py-8 text-neutral-500">
+                    <td colSpan="3" className="text-center py-8 text-neutral-500">
                       No products found.
                     </td>
                   </tr>
                 ) : (
                   products.map((product, idx) => {
-                    const status = getStatus(product.stock);
                     return (
                       <motion.tr 
                         key={product._id}
@@ -159,13 +154,7 @@ export default function ProductsList() {
                           <div className="text-xs text-neutral-400 mt-0.5">{product.unit}</div>
                         </td>
                         <td className="py-4 text-right font-medium text-neutral-900">₹{product.price}</td>
-                        <td className="py-4 text-right font-medium text-neutral-700">{product.stock}</td>
                         <td className="py-4 text-right font-medium text-neutral-700">{product.monthlySold}×</td>
-                        <td className="py-4 pl-8">
-                          <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${status.classes}`}>
-                            {status.label}
-                          </span>
-                        </td>
                       </motion.tr>
                     )
                   })

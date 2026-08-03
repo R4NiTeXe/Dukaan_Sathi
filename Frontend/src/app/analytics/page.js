@@ -7,8 +7,14 @@ import {
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   BarChart, Bar, Cell, PieChart, Pie
 } from 'recharts';
-import { TrendingUp, Users, ReceiptText, Wallet, Plus, BarChart3, Loader2, AlertCircle } from 'lucide-react';
+import { TrendingUp, ReceiptText, Wallet, BarChart3, Loader2, AlertCircle } from 'lucide-react';
 import api from '@/services/api';
+
+const PAYMENT_COLORS = {
+  cash: 'var(--color-forest-green)',
+  upi: '#3b82f6',
+  unpaid: 'var(--color-muted-red)'
+};
 
 export default function AnalyticsDashboard() {
   const [data, setData] = useState({
@@ -99,8 +105,8 @@ export default function AnalyticsDashboard() {
       {/* KPI Overview */}
       <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 px-4 md:px-6 bg-off-white pt-2">
         {[
-          { title: 'Total Bills', value: summary?.totalBills || 0, change: 'Lifetime', icon: ReceiptText, iconColor: 'text-[#64748b]', iconBg: 'bg-[#f1f5f9]' },
-          { title: 'Customers', value: summary?.topCustomers?.length || 0, change: 'Active', icon: Users, iconColor: 'text-purple-500', iconBg: 'bg-purple-50' },
+          { title: 'Total Revenue', value: `₹${summary?.totalRevenue?.toLocaleString() || 0}`, change: 'Lifetime', icon: Wallet, iconColor: 'text-[#64748b]', iconBg: 'bg-[#f1f5f9]' },
+          { title: 'Total Bills', value: summary?.totalBills || 0, change: 'Lifetime', icon: ReceiptText, iconColor: 'text-indigo-500', iconBg: 'bg-indigo-500/10' },
           { title: 'Avg. Bill Value', value: `₹${summary?.totalBills ? Math.round(summary.totalRevenue / summary.totalBills).toLocaleString() : 0}`, change: 'Per Order', icon: TrendingUp, iconColor: 'text-emerald', iconBg: 'bg-emerald/10' },
           { title: 'Unpaid Bills', value: summary?.unpaidBills || 0, change: 'Pending', icon: AlertCircle, iconColor: 'text-muted-red', iconBg: 'bg-muted-red/10' }
         ].map((kpi, idx) => (
@@ -117,69 +123,49 @@ export default function AnalyticsDashboard() {
         ))}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 px-4 md:px-6 bg-off-white pb-6 rounded-b-2xl">
+      <div className="grid grid-cols-1 gap-4 px-4 md:px-6 bg-off-white pb-6 rounded-b-2xl">
         {/* Payment Mode Analysis */}
         <div className="bg-off-white rounded-[16px] p-5 border border-soft-stone shadow-sm flex flex-col">
           <h3 className="text-[14px] font-bold text-neutral-900 mb-6">Payment Mode Analysis</h3>
           <div className="flex-1 w-full flex flex-col">
             {summary?.paymentModes?.length > 0 ? (
-              <div className="h-56 w-full">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={summary.paymentModes}
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={60}
-                      outerRadius={80}
-                      paddingAngle={5}
-                      dataKey="total"
-                      nameKey="_id"
-                    >
-                      {summary.paymentModes.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={index % 2 === 0 ? 'var(--color-forest-green)' : 'var(--color-sage-green)'} />
-                      ))}
-                    </Pie>
-                    <Tooltip 
-                      formatter={(value) => [`₹${value.toLocaleString()}`, 'Total']}
-                      labelFormatter={(label, payload) => payload?.[0]?.payload?._id || label}
-                      contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: 'var(--shadow-soft)' }}
-                    />
-                  </PieChart>
-                </ResponsiveContainer>
+              <div className="flex flex-col h-full pb-4">
+                <div className="h-48 w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={summary.paymentModes}
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={50}
+                        outerRadius={70}
+                        paddingAngle={5}
+                        dataKey="total"
+                        nameKey="_id"
+                      >
+                        {summary.paymentModes.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={PAYMENT_COLORS[entry._id] || 'var(--color-sage-green)'} />
+                        ))}
+                      </Pie>
+                      <Tooltip 
+                        formatter={(value) => [`₹${value.toLocaleString()}`, 'Total']}
+                        labelFormatter={(label, payload) => payload?.[0]?.payload?._id?.toUpperCase() || label}
+                        contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: 'var(--shadow-soft)' }}
+                      />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+                <div className="flex justify-center gap-6 mt-2">
+                  {summary.paymentModes.map((entry, idx) => (
+                    <div key={idx} className="flex items-center gap-2">
+                      <div className="w-3 h-3 rounded-full" style={{ backgroundColor: PAYMENT_COLORS[entry._id] || 'var(--color-sage-green)' }}></div>
+                      <span className="text-xs font-bold text-neutral-600 uppercase tracking-wider">{entry._id}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
             ) : (
               <div className="flex h-full items-center justify-center text-neutral-400 pb-10">No payment data available</div>
-            )}
-          </div>
-        </div>
-
-        {/* Top Customers (Replaced Payment Methods) */}
-        <div className="bg-off-white rounded-[16px] p-5 border border-soft-stone shadow-sm flex flex-col">
-          <h3 className="text-[14px] font-bold text-neutral-900 mb-6">Top Customers by Spending</h3>
-          <div className="flex-1 w-full flex flex-col">
-            {data.customerReport.length > 0 ? (
-              <div className="h-56 w-full">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={data.customerReport} layout="vertical" margin={{ top: 0, right: 20, left: 0, bottom: 0 }}>
-                    <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="var(--color-soft-stone)" />
-                    <XAxis type="number" hide />
-                    <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{fill: 'var(--color-neutral-600)', fontSize: 12}} width={80} />
-                    <Tooltip 
-                      cursor={{fill: 'var(--color-warm-ivory)'}}
-                      contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: 'var(--shadow-soft)' }}
-                      formatter={(value) => [`₹${value.toLocaleString()}`, 'Spent']}
-                    />
-                    <Bar dataKey="spent" radius={[0, 8, 8, 0]} barSize={24}>
-                      {data.customerReport.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={index === 0 ? 'var(--color-forest-green)' : 'var(--color-sage-green)'} />
-                      ))}
-                    </Bar>
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            ) : (
-              <div className="flex h-full items-center justify-center text-neutral-400 pb-10">No customer data available</div>
             )}
           </div>
         </div>

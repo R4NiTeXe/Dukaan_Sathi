@@ -102,7 +102,13 @@ export const dashboardSummary = async (userId) => {
         paymentModes: [
           {
             $group: {
-              _id: '$paymentMethod',
+              _id: {
+                $cond: [
+                  { $eq: ['$paymentStatus', 'pending'] },
+                  'unpaid',
+                  '$paymentMethod'
+                ]
+              },
               total: { $sum: '$totalAmount' },
               count: { $sum: 1 },
             },

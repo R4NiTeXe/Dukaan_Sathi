@@ -1,8 +1,10 @@
 import { Router } from 'express'
-import { ask } from '../controllers/assistant.controller.js'
+import { ask, checkHealth } from '../controllers/assistant.controller.js'
 import { verifyJWT } from '../middlewares/auth.middleware.js'
 
 const router = Router()
+
+router.get('/health', checkHealth)
 
 router.use(verifyJWT)
 

@@ -8,11 +8,15 @@ import {
   FileText, TrendingUp, Users, AlertTriangle, Plus, Trash2
 } from 'lucide-react';
 import api from '@/services/api';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import rehypeRaw from 'rehype-raw';
+import AIStatusNotice from '@/components/ui/AIStatusNotice';
 
 const presetQuestions = [
   { title: "Today's Summary", icon: FileText, color: "text-blue-500 dark:text-blue-400", bg: "bg-blue-500/10" },
   { title: "Top Products", icon: TrendingUp, color: "text-purple-500 dark:text-purple-400", bg: "bg-purple-500/10" },
-  { title: "Best Customers", icon: Users, color: "text-orange-500 dark:text-orange-400", bg: "bg-orange-500/10" },
+  { title: "Pending Bills", icon: AlertTriangle, color: "text-orange-500 dark:text-orange-400", bg: "bg-orange-500/10" },
   { title: "Monthly Trend", icon: AlertTriangle, color: "text-red-500 dark:text-red-400", bg: "bg-red-500/10" }
 ];
 
@@ -95,7 +99,8 @@ export default function AIAdvisor() {
       </div>
 
       {/* Main Chat Area */}
-      <div className="flex-1 flex flex-col relative bg-off-white">
+      <div className="flex-1 flex flex-col relative bg-off-white p-4 pb-0">
+        <AIStatusNotice type="advisor" />
 
         {messages.length > 0 && (
           <div className="flex items-center justify-end px-6 py-3 border-b border-soft-stone/50 bg-off-white">
@@ -168,10 +173,10 @@ export default function AIAdvisor() {
                       <div className="w-8 h-8 rounded-full bg-forest-green flex items-center justify-center shrink-0 mt-1">
                         <Bot className="w-4 h-4 text-warm-ivory" />
                       </div>
-                      <div className="px-5 py-3 rounded-2xl rounded-tl-sm bg-warm-ivory border border-soft-stone text-neutral-800 shadow-sm text-[14px] prose prose-sm max-w-none">
-                        {msg.content.split('\n').map((line, i) => (
-                          <p key={i} className="mb-1">{line}</p>
-                        ))}
+                      <div className="px-5 py-3 rounded-2xl rounded-tl-sm bg-warm-ivory border border-soft-stone text-neutral-800 shadow-sm text-[14px] prose prose-sm max-w-none prose-p:leading-relaxed prose-pre:bg-neutral-100 prose-pre:text-neutral-800 prose-strong:text-neutral-900 prose-strong:font-semibold">
+                        <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]}>
+                          {msg.content}
+                        </ReactMarkdown>
                       </div>
                     </div>
                   )}

@@ -66,46 +66,63 @@ export default function BillsList() {
               <Loader2 className="w-8 h-8 animate-spin text-forest-green" />
             </div>
           ) : (
-            <table className="w-full text-left border-collapse">
+            <table className="w-full text-left border-collapse whitespace-nowrap">
               <thead>
-                <tr className="border-b border-soft-stone text-sm text-neutral-600">
-                  <th className="pb-4 font-medium pl-4">Bill ID</th>
-                  <th className="pb-4 font-medium">Customer</th>
-                  <th className="pb-4 font-medium">Date</th>
-                  <th className="pb-4 font-medium">Amount</th>
-                  <th className="pb-4 font-medium">Status</th>
-                  <th className="pb-4 font-medium">Method</th>
-                  <th className="pb-4 font-medium text-right pr-4">Action</th>
+                <tr className="border-b border-soft-stone text-xs md:text-sm text-neutral-600">
+                  <th className="pb-4 font-medium pl-2 md:pl-4">Bill ID</th>
+                  <th className="pb-4 font-medium pl-2">Token No</th>
+                  <th className="hidden md:table-cell pb-4 font-medium">Date & Time</th>
+                  <th className="pb-4 font-medium pl-2">Amount</th>
+                  <th className="pb-4 font-medium pl-2">Status</th>
+                  <th className="hidden md:table-cell pb-4 font-medium">Method</th>
                 </tr>
               </thead>
               <tbody>
                 {bills.length === 0 ? (
                   <tr>
-                    <td colSpan="7" className="text-center py-8 text-neutral-500">
+                    <td colSpan="6" className="text-center py-8 text-neutral-500">
                       No bills found.
                     </td>
                   </tr>
                 ) : (
-                  bills.map((bill) => (
-                    <tr 
-                      key={bill._id} 
-                      onClick={() => router.push(`/bills/${bill._id}`)}
-                      className="border-b border-soft-stone hover:bg-warm-ivory/50 transition-colors group cursor-pointer"
-                    >
-                      <td className="py-4 pl-4 font-medium text-neutral-700">{bill.billNumber || bill._id.substring(bill._id.length - 6).toUpperCase()}</td>
-                      <td className="py-4 text-neutral-900">{bill.customer?.customerNumber || 'Walk-in'}</td>
-                      <td className="py-4 text-neutral-500 text-sm">{new Date(bill.createdAt).toLocaleDateString()}</td>
-                      <td className="py-4 font-semibold text-neutral-900">₹{bill.totalAmount}</td>
-                      <td className="py-4">
-                        <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${
-                          bill.status === 'paid' ? 'bg-emerald/10 text-emerald' : 'bg-yellow-500/10 text-yellow-700'
-                        }`}>
-                          {bill.status}
-                        </span>
-                      </td>
-                      <td className="py-4 text-neutral-600 text-sm">{bill.paymentMethod || '-'}</td>
-                    </tr>
-                  ))
+                  bills.map((bill) => {
+                    const formatBillId = (id) => {
+                      if (!id) return '';
+                      if (id.startsWith('BILL-')) return id.replace(/BILL-\d{4}/, 'BILL-');
+                      return id.substring(id.length - 6).toUpperCase();
+                    };
+                    const displayId = formatBillId(bill.billNumber || bill._id);
+                    const tokenNo = bill.billNumber ? bill.billNumber.split('-').pop() : '01';
+                    
+                    return (
+                      <tr 
+                        key={bill._id} 
+                        onClick={() => router.push(`/bills/${bill._id}`)}
+                        className="border-b border-soft-stone hover:bg-warm-ivory/50 transition-colors group cursor-pointer text-sm"
+                      >
+                        <td className="py-4 pl-2 md:pl-4 font-medium text-neutral-700">
+                          <div>{displayId}</div>
+                          <div className="text-[10px] text-neutral-500 md:hidden mt-0.5">
+                            {new Date(bill.createdAt).toLocaleDateString()} {new Date(bill.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                          </div>
+                        </td>
+                        <td className="py-4 pl-2 text-neutral-900 font-semibold">{tokenNo}</td>
+                        <td className="hidden md:table-cell py-4 text-neutral-500 text-sm">
+                          {new Date(bill.createdAt).toLocaleDateString()} {new Date(bill.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                        </td>
+                        <td className="py-4 pl-2 font-semibold text-neutral-900">₹{bill.totalAmount}</td>
+                        <td className="py-4 pl-2">
+                          <span className={`inline-flex items-center px-2 py-0.5 md:px-2.5 md:py-1 rounded-full text-[10px] md:text-xs font-medium ${
+                            bill.paymentStatus === 'paid' ? 'bg-emerald/10 text-emerald' : 'bg-yellow-500/10 text-yellow-700'
+                          }`}>
+                            {bill.paymentStatus}
+                          </span>
+                          <div className="text-[10px] text-neutral-500 md:hidden mt-0.5 uppercase tracking-wider">{bill.paymentMethod || '-'}</div>
+                        </td>
+                        <td className="hidden md:table-cell py-4 text-neutral-600 text-sm uppercase">{bill.paymentMethod || '-'}</td>
+                      </tr>
+                    );
+                  })
                 )}
               </tbody>
             </table>

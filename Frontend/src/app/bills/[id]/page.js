@@ -101,19 +101,19 @@ export default function BillDetails({ params }) {
           {/* Status Badge */}
           <div className="absolute top-8 right-8">
             <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium ${
-              bill.status === 'paid' ? 'bg-emerald/10 text-emerald' : 'bg-yellow-500/10 text-yellow-700'
+              bill.paymentStatus === 'paid' ? 'bg-emerald/10 text-emerald' : 'bg-yellow-500/10 text-yellow-700'
             }`}>
               <CheckCircle2 className="w-4 h-4" />
-              {bill.status}
+              {bill.paymentStatus}
             </div>
           </div>
 
           <div className="mb-10">
             <h2 className="text-sm font-medium text-neutral-500 uppercase tracking-wider mb-1">
-              Billed To
+              Token No
             </h2>
-            <p className="text-lg font-semibold text-neutral-900">
-              {bill.customer?.customerNumber || "Walk-in Customer"}
+            <p className="text-2xl font-bold text-neutral-900">
+              {bill.billNumber ? bill.billNumber.split('-').pop() : '01'}
             </p>
           </div>
 

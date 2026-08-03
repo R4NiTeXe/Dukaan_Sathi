@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import api from "@/services/api";
 import { useAuth } from "@/context/AuthContext";
+import AIStatusNotice from '@/components/ui/AIStatusNotice';
 
 const LANG_MAP = {
   en: "en-IN",
@@ -41,6 +42,7 @@ export default function VoiceBilling() {
   const [extractError, setExtractError] = useState("");
   const [paymentMethod, setPaymentMethod] = useState("cash");
   const [paymentStatus, setPaymentStatus] = useState("paid");
+  const [showSuccessToast, setShowSuccessToast] = useState(false);
 
   const SpeechRecognition = typeof window !== 'undefined' ? window.SpeechRecognition || window.webkitSpeechRecognition : null;
   const recognitionRef = useRef(null);
@@ -221,7 +223,24 @@ export default function VoiceBilling() {
     if (isRecording) {
       manualStopRef.current = true;
       pendingExtractRef.current = true;
-      recognitionRef.current?.stop();
+      setIsRecording(false); // Update UI immediately to prevent getting stuck
+      
+      try {
+        recognitionRef.current?.stop();
+      } catch (e) {
+        console.warn("Could not stop recognition normally", e);
+      }
+
+      // Mobile Fallback: If the browser's onend event fails to fire, force the extraction
+      setTimeout(() => {
+        if (pendingExtractRef.current) {
+          pendingExtractRef.current = false;
+          manualStopRef.current = false;
+          pausedRef.current = false;
+          setIsPaused(false);
+          extractItemsFromTranscript(latestTranscriptRef.current);
+        }
+      }, 1500);
     } else {
       // Continuing after a paused session keeps the accumulated transcript;
       // a fresh session clears everything.
@@ -267,7 +286,8 @@ export default function VoiceBilling() {
       };
       const response = await api.post("/billing/save", payload);
       if (response.data.success) {
-        alert("Bill saved successfully!");
+        setShowSuccessToast(true);
+        setTimeout(() => setShowSuccessToast(false), 3000);
         pausedRef.current = false;
         setTranscript("");
         setExtractedItems([]);
@@ -289,15 +309,34 @@ export default function VoiceBilling() {
   const updateItem = (idx, field, value) => {
     setExtractedItems(prev => prev.map((item, i) => {
       if (i !== idx) return item;
-      return {
-        ...item,
-        [field]: field === 'productName' ? value : Number(value) || 0,
-      };
+      
+      const updatedItem = { ...item };
+      
+      if (field === 'productName') {
+        updatedItem.productName = value;
+      } else {
+        // Auto-scale price if quantity changes and pricePerUnit is false
+        if (field === 'quantity' && !item.pricePerUnit) {
+          const oldQty = Number(item.quantity) || 1;
+          const newQty = Number(value) || 0;
+          const currentPrice = Number(item.price) || 0;
+          if (oldQty > 0) {
+            const unitPrice = currentPrice / oldQty;
+            updatedItem.price = Number((unitPrice * newQty).toFixed(2));
+          }
+        }
+        // Store as string to prevent "0" prefix bugs when typing
+        updatedItem[field] = value;
+      }
+      return updatedItem;
     }));
   };
 
-  const lineTotal = (item) =>
-    item.pricePerUnit ? item.price * item.quantity : item.price;
+  const lineTotal = (item) => {
+    const p = Number(item.price) || 0;
+    const q = Number(item.quantity) || 0;
+    return item.pricePerUnit ? p * q : p;
+  };
 
   const total = extractedItems.reduce((acc, item) => acc + lineTotal(item), 0);
 
@@ -307,8 +346,27 @@ export default function VoiceBilling() {
       initial="initial"
       animate="animate"
       exit="exit"
-      className="max-w-4xl mx-auto min-w-0"
+      className="max-w-4xl mx-auto min-w-0 relative"
     >
+      {/* Success Toast */}
+      <AnimatePresence>
+        {showSuccessToast && (
+          <motion.div
+            initial={{ opacity: 0, y: 50, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 20, scale: 0.9 }}
+            className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 px-6 py-4 bg-neutral-900 text-warm-ivory rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-neutral-800"
+          >
+            <div className="w-8 h-8 rounded-full bg-emerald/20 flex items-center justify-center shrink-0">
+              <Sparkles className="w-4 h-4 text-emerald" />
+            </div>
+            <p className="font-medium">Bill saved successfully!</p>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <AIStatusNotice />
+
       <header className="mb-8 text-center">
         <h1 className="text-3xl font-bold tracking-tight text-neutral-900 flex items-center justify-center gap-3">
           <Sparkles className="w-6 h-6 text-emerald" />
@@ -462,7 +520,7 @@ export default function VoiceBilling() {
                           <input
                             type="number"
                             min="0"
-                            step="0.01"
+                            step="any"
                             value={item.quantity}
                             onChange={(e) => updateItem(idx, 'quantity', e.target.value)}
                             className="w-16 px-2 py-1 bg-off-white border border-soft-stone rounded-lg text-sm text-neutral-700 focus:outline-none focus:border-sage-green"
@@ -471,7 +529,7 @@ export default function VoiceBilling() {
                           <input
                             type="number"
                             min="0"
-                            step="0.01"
+                            step="any"
                             value={item.price}
                             onChange={(e) => updateItem(idx, 'price', e.target.value)}
                             className="w-20 px-2 py-1 bg-off-white border border-soft-stone rounded-lg text-sm text-neutral-700 focus:outline-none focus:border-sage-green"
@@ -542,13 +600,13 @@ export default function VoiceBilling() {
                   {paymentMethod === 'upi' && (
                     <div className="mb-6">
                       {user?.upiQrCode ? (
-                        <div className="flex flex-col items-center justify-center p-4 bg-white rounded-xl shadow-sm border border-soft-stone">
+                        <div className="flex flex-col items-center justify-center p-4 bg-warm-ivory rounded-xl border border-soft-stone shadow-sm">
                           <img 
                             src={user.upiQrCode} 
                             alt="Shop UPI QR Code" 
-                            className="w-32 h-32 object-contain"
+                            className="w-full max-w-[160px] h-auto aspect-square object-cover rounded-lg"
                           />
-                          <p className="text-[10px] font-bold text-neutral-500 uppercase tracking-widest mt-3">Scan to Pay</p>
+                          <p className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest mt-4">Scan to Pay</p>
                         </div>
                       ) : (
                         <p className="text-muted-indigo text-xs text-center p-3 bg-muted-indigo/10 rounded-lg border border-muted-indigo/20">

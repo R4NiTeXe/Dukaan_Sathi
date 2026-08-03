@@ -190,7 +190,7 @@ export default function ProfilePage() {
                   className="w-48 h-48 rounded-2xl border-2 border-sage-green/30 object-contain bg-warm-ivory p-2 shadow-sm"
                 />
                 <div className="flex gap-3 w-full">
-                  <label className="flex-1 flex justify-center items-center gap-2 px-4 py-2.5 bg-sage-green text-forest-green rounded-xl font-medium hover:bg-sage-green/80 transition-colors cursor-pointer text-sm">
+                  <label className="flex-1 flex justify-center items-center gap-2 px-4 py-2.5 bg-emerald/10 text-emerald rounded-xl font-medium hover:bg-emerald/20 transition-colors cursor-pointer text-sm">
                     <Upload className="w-4 h-4" />
                     Replace
                     <input

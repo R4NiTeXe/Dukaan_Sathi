@@ -160,6 +160,7 @@ export default function Dashboard() {
                   <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: 'var(--color-neutral-600)', fontSize: 12}} dy={10} />
                   <YAxis axisLine={false} tickLine={false} tick={{fill: 'var(--color-neutral-600)', fontSize: 12}} tickFormatter={(value) => `₹${value}`} />
                   <Tooltip 
+                    cursor={false}
                     contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: 'var(--shadow-hover)' }}
                     itemStyle={{ color: 'var(--color-forest-green)', fontWeight: 600 }}
                   />
@@ -182,7 +183,7 @@ export default function Dashboard() {
                   <XAxis type="number" hide />
                   <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{fill: 'var(--color-neutral-600)', fontSize: 12}} width={120} />
                   <Tooltip 
-                    cursor={{fill: 'var(--color-warm-ivory)'}}
+                    cursor={false}
                     contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: 'var(--shadow-soft)' }}
                   />
                   <Bar dataKey="sales" radius={[0, 8, 8, 0]} barSize={24}>

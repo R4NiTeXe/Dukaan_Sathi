@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  Search, Bell, User, Menu, X, LogOut,
+  Search, Bell, User, Menu, X, LogOut, Settings,
   LayoutDashboard, Mic, ReceiptText, Users as UsersIcon, Package, BarChart, BotMessageSquare
 } from 'lucide-react';
 import ThemeToggle from '@/components/layout/ThemeToggle';
@@ -15,10 +15,10 @@ const navItems = [
   { name: 'Dashboard', href: '/', icon: LayoutDashboard },
   { name: 'Voice Billing', href: '/billing', icon: Mic },
   { name: 'Bills', href: '/bills', icon: ReceiptText },
-  { name: 'Customers', href: '/customers', icon: UsersIcon },
   { name: 'Products', href: '/products', icon: Package },
   { name: 'Analytics', href: '/analytics', icon: BarChart },
   { name: 'AI Advisor', href: '/advisor', icon: BotMessageSquare },
+  { name: 'Profile', href: '/profile', icon: Settings },
 ];
 
 export default function Topbar() {
@@ -77,7 +77,7 @@ export default function Topbar() {
             <input
               type="text"
               className="block w-full min-w-0 pl-10 pr-4 py-2.5 bg-off-white border border-soft-stone rounded-2xl text-sm placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-sage-green/30 focus:border-sage-green transition-all shadow-[var(--shadow-soft)] hover:shadow-md"
-              placeholder="Search bills, customers, or products..."
+              placeholder="Search bills or products..."
             />
           </div>
         </div>

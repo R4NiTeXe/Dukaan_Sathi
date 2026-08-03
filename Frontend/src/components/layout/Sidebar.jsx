@@ -18,7 +18,6 @@ const navItems = [
   { name: 'Dashboard', href: '/', icon: LayoutDashboard },
   { name: 'Voice Billing', href: '/billing', icon: Mic },
   { name: 'Bills', href: '/bills', icon: ReceiptText },
-  { name: 'Customers', href: '/customers', icon: Users },
   { name: 'Products', href: '/products', icon: Package },
   { name: 'Analytics', href: '/analytics', icon: BarChart },
   { name: 'AI Advisor', href: '/advisor', icon: BotMessageSquare },

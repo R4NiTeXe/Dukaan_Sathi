@@ -52,6 +52,9 @@ CRITICAL: Do NOT mention their business data (like revenue or bills) UNLESS they
 Today's date is {current_date}.
 IMPORTANT: For any question about the date, day, time, or "today", use the date above — never guess, invent, or answer from your training data.
 
+CRITICAL FINANCIAL RULE:
+ALWAYS use the Indian Rupee symbol (₹) for ALL monetary values and amounts. NEVER use the dollar sign ($) or the word 'dollars' under any circumstances. If the user mentions money, assume they mean Rupees (₹).
+
 Shop Data:
 {data}
 
@@ -59,7 +62,16 @@ Owner's Question: "{question}"
 
 Answer in a helpful, friendly tone.
 If answering a business question, use numbers and specifics from the data.
-If the owner asked in Bengali or Hindi, answer in that language.
+Format your answer beautifully using Markdown (bold text, lists).
+
+CRITICAL: When mentioning the payment status or payment mode of bills, you MUST use symbols (not emojis) and HTML span tags for colors:
+- For Paid bills: Use <span class="text-emerald font-bold">✓ Paid</span>
+- For Unpaid/Pending bills: Use <span class="text-red-500 font-bold">✗ Unpaid</span>
+- For Cash payment mode: Use <span class="text-neutral-700 font-semibold">[₹] Cash</span>
+- For UPI payment mode: Use <span class="text-neutral-700 font-semibold">[QR] UPI</span>
+
+Never confuse Paid and Unpaid bills. Read the provided data carefully.
+If the owner asked in Bengali or Hindi, answer in that language but keep the HTML formatting.
 Return ONLY the answer text, no JSON.`
 
 const generateWithRetry = async (model, prompt, attempts = 3) => {
@@ -128,28 +140,28 @@ export const extractBillItems = async (transcript, language = 'en') => {
   }
 }
 
-export const askAssistant = async (question, data) => {
-  if (GEMINI_MOCK === 'ok') {
-    return 'Mocked answer: revenue 200 INR from 1 bill today.'
+export const askAssistant = async (dataContext, question, user) => {
+  if (!genAI) {
+    return 'Demo Mode: This is a placeholder AI response because GEMINI_MOCK is enabled.'
   }
-  if (GEMINI_MOCK === 'fail') {
-    throw new Error('Gemini unavailable (test mock)')
-  }
-  const model = genAI.getGenerativeModel({ model: config.gemini.model })
-  const today = new Date().toLocaleDateString('en-GB', {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  })
-  const result = await generateWithRetry(
-    model,
-    ASSISTANT_PROMPT.replace('{current_date}', today)
-      .replace('{data}', JSON.stringify(data))
+  try {
+    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' })
+    const promptContext = ASSISTANT_PROMPT.replace('{data}', JSON.stringify(dataContext))
       .replace('{question}', question)
-  )
-  return result.response.text().trim()
+      .replace('{current_date}', new Date().toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }))
+
+    const result = await withTimeout(
+      model.generateContent(promptContext),
+      GENERATE_TIMEOUT_MS,
+      'AI response timed out'
+    )
+    return result.response.text()
+  } catch (error) {
+    console.error('Gemini Assistant Error:', error)
+    throw new Error('Failed to generate AI response: ' + error.message)
+  }
 }
+
 
 let lastGeminiPing = { at: 0, ok: false }
 const GEMINI_PING_TTL_MS = 10 * 60 * 1000

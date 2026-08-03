@@ -9,8 +9,7 @@ export default function AddProductModal({ isOpen, onClose, onProductAdded }) {
   const [formData, setFormData] = useState({
     name: '',
     unit: 'kg',
-    price: '',
-    stock: ''
+    price: ''
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -23,14 +22,13 @@ export default function AddProductModal({ isOpen, onClose, onProductAdded }) {
     try {
       const payload = {
         ...formData,
-        price: Number(formData.price),
-        stock: Number(formData.stock)
+        price: Number(formData.price)
       };
       
       const response = await api.post('/products', payload);
       if (response.data.success) {
         if (onProductAdded) onProductAdded();
-        setFormData({ name: '', unit: 'kg', price: '', stock: '' });
+        setFormData({ name: '', unit: 'kg', price: '' });
         onClose();
       }
     } catch (err) {
@@ -82,41 +80,22 @@ export default function AddProductModal({ isOpen, onClose, onProductAdded }) {
           </select>
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-1.5">
-            <label className="text-sm font-medium text-neutral-700">Price</label>
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <IndianRupee className="h-4 w-4 text-neutral-400" />
-              </div>
-              <input 
-                type="number" 
-                required
-                min="0"
-                step="0.01"
-                value={formData.price}
-                onChange={e => setFormData({...formData, price: e.target.value})}
-                placeholder="0.00"
-                className="w-full pl-10 pr-4 py-2.5 bg-off-white border border-soft-stone rounded-xl text-sm focus:outline-none focus:border-sage-green transition-all"
-              />
+        <div className="space-y-1.5">
+          <label className="text-sm font-medium text-neutral-700">Price</label>
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <IndianRupee className="h-4 w-4 text-neutral-400" />
             </div>
-          </div>
-          <div className="space-y-1.5">
-            <label className="text-sm font-medium text-neutral-700">Initial Stock</label>
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Hash className="h-4 w-4 text-neutral-400" />
-              </div>
-              <input 
-                type="number" 
-                required
-                min="0"
-                value={formData.stock}
-                onChange={e => setFormData({...formData, stock: e.target.value})}
-                placeholder="0"
-                className="w-full pl-10 pr-4 py-2.5 bg-off-white border border-soft-stone rounded-xl text-sm focus:outline-none focus:border-sage-green transition-all"
-              />
-            </div>
+            <input 
+              type="number" 
+              required
+              min="0"
+              step="0.01"
+              value={formData.price}
+              onChange={e => setFormData({...formData, price: e.target.value})}
+              placeholder="0.00"
+              className="w-full pl-10 pr-4 py-2.5 bg-off-white border border-soft-stone rounded-xl text-sm focus:outline-none focus:border-sage-green transition-all"
+            />
           </div>
         </div>
 

@@ -21,11 +21,6 @@ const productSchema = new mongoose.Schema(
       type: String,
       default: 'piece',
     },
-    stock: {
-      type: Number,
-      default: 0,
-      min: 0,
-    },
     autoAdded: {
       type: Boolean,
       default: false,

@@ -1,7 +1,7 @@
 import mongoose from 'mongoose'
 import { Bill } from '../models/Bill.model.js'
 import { Customer } from '../models/Customer.model.js'
-import { askAssistant } from '../services/gemini.service.js'
+import { askAssistant, pingGemini } from '../services/gemini.service.js'
 import ApiError from '../utils/ApiError.js'
 import ApiResponse from '../utils/ApiResponse.js'
 import asyncHandler from '../utils/asyncHandler.js'
@@ -269,6 +269,11 @@ const ask = asyncHandler(async (req, res) => {
   return res
     .status(200)
     .json(new ApiResponse(200, { answer, intent, data }, 'Answer generated'))
+})
+
+export const checkHealth = asyncHandler(async (req, res) => {
+  const isUp = await pingGemini()
+  res.status(200).json(new ApiResponse(200, { isUp }, 'AI Health Status'))
 })
 
 export { ask }
