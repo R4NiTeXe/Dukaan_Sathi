@@ -101,7 +101,7 @@ export default function AIAdvisor() {
 
         <div className="px-6 py-4 mt-4">
           <p className="text-sm text-neutral-600 leading-relaxed font-medium">
-            Your intelligent shop assistant, securely plugged into your live database. Gain insights into revenue, track top-performing products, and discover your best customers instantly.
+            Your intelligent shop assistant, securely plugged into your live database. Gain insights into sales, track top-performing products, and discover your best customers instantly.
           </p>
         </div>
 
