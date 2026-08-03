@@ -46,7 +46,7 @@ after(async () => {
   await dropTestDb(server.dbName)
 })
 
-test('product auto-added after 4th sale with derived stock', async () => {
+test('product auto-added after 4th sale with sales counts', async () => {
   for (let i = 0; i < 3; i++) {
     const r = await saveBill('AutoTea', 2, 120)
     assert.equal(r.status, 201)
@@ -62,7 +62,6 @@ test('product auto-added after 4th sale with derived stock', async () => {
   assert.equal(p.autoAdded, true)
   assert.equal(p.price, 60)
   assert.equal(p.unit, 'kg')
-  assert.equal(p.stock, 8)
   assert.equal(p.monthlySold, 4)
   assert.equal(p.monthlyQuantity, 8)
 })
@@ -73,7 +72,6 @@ test('case-insensitive sales count without duplicate product', async () => {
   const products = await listProducts('autotea')
   assert.equal(products.length, 1)
   assert.equal(products[0].monthlySold, 5)
-  assert.equal(products[0].stock, 8)
 })
 
 test('low-selling items are never auto-added', async () => {

@@ -99,7 +99,6 @@ export const autoAddProducts = async (userId, items) => {
       name: entry.name,
       price: Math.round(unitPrice * 100) / 100,
       unit: entry.lastUnit,
-      stock: entry.qty,
       autoAdded: true,
     })
     added.push(product)
