@@ -100,7 +100,10 @@ export const extractBillItems = async (transcript, language = 'en') => {
   const model = genAI.getGenerativeModel({ model: config.gemini.model })
   const result = await generateWithRetry(
     model,
-    PROMPT.replace('{transcribed_text}', transcript).replace('{language}', language)
+    PROMPT.replace('{transcribed_text}', transcript).replace(
+      '{language}',
+      language
+    )
   )
   const rawText = result.response.text().trim()
 
@@ -140,51 +143,82 @@ export const extractBillItems = async (transcript, language = 'en') => {
   }
 }
 
-export const askAssistant = async (dataContext, question, user) => {
+export const askAssistant = async (dataContext, question, _user) => {
+  if (GEMINI_MOCK === 'fail') {
+    throw new Error('Gemini is unavailable (mock fail mode)')
+  }
   if (!genAI) {
     return 'Demo Mode: This is a placeholder AI response because GEMINI_MOCK is enabled.'
   }
   try {
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' })
-    const promptContext = ASSISTANT_PROMPT.replace('{data}', JSON.stringify(dataContext))
+    const model = genAI.getGenerativeModel({ model: config.gemini.model })
+    const promptContext = ASSISTANT_PROMPT.replace(
+      '{data}',
+      JSON.stringify(dataContext)
+    )
       .replace('{question}', question)
-      .replace('{current_date}', new Date().toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }))
+      .replace(
+        '{current_date}',
+        new Date().toLocaleDateString('en-IN', {
+          weekday: 'long',
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+        })
+      )
 
     const result = await withTimeout(
       model.generateContent(promptContext),
       GENERATE_TIMEOUT_MS,
       'AI response timed out'
     )
-    return result.response.text()
+    const text = (result.response.text() || '').trim()
+    if (!text) {
+      throw new Error('Gemini returned an empty response')
+    }
+    return text
   } catch (error) {
     console.error('Gemini Assistant Error:', error)
-    throw new Error('Failed to generate AI response: ' + error.message)
+    throw new Error('Failed to generate AI response: ' + error.message, {
+      cause: error,
+    })
   }
 }
 
-
 let lastGeminiPing = { at: 0, ok: false }
-const GEMINI_PING_TTL_MS = 10 * 60 * 1000
+const GEMINI_PING_TTL_MS = 2 * 60 * 1000
 
+// Performs a REAL generation test against the configured model. A token count
+// is not enough: a model that returns 404 or rejects prompts must be reported
+// as down. Green is only returned when the model genuinely answers.
 export const pingGemini = async () => {
-  if (GEMINI_MOCK === 'ok') return true
-  if (GEMINI_MOCK === 'fail') return false
+  const checkedAt = new Date().toISOString()
+  if (GEMINI_MOCK === 'ok') {
+    return { ok: true, model: config.gemini.model, checkedAt }
+  }
+  if (GEMINI_MOCK === 'fail') {
+    return { ok: false, model: config.gemini.model, checkedAt }
+  }
   if (Date.now() - lastGeminiPing.at < GEMINI_PING_TTL_MS) {
-    return lastGeminiPing.ok
+    return { ok: lastGeminiPing.ok, model: config.gemini.model, checkedAt }
   }
   try {
     const model = genAI.getGenerativeModel({ model: config.gemini.model })
-    await withTimeout(
-      model.countTokens({
+    const result = await withTimeout(
+      model.generateContent({
         contents: [{ role: 'user', parts: [{ text: 'ping' }] }],
+        generationConfig: { maxOutputTokens: 5, temperature: 0 },
       }),
-      5000,
+      8000,
       'Gemini ping timed out'
     )
+    const text = (result.response.text() || '').trim()
+    if (!text) throw new Error('Gemini returned an empty response')
     lastGeminiPing = { at: Date.now(), ok: true }
-    return true
-  } catch {
+    return { ok: true, model: config.gemini.model, checkedAt }
+  } catch (error) {
+    console.error('Gemini health check failed:', error.message)
     lastGeminiPing = { at: Date.now(), ok: false }
-    return false
+    return { ok: false, model: config.gemini.model, checkedAt }
   }
 }

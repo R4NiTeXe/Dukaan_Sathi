@@ -74,7 +74,13 @@ app.get('/health', async (req, res) => {
     uptime: process.uptime(),
     database: dbState,
     services: {
-      gemini: geminiOk ? 'ok' : 'error',
+      gemini: geminiOk.ok
+        ? { status: 'ok', model: geminiOk.model, checkedAt: geminiOk.checkedAt }
+        : {
+            status: 'error',
+            model: geminiOk.model,
+            checkedAt: geminiOk.checkedAt,
+          },
       cloudinary: cloudinaryOk ? 'ok' : 'error',
     },
     memory: {

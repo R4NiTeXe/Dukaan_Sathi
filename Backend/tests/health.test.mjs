@@ -22,6 +22,24 @@ after(async () => {
   await dropTestDb(server.dbName)
 })
 
+test('health reports error when the configured model cannot generate', async () => {
+  const badServer = await spawnServer({
+    env: { GEMINI_MODEL: 'gemini-1.5-flash' },
+  })
+  try {
+    const r = await request(badServer.baseUrl, 'GET', '/api/v1/assistant/health')
+    assert.equal(r.status, 200)
+    assert.equal(r.json.data.isUp, false)
+    assert.equal(r.json.data.model, 'gemini-1.5-flash')
+    assert.ok(!Number.isNaN(Date.parse(r.json.data.checkedAt)))
+
+    const h = await request(badServer.baseUrl, 'GET', '/health')
+    assert.equal(h.json.services.gemini.status, 'error')
+  } finally {
+    badServer.stop()
+  }
+})
+
 test('GET /health returns status, version, services and db state', async () => {
   const r = await request(baseUrl, 'GET', '/health')
   assert.equal(r.status, 200)
@@ -30,7 +48,9 @@ test('GET /health returns status, version, services and db state', async () => {
   assert.equal(r.json.version, '1.0.0')
   assert.ok(r.json.nodeVersion.startsWith('v'))
   assert.ok(r.json.uptime > 0)
-  assert.ok(['ok', 'error'].includes(r.json.services.gemini))
+  assert.ok(['ok', 'error'].includes(r.json.services.gemini.status))
+  assert.ok(typeof r.json.services.gemini.model === 'string')
+  assert.ok(!Number.isNaN(Date.parse(r.json.services.gemini.checkedAt)))
   assert.ok(['ok', 'error'].includes(r.json.services.cloudinary))
   assert.ok(r.json.memory.rss > 0)
 })
