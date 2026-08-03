@@ -132,18 +132,21 @@ export default function AIAdvisor() {
 
         {messages.length === 0 ? (
           /* Empty State / Welcome Screen */
-          <div className="flex-1 flex flex-col items-center justify-center p-4 md:p-8 text-center relative overflow-y-auto min-h-0">
-            <div className="w-20 h-20 md:w-24 md:h-24 mb-6 relative shrink-0">
-              <div className="absolute inset-0 bg-gradient-to-b from-transparent to-[#f5f3ef]/50 rounded-full blur-xl"></div>
-              <BotMessageSquare className="w-full h-full text-sage-green/40 absolute z-10 drop-shadow-md" strokeWidth={1} />
-            </div>
+          <div className="flex-1 overflow-y-auto min-h-0 flex flex-col px-4 md:px-8">
+            <div className="flex-1 min-h-[20px]"></div>
             
-            <h2 className="text-2xl font-bold text-neutral-900 mb-2 flex items-center justify-center gap-2">
-              Namaste! <Bot className="w-7 h-7 text-sage-green" />
-            </h2>
-            <p className="text-sm text-neutral-500 mb-8">I&apos;m here to help you grow your business smarter.</p>
-            
-            <div className="w-full max-w-xl text-left">
+            <div className="flex flex-col items-center text-center w-full max-w-xl mx-auto shrink-0 py-4">
+              <div className="w-20 h-20 md:w-24 md:h-24 mb-6 relative shrink-0">
+                <div className="absolute inset-0 bg-gradient-to-b from-transparent to-[#f5f3ef]/50 rounded-full blur-xl"></div>
+                <BotMessageSquare className="w-full h-full text-sage-green/40 absolute z-10 drop-shadow-md" strokeWidth={1} />
+              </div>
+              
+              <h2 className="text-2xl font-bold text-neutral-900 mb-2 flex items-center justify-center gap-2">
+                Namaste! <Bot className="w-7 h-7 text-sage-green" />
+              </h2>
+              <p className="text-sm text-neutral-500 mb-8">I&apos;m here to help you grow your business smarter.</p>
+              
+              <div className="w-full text-left">
               
               {/* Highlighted 'What I Can Do' Section */}
               <div className="mb-8 p-6 bg-gradient-to-br from-forest-green/10 to-emerald/5 border-2 border-forest-green/20 rounded-[20px] shadow-sm relative overflow-hidden">
@@ -182,7 +185,10 @@ export default function AIAdvisor() {
                   </button>
                 ))}
               </div>
+              </div>
             </div>
+            
+            <div className="flex-1 min-h-[20px]"></div>
           </div>
         ) : (
           /* Chat History */
