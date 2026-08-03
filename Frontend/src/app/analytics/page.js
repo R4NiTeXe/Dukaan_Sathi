@@ -105,7 +105,7 @@ export default function AnalyticsDashboard() {
       {/* KPI Overview */}
       <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 px-4 md:px-6 bg-off-white pt-2">
         {[
-          { title: 'Total Revenue', value: `₹${summary?.totalRevenue?.toLocaleString() || 0}`, change: 'Lifetime', icon: Wallet, iconColor: 'text-[#64748b]', iconBg: 'bg-[#f1f5f9]' },
+          { title: "Today's Total Sale", value: `₹${summary?.todayRevenue?.toLocaleString() || 0}`, change: 'Today', icon: Wallet, iconColor: 'text-[#64748b]', iconBg: 'bg-[#f1f5f9]' },
           { title: 'Total Bills', value: summary?.totalBills || 0, change: 'Lifetime', icon: ReceiptText, iconColor: 'text-indigo-500', iconBg: 'bg-indigo-500/10' },
           { title: 'Avg. Bill Value', value: `₹${summary?.totalBills ? Math.round(summary.totalRevenue / summary.totalBills).toLocaleString() : 0}`, change: 'Per Order', icon: TrendingUp, iconColor: 'text-emerald', iconBg: 'bg-emerald/10' },
           { title: 'Unpaid Bills', value: summary?.unpaidBills || 0, change: 'Pending', icon: AlertCircle, iconColor: 'text-muted-red', iconBg: 'bg-muted-red/10' }
@@ -118,7 +118,7 @@ export default function AnalyticsDashboard() {
             <div className="text-xl md:text-[28px] font-bold text-neutral-900 mb-2">{kpi.value}</div>
             <span className="text-[#22c55e] text-[11px] font-bold flex items-center gap-1">
               <span className="text-neutral-400 font-medium">{kpi.change}</span>
-            </span>
+            </span>           
           </motion.div>
         ))}
       </div>
@@ -140,7 +140,7 @@ export default function AnalyticsDashboard() {
                         innerRadius={50}
                         outerRadius={70}
                         paddingAngle={5}
-                        dataKey="total"
+                        dataKey="count"
                         nameKey="_id"
                       >
                         {summary.paymentModes.map((entry, index) => (
@@ -148,7 +148,7 @@ export default function AnalyticsDashboard() {
                         ))}
                       </Pie>
                       <Tooltip 
-                        formatter={(value) => [`₹${value.toLocaleString()}`, 'Total']}
+                        formatter={(value, name, props) => [`${value} Bills (₹${props.payload.total.toLocaleString()})`, name.toUpperCase()]}
                         labelFormatter={(label, payload) => payload?.[0]?.payload?._id?.toUpperCase() || label}
                         contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: 'var(--shadow-soft)' }}
                       />

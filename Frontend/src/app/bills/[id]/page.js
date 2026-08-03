@@ -53,7 +53,7 @@ export default function BillDetails({ params }) {
   }
 
   const date = new Date(bill.createdAt);
-  const displayDate = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  const displayDate = date.toLocaleDateString('en-GB');
   const displayTime = date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
 
   // Assume items is an array of { productName, quantity, price, total }

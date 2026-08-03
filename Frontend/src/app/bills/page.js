@@ -103,12 +103,12 @@ export default function BillsList() {
                         <td className="py-4 pl-2 md:pl-4 font-medium text-neutral-700">
                           <div>{displayId}</div>
                           <div className="text-[10px] text-neutral-500 md:hidden mt-0.5">
-                            {new Date(bill.createdAt).toLocaleDateString()} {new Date(bill.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                            {new Date(bill.createdAt).toLocaleDateString('en-GB')} {new Date(bill.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
                           </div>
                         </td>
                         <td className="py-4 pl-2 text-neutral-900 font-semibold">{tokenNo}</td>
                         <td className="hidden md:table-cell py-4 text-neutral-500 text-sm">
-                          {new Date(bill.createdAt).toLocaleDateString()} {new Date(bill.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                          {new Date(bill.createdAt).toLocaleDateString('en-GB')} {new Date(bill.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
                         </td>
                         <td className="py-4 pl-2 font-semibold text-neutral-900">₹{bill.totalAmount}</td>
                         <td className="py-4 pl-2">

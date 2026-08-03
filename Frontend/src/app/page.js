@@ -50,10 +50,29 @@ export default function Dashboard() {
         ]);
 
         // Format weekly data for chart
-        const formattedWeekly = weeklyRes.data.data?.data?.map(item => ({
-          name: new Date(item.date).toLocaleDateString('en-US', { weekday: 'short' }),
-          total: item.totalRevenue
-        })) || [];
+        const rawWeekly = weeklyRes.data.data?.data || [];
+        
+        // Pad with missing days to always show 7 days (fixes the "no line" issue for single-day data)
+        const last7Days = Array.from({ length: 7 }).map((_, i) => {
+          const d = new Date();
+          d.setDate(d.getDate() - (6 - i));
+          return d;
+        });
+
+        const formattedWeekly = last7Days.map(dateObj => {
+          // Create local YYYY-MM-DD string
+          const dateStr = [
+            dateObj.getFullYear(),
+            String(dateObj.getMonth() + 1).padStart(2, '0'),
+            String(dateObj.getDate()).padStart(2, '0')
+          ].join('-');
+          
+          const existing = rawWeekly.find(item => item.date === dateStr);
+          return {
+            name: dateObj.toLocaleDateString('en-US', { weekday: 'short' }),
+            total: existing ? existing.totalRevenue : 0
+          };
+        });
 
         // Format top products
         const formattedTopProducts = topRes.data.data?.data?.map(item => ({

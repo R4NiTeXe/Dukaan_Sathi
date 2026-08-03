@@ -102,7 +102,7 @@ export default function CustomersList() {
                         {customer.totalPurchases?.toLocaleString() || 0}
                       </td>
                       <td className="py-4 text-neutral-500 text-sm">
-                        {new Date(customer.createdAt).toLocaleDateString()}
+                        {new Date(customer.createdAt).toLocaleDateString('en-GB')}
                       </td>
                     </motion.tr>
                   ))
