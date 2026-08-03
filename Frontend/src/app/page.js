@@ -180,9 +180,9 @@ export default function Dashboard() {
                   <YAxis axisLine={false} tickLine={false} tick={{fill: 'var(--color-neutral-600)', fontSize: 12}} tickFormatter={(value) => `₹${value}`} />
                   <Tooltip 
                     cursor={false}
-                    contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: 'var(--shadow-hover)' }}
+                    contentStyle={{ backgroundColor: 'var(--color-off-white)', borderRadius: '16px', border: '1px solid var(--color-soft-stone)', boxShadow: 'var(--shadow-hover)' }}
                     itemStyle={{ color: 'var(--color-forest-green)', fontWeight: 600 }}
-                    labelStyle={{ color: 'var(--color-neutral-800)', fontWeight: 'bold' }}
+                    labelStyle={{ color: 'var(--color-neutral-900)', fontWeight: 'bold' }}
                   />
                   <Area type="monotone" dataKey="total" stroke="var(--color-forest-green)" strokeWidth={3} fillOpacity={1} fill="url(#colorTotal)" />
                 </AreaChart>
