@@ -56,6 +56,11 @@ export default function VoiceBilling() {
   const languageRef = useRef(language);
   const pausedRef = useRef(false);
   const [isPaused, setIsPaused] = useState(false);
+  // True while the user intends a session to be live (covers the async window
+  // while the mic permission prompt is resolving — prevents a quick stop tap
+  // from accidentally starting a second, duplicate session).
+  const sessionActiveRef = useRef(false);
+  const extractInFlightRef = useRef(false);
 
   useEffect(() => {
     languageRef.current = language;
@@ -84,8 +89,11 @@ export default function VoiceBilling() {
   };
 
   const extractItemsFromTranscript = useCallback(async (text) => {
+    if (extractInFlightRef.current) return;
+    extractInFlightRef.current = true;
     const source = cleanTranscript(text ?? "").trim();
     if (!source) {
+      extractInFlightRef.current = false;
       pendingExtractRef.current = false;
       setExtractError("No speech captured. Try speaking again or type the items manually.");
       return;
@@ -107,105 +115,172 @@ export default function VoiceBilling() {
       }
     } catch (err) {
       console.error(err);
-      setExtractError(err.response?.data?.message || "Failed to extract items from voice");
+      if (!err.response) {
+        setExtractError("Couldn't reach the server. Check your internet connection and try again.");
+      } else if (err.response.status === 502 || err.response.status === 503) {
+        setExtractError("The AI service is temporarily unavailable. Please try again in a moment.");
+      } else if (err.response.status === 429) {
+        setExtractError("Too many requests. Please wait a few seconds and try again.");
+      } else {
+        setExtractError(err.response?.data?.message || "Failed to extract items from voice");
+      }
     } finally {
+      extractInFlightRef.current = false;
       setIsExtracting(false);
     }
   }, []);
 
-  useEffect(() => {
-    if (SpeechRecognition && !recognitionRef.current) {
-      const recognition = new SpeechRecognition();
-      recognition.continuous = true;
-      recognition.interimResults = true;
-      recognition.lang = LANG_MAP[user?.preferredLanguage] || 'en-IN';
+  // The Web Speech API requires a secure context (HTTPS, or localhost).
+  // Accessing the app over a plain http:// LAN address (common on Android
+  // phones) makes SpeechRecognition undefined or silently blocked.
 
-      recognition.onresult = (event) => {
-        // Fresh results array after a session restart: resultIndex resets to 0,
-        // which can never happen mid-session (indices below our cursor are final
-        // and finals never change). The length check covers the reverse edge.
-        if (event.resultIndex < lastResultIndexRef.current || event.results.length < seenResultsRef.current) {
-          lastResultIndexRef.current = 0;
-          seenResultsRef.current = 0;
-        }
-        seenResultsRef.current = event.results.length;
+  // Chrome (Windows/Android) keeps a stale instance alive after stop()/onend:
+  // reusing it for a new session silently drops results or throws
+  // InvalidStateError. Safari tolerates reuse, but every browser behaves
+  // correctly with a FRESH instance per start.
+  const createRecognition = useCallback(() => {
+    if (!SpeechRecognition) return null;
+    const recognition = new SpeechRecognition();
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    recognition.maxAlternatives = 1;
+    recognition.lang = LANG_MAP[languageRef.current] || "en-IN";
 
-        let interim = "";
-        for (let i = event.resultIndex; i < event.results.length; ++i) {
-          const result = event.results[i];
-          if (result.isFinal) {
-            finalTranscriptRef.current += ` ${result[0].transcript}`;
-            lastResultIndexRef.current = i + 1;
-          } else {
-            interim += result[0].transcript;
-          }
-        }
-        interimTranscriptRef.current = interim;
-        const combined = cleanTranscript(`${finalTranscriptRef.current} ${interim}`.trim());
-        latestTranscriptRef.current = combined;
-        setTranscript(combined);
-        setMicError("");
-        setIsPaused(false);
-      };
+    recognition.onresult = (event) => {
+      // Fresh results array after a session restart: resultIndex resets to 0,
+      // which can never happen mid-session (indices below our cursor are final
+      // and finals never change). The length check covers the reverse edge.
+      if (event.resultIndex < lastResultIndexRef.current || event.results.length < seenResultsRef.current) {
+        lastResultIndexRef.current = 0;
+        seenResultsRef.current = 0;
+      }
+      seenResultsRef.current = event.results.length;
 
-      recognition.onerror = (event) => {
-        const messages = {
-          'not-allowed': 'Microphone permission was denied. Allow mic access and try again.',
-          'service-not-allowed': 'Microphone access is blocked in your browser settings.',
-          'no-speech': 'No speech detected. Please speak louder or check your microphone.',
-          'audio-capture': 'No microphone found. Check that a microphone is connected.',
-          'network': 'Speech recognition service could not be reached. Check your internet connection.',
-          'aborted': '',
-        };
-        setMicError(messages[event.error] || `Speech recognition error: ${event.error}`);
-      };
-
-      recognition.onend = () => {
-        setIsRecording(false);
-        if (manualStopRef.current) {
-          manualStopRef.current = false;
-          pausedRef.current = false;
-          setIsPaused(false);
-          if (pendingExtractRef.current) {
-            pendingExtractRef.current = false;
-            extractItemsFromTranscript(latestTranscriptRef.current);
-          }
+      let interim = "";
+      for (let i = event.resultIndex; i < event.results.length; ++i) {
+        const result = event.results[i];
+        if (result.isFinal) {
+          finalTranscriptRef.current += ` ${result[0].transcript}`;
+          lastResultIndexRef.current = i + 1;
         } else {
-          // Session ended on its own (silence, tab switch, service hiccup).
-          // Never auto-restart — that re-captures leftover mic audio and
-          // duplicates the last phrase on mobile. Keep the transcript safe
-          // and let the user tap the mic to continue adding items.
-          if (interimTranscriptRef.current.trim()) {
-            finalTranscriptRef.current += ` ${interimTranscriptRef.current}`;
-            finalTranscriptRef.current = cleanTranscript(finalTranscriptRef.current);
-            interimTranscriptRef.current = "";
-            setTranscript(finalTranscriptRef.current);
-          }
-          pausedRef.current = true;
-          setIsPaused(true);
-        }
-      };
-      recognitionRef.current = recognition;
-
-      // Auto-start if navigated with ?autoStart=true
-      if (typeof window !== 'undefined') {
-        const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.get('autoStart') === 'true') {
-          // Small delay to ensure UI is ready
-          setTimeout(() => {
-            try {
-              recognition.start();
-              setIsRecording(true);
-              // Clean up URL so it doesn't auto-start on refresh
-              window.history.replaceState({}, document.title, window.location.pathname);
-            } catch (err) {
-              setMicError("Could not start microphone. Check permissions and try again.");
-            }
-          }, 500);
+          interim += result[0].transcript;
         }
       }
+      interimTranscriptRef.current = interim;
+      const combined = cleanTranscript(`${finalTranscriptRef.current} ${interim}`.trim());
+      latestTranscriptRef.current = combined;
+      setTranscript(combined);
+      setMicError("");
+      setIsPaused(false);
+    };
+
+    recognition.onerror = (event) => {
+      const messages = {
+        'not-allowed': 'Microphone permission was denied. Allow mic access and try again.',
+        'service-not-allowed': 'Microphone access is blocked in your browser settings.',
+        'no-speech': 'No speech detected. Please speak louder or check your microphone.',
+        'audio-capture': 'No microphone found. Check that a microphone is connected.',
+        'network': 'Speech recognition service could not be reached. Check your internet connection.',
+        'aborted': '',
+        'invalid-state': 'The microphone could not start. Tap the mic again to retry.',
+      };
+      setMicError(messages[event.error] || `Speech recognition error: ${event.error}`);
+    };
+
+    recognition.onend = () => {
+      setIsRecording(false);
+      sessionActiveRef.current = false;
+      recognitionRef.current = null; // always force a fresh instance next start
+      if (manualStopRef.current) {
+        manualStopRef.current = false;
+        pausedRef.current = false;
+        setIsPaused(false);
+        if (pendingExtractRef.current) {
+          pendingExtractRef.current = false;
+          extractItemsFromTranscript(latestTranscriptRef.current);
+        }
+      } else {
+        // Session ended on its own (silence, tab switch, service hiccup).
+        // Never auto-restart — that re-captures leftover mic audio and
+        // duplicates the last phrase on mobile. Keep the transcript safe
+        // and let the user tap the mic to continue adding items.
+        if (interimTranscriptRef.current.trim()) {
+          finalTranscriptRef.current += ` ${interimTranscriptRef.current}`;
+          finalTranscriptRef.current = cleanTranscript(finalTranscriptRef.current);
+          interimTranscriptRef.current = "";
+          setTranscript(finalTranscriptRef.current);
+        }
+        pausedRef.current = true;
+        setIsPaused(true);
+      }
+    };
+
+    return recognition;
+  }, [SpeechRecognition, extractItemsFromTranscript]);
+
+  // Chrome/Edge on Windows and Android only shows the mic prompt reliably via
+  // getUserMedia. Preflight it so the user is prompted once, cleanly, before
+  // SpeechRecognition starts — otherwise first-run sessions can fail with
+  // 'not-allowed' or hang on Android.
+  const ensureMicPermission = useCallback(async () => {
+    if (typeof window === "undefined" || !navigator.mediaDevices?.getUserMedia) {
+      return true; // older browsers: let SpeechRecognition handle the prompt
     }
-  }, [SpeechRecognition, user?.preferredLanguage, extractItemsFromTranscript]);
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      stream.getTracks().forEach((track) => track.stop());
+      return true;
+    } catch (err) {
+      console.warn("Microphone permission denied:", err);
+      return false;
+    }
+  }, []);
+
+  const startRecognition = useCallback(async () => {
+    if (!SpeechRecognition) return false;
+    if (!sessionActiveRef.current) return false;
+    setMicError("");
+    if (!window.isSecureContext) {
+      setMicError("Voice recognition requires a secure connection (HTTPS or localhost). Connect via HTTPS and try again.");
+      return false;
+    }
+    const permitted = await ensureMicPermission();
+    // The user may have tapped stop while the permission prompt was open.
+    if (!permitted) {
+      sessionActiveRef.current = false;
+      setMicError("Microphone permission was denied. Allow mic access in your browser and try again.");
+      return false;
+    }
+    if (!sessionActiveRef.current) return false;
+    try {
+      const recognition = createRecognition();
+      recognitionRef.current = recognition;
+      recognition.start();
+      setIsRecording(true);
+      return true;
+    } catch (err) {
+      console.warn("SpeechRecognition start failed:", err);
+      sessionActiveRef.current = false;
+      setIsRecording(false);
+      setMicError("Could not start the microphone. Tap the mic again to retry.");
+      return false;
+    }
+  }, [SpeechRecognition, ensureMicPermission, createRecognition]);
+
+  // Auto-start if navigated with ?autoStart=true (home screen "Start Billing").
+  // No artificial delay: start is attempted immediately, and a failed start
+  // falls back to the paused state instead of leaving a stuck UI.
+  useEffect(() => {
+    if (typeof window === "undefined" || !SpeechRecognition) return;
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get("autoStart") !== "true") return;
+    sessionActiveRef.current = true;
+    startRecognition().then((started) => {
+      if (started) {
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
+    });
+  }, [SpeechRecognition, startRecognition]);
 
   const handleLanguageChange = (value) => {
     setLanguage(value);
@@ -216,55 +291,57 @@ export default function VoiceBilling() {
 
   const toggleRecording = () => {
     if (!SpeechRecognition) {
-      alert("Speech recognition is not supported in your browser. Please type the transcript manually.");
+      setMicError("Speech recognition isn't supported in this browser. You can still type the transcript below.");
       return;
     }
 
-    if (isRecording) {
-      manualStopRef.current = true;
-      pendingExtractRef.current = true;
-      setIsRecording(false); // Update UI immediately to prevent getting stuck
-      
-      try {
-        recognitionRef.current?.stop();
-      } catch (e) {
-        console.warn("Could not stop recognition normally", e);
-      }
+    if (isRecording || sessionActiveRef.current) {
+      // Stop intent — also covers the window while the mic permission prompt
+      // is still resolving (isRecording is not yet true).
+      sessionActiveRef.current = false;
+      if (isRecording) {
+        manualStopRef.current = true;
+        pendingExtractRef.current = true;
+        setIsRecording(false); // Update UI immediately to prevent getting stuck
 
-      // Mobile Fallback: If the browser's onend event fails to fire, force the extraction
-      setTimeout(() => {
-        if (pendingExtractRef.current) {
-          pendingExtractRef.current = false;
-          manualStopRef.current = false;
-          pausedRef.current = false;
-          setIsPaused(false);
-          extractItemsFromTranscript(latestTranscriptRef.current);
+        try {
+          recognitionRef.current?.stop();
+        } catch (e) {
+          console.warn("Could not stop recognition normally", e);
         }
-      }, 1500);
-    } else {
-      // Continuing after a paused session keeps the accumulated transcript;
-      // a fresh session clears everything.
-      if (!pausedRef.current) {
-        setTranscript("");
-        setExtractedItems([]);
-        setSaveError("");
-        setExtractError("");
-        setMicError("");
-        latestTranscriptRef.current = "";
-        finalTranscriptRef.current = "";
-        interimTranscriptRef.current = "";
-        lastResultIndexRef.current = 0;
-        seenResultsRef.current = 0;
+
+        // Mobile Fallback: If the browser's onend event fails to fire, force the extraction
+        setTimeout(() => {
+          if (pendingExtractRef.current) {
+            pendingExtractRef.current = false;
+            manualStopRef.current = false;
+            pausedRef.current = false;
+            setIsPaused(false);
+            extractItemsFromTranscript(latestTranscriptRef.current);
+          }
+        }, 1500);
       }
-      pausedRef.current = false;
-      setIsPaused(false);
-      try {
-        recognitionRef.current?.start();
-        setIsRecording(true);
-      } catch (err) {
-        setMicError("Could not start microphone. Check permissions and try again.");
-      }
+      return;
     }
+
+    // Continuing after a paused session keeps the accumulated transcript;
+    // a fresh session clears everything.
+    if (!pausedRef.current) {
+      setTranscript("");
+      setExtractedItems([]);
+      setSaveError("");
+      setExtractError("");
+      setMicError("");
+      latestTranscriptRef.current = "";
+      finalTranscriptRef.current = "";
+      interimTranscriptRef.current = "";
+      lastResultIndexRef.current = 0;
+      seenResultsRef.current = 0;
+    }
+    pausedRef.current = false;
+    setIsPaused(false);
+    sessionActiveRef.current = true;
+    startRecognition();
   };
 
   const handleSaveBill = async () => {
@@ -276,9 +353,9 @@ export default function VoiceBilling() {
       const payload = {
         items: extractedItems.map(item => ({
           productName: item.productName || item.name, // Fallback if name is returned
-          quantity: item.quantity || 1,
+          quantity: Number(item.quantity) || 1,
           unit: item.unit || 'piece',
-          price: item.price || 0,
+          price: Number(item.price) || 0,
           pricePerUnit: item.pricePerUnit === true
         })),
         paymentMethod,
@@ -296,7 +373,15 @@ export default function VoiceBilling() {
       }
     } catch (err) {
       console.error(err);
-      setSaveError(err.response?.data?.message || "Failed to save bill");
+      if (!err.response) {
+        setSaveError("Couldn't reach the server. Check your internet connection and try again.");
+      } else if (err.response.status === 502 || err.response.status === 503) {
+        setSaveError("The server is temporarily unavailable. Please try again in a moment.");
+      } else if (err.response.status === 429) {
+        setSaveError("Too many requests. Please wait a few seconds and try again.");
+      } else {
+        setSaveError(err.response?.data?.message || "Failed to save bill");
+      }
     } finally {
       setIsSaving(false);
     }
