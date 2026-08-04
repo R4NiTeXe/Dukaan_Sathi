@@ -176,7 +176,7 @@ export default function Dashboard() {
 
       {/* Charts Section */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <motion.div variants={listItemVariants} className="lg:col-span-2 bg-off-white rounded-3xl p-6 shadow-[var(--shadow-soft)] border border-soft-stone">
+        <motion.div variants={listItemVariants} className="lg:col-span-2 bg-off-white rounded-2xl p-6 shadow-[var(--shadow-soft)] border border-soft-stone">
           <h3 className="text-lg font-semibold mb-6">Revenue Trend (Last 7 Days)</h3>
           <div className="h-72 w-full">
             {data.weekly.length > 0 ? (
@@ -206,7 +206,7 @@ export default function Dashboard() {
           </div>
         </motion.div>
 
-        <motion.div variants={listItemVariants} className="bg-off-white rounded-3xl p-6 shadow-[var(--shadow-soft)] border border-soft-stone">
+        <motion.div variants={listItemVariants} className="bg-off-white rounded-2xl p-6 shadow-[var(--shadow-soft)] border border-soft-stone">
           <h3 className="text-lg font-semibold mb-6">Top Selling Items</h3>
           <div className="h-72 w-full">
             {data.topProducts.length > 0 ? (

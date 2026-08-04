@@ -59,7 +59,7 @@ export default function BillsList() {
         </div>
       )}
 
-      <div className="bg-off-white rounded-3xl p-4 md:p-6 shadow-[var(--shadow-soft)] border border-soft-stone min-w-0">
+      <div className="bg-off-white rounded-2xl p-4 md:p-6 shadow-[var(--shadow-soft)] border border-soft-stone min-w-0">
         
         {/* Table */}
         <div className="overflow-x-auto">
