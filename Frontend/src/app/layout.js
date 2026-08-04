@@ -10,6 +10,13 @@ export const metadata = {
   title: "Dukaan Saathi | AI Billing Platform",
   description:
     "AI-powered billing and business operating system for local Indian businesses.",
+  openGraph: {
+    title: "Dukaan Saathi | AI Billing Platform",
+    description:
+      "AI-powered billing and business operating system for local Indian businesses.",
+    type: "website",
+    locale: "en_IN",
+  },
 };
 
 export default function RootLayout({ children }) {

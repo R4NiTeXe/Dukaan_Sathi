@@ -7,6 +7,8 @@ import { ArrowLeft, CheckCircle2, Loader2, AlertCircle } from "lucide-react";
 import Link from "next/link";
 import { use } from "react";
 import api from "@/services/api";
+import Badge from "@/components/ui/Badge";
+import { SkeletonLine, SkeletonCard } from "@/components/ui/Skeleton";
 
 export default function BillDetails({ params }) {
   // In Next.js 15, params is a Promise, so we must unwrap it using React.use()
@@ -35,8 +37,18 @@ export default function BillDetails({ params }) {
 
   if (loading) {
     return (
-      <div className="flex h-[80vh] items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-forest-green" />
+      <div className="max-w-4xl mx-auto space-y-8 min-w-0">
+        <div className="flex items-center gap-4">
+          <SkeletonLine className="h-10 w-10 rounded-xl" />
+          <div className="space-y-2">
+            <SkeletonLine className="h-8 w-48" />
+            <SkeletonLine className="h-4 w-32" />
+          </div>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <SkeletonCard className="md:col-span-2 min-h-[400px]" />
+          <SkeletonCard className="min-h-[200px]" />
+        </div>
       </div>
     );
   }
@@ -81,11 +93,12 @@ export default function BillDetails({ params }) {
           <Link
             href="/bills"
             className="p-2 bg-off-white rounded-xl border border-soft-stone hover:bg-soft-stone/50 transition-colors"
+            aria-label="Back to bills"
           >
             <ArrowLeft className="w-5 h-5 text-neutral-600" />
           </Link>
           <div>
-            <h1 className="text-3xl font-bold tracking-tight text-neutral-900">
+            <h1 className="text-3xl font-bold tracking-tight text-neutral-900 font-heading">
               Bill {bill.billNumber || bill._id.substring(bill._id.length - 6).toUpperCase()}
             </h1>
             <p className="text-neutral-500 mt-1">
@@ -97,15 +110,13 @@ export default function BillDetails({ params }) {
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Main Receipt */}
-        <div className="md:col-span-2 bg-off-white rounded-[24px] p-8 shadow-[var(--shadow-soft)] border border-soft-stone relative">
+        <div className="md:col-span-2 bg-off-white rounded-2xl p-8 shadow-[var(--shadow-soft)] border border-soft-stone relative">
           {/* Status Badge */}
           <div className="absolute top-8 right-8">
-            <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium ${
-              bill.paymentStatus === 'paid' ? 'bg-emerald/10 text-emerald' : 'bg-yellow-500/10 text-yellow-700'
-            }`}>
-              <CheckCircle2 className="w-4 h-4" />
+            <Badge variant={bill.paymentStatus === 'paid' ? 'success' : 'warning'}>
+              <CheckCircle2 className="w-4 h-4 mr-1" />
               {bill.paymentStatus}
-            </div>
+            </Badge>
           </div>
 
           <div className="mb-10">
@@ -168,7 +179,7 @@ export default function BillDetails({ params }) {
 
         {/* Payment Details Side Panel */}
         <div className="space-y-6">
-          <div className="bg-off-white rounded-[24px] p-6 shadow-[var(--shadow-soft)] border border-soft-stone">
+          <div className="bg-off-white rounded-2xl p-6 shadow-[var(--shadow-soft)] border border-soft-stone">
             <h3 className="text-lg font-semibold mb-4">Payment Info</h3>
             <div className="space-y-4">
               <div>
