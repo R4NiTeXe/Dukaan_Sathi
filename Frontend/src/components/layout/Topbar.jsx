@@ -139,7 +139,12 @@ export default function Topbar() {
       )}
       
       {/* Mobile Slide-over Drawer */}
-      <div className={`md:hidden fixed inset-y-0 left-0 w-64 bg-off-white shadow-2xl z-50 flex flex-col pt-6 pb-8 border-r border-soft-stone transition-transform duration-300 ease-in-out ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+      <div 
+        role="dialog"
+        aria-modal="true"
+        aria-label="Navigation menu"
+        className={`md:hidden fixed inset-y-0 left-0 w-64 bg-off-white shadow-2xl z-50 flex flex-col pt-6 pb-8 border-r border-soft-stone transition-transform duration-300 ease-in-out ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}
+      >
         <div className="px-4 mb-8 flex items-center justify-between">
           <div className="w-9 h-9 rounded-lg bg-forest-green flex items-center justify-center text-warm-ivory font-bold shadow-sm">
             DS

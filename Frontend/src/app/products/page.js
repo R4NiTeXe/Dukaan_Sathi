@@ -67,7 +67,7 @@ export default function ProductsList() {
 
       {/* Cool Inventory Health Banner */}
       {!loading && products.length > 0 && (
-        <motion.div variants={listItemVariants} className="bg-gradient-to-r from-neutral-900 via-[#1e293b] to-neutral-900 rounded-2xl p-6 text-white shadow-lg relative overflow-hidden flex flex-col sm:flex-row items-center justify-between gap-6">
+        <motion.div variants={listItemVariants} className="bg-gradient-to-r from-neutral-900 via-slate-800 to-neutral-900 rounded-2xl p-6 text-white shadow-lg relative overflow-hidden flex flex-col sm:flex-row items-center justify-between gap-6">
           <div className="absolute top-0 right-1/4 opacity-[0.03] transform rotate-45 scale-150">
             <PackageOpen className="w-64 h-64" />
           </div>
@@ -171,7 +171,7 @@ export default function ProductsList() {
                           <div className="font-semibold text-neutral-900 flex items-center gap-2">
                             {product.name}
                             {product.autoAdded && (
-                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-sage-green/10 text-sage-green border border-sage-green/20">
+                              <span title="Automatically added based on sales frequency (sold more than 15 times)" className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-sage-green/10 text-sage-green border border-sage-green/20 cursor-help">
                                 <Sparkles className="w-2.5 h-2.5" />
                                 Auto-added
                               </span>

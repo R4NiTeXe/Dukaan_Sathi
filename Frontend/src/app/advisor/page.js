@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { pageVariants } from '@/utils/animations';
 import { 
   BotMessageSquare, Send, Bot, User, 
-  FileText, TrendingUp, Users, AlertTriangle, AlertCircle, Plus, Trash2, Sparkles
+  FileText, TrendingUp, Users, AlertTriangle, AlertCircle, Plus, Trash2, Sparkles, Loader2
 } from 'lucide-react';
 import api from '@/services/api';
 import ReactMarkdown from 'react-markdown';
@@ -177,6 +177,7 @@ export default function AIAdvisor() {
                   <button
                     key={idx}
                     onClick={() => handleSend(q.title)}
+                    aria-label={`Ask: ${q.title}`}
                     className="flex items-center gap-3 p-3.5 bg-off-white border border-soft-stone rounded-xl hover:border-sage-green hover:shadow-sm transition-all text-left cursor-pointer"
                   >
                     <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${q.bg} ${q.color}`}>
@@ -239,7 +240,7 @@ export default function AIAdvisor() {
         )}
 
         {/* Input Area */}
-        <div className="p-4 pb-28 md:pb-6 md:p-6 bg-off-white shrink-0 mt-auto">
+        <div className="p-4 pb-32 md:pb-6 md:p-6 bg-off-white shrink-0 mt-auto">
           <form 
             onSubmit={(e) => { e.preventDefault(); handleSend(input); }}
             className="relative flex items-center w-full"
@@ -254,9 +255,9 @@ export default function AIAdvisor() {
             <button 
               type="submit"
               disabled={!input.trim() || isTyping}
-              className="absolute right-3 p-2.5 bg-[#4c7c5b] text-white rounded-xl hover:bg-[#3d654a] transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+              className="absolute right-3 p-2.5 bg-[#4c7c5b] text-white rounded-xl hover:bg-[#3d654a] transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm cursor-pointer"
             >
-              <Send className="w-4 h-4" />
+              {isTyping ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
             </button>
           </form>
         </div>

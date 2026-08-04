@@ -486,6 +486,7 @@ export default function VoiceBilling() {
 
           <button
             onClick={toggleRecording}
+            aria-label={isRecording ? "Stop recording" : "Start voice billing"}
             className={`relative z-10 w-24 h-24 rounded-full flex items-center justify-center shadow-lg transition-all ${
               isRecording
                 ? "bg-muted-red text-warm-ivory scale-110"

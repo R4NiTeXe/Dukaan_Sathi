@@ -116,6 +116,9 @@ export default function BillsList() {
                       <tr 
                         key={bill._id} 
                         onClick={() => router.push(`/bills/${bill._id}`)}
+                        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); router.push(`/bills/${bill._id}`); } }}
+                        role="button"
+                        tabIndex={0}
                         className="border-b border-soft-stone hover:bg-warm-ivory/50 transition-colors group cursor-pointer text-sm"
                       >
                         <td className="py-4 pl-2 md:pl-4 font-medium text-neutral-700">
