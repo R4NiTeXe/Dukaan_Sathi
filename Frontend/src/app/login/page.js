@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { Store, Mail, Lock, Eye, EyeOff, AlertCircle, Loader2 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
+import Button from '@/components/ui/Button';
 
 export default function LoginPage() {
   const { login } = useAuth();
@@ -37,7 +38,7 @@ export default function LoginPage() {
           <div className="mx-auto w-12 h-12 rounded-xl bg-forest-green flex items-center justify-center text-warm-ivory mb-4 shadow-sm">
             <Store className="w-6 h-6" />
           </div>
-          <h1 className="text-2xl font-bold text-neutral-900 tracking-tight">Welcome back</h1>
+          <h1 className="text-2xl font-bold text-neutral-900 tracking-tight font-heading">Welcome back</h1>
           <p className="text-neutral-500 mt-2 text-sm">Sign in to your Dukaan Saathi account</p>
         </div>
 
@@ -101,13 +102,13 @@ export default function LoginPage() {
             </div>
           </div>
 
-          <button 
+          <Button 
             type="submit"
-            disabled={isLoading}
-            className="w-full py-4 bg-forest-green text-warm-ivory rounded-2xl text-sm font-bold shadow-md shadow-forest-green/20 hover:bg-forest-green/90 transition-all disabled:opacity-70 flex items-center justify-center gap-2 mt-2"
+            loading={isLoading}
+            className="w-full py-4 mt-2"
           >
-            {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Sign In'}
-          </button>
+            Sign In
+          </Button>
         </form>
 
         <p className="text-center mt-8 text-sm text-neutral-500">

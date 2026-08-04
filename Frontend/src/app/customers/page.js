@@ -6,6 +6,9 @@ import { pageVariants, listItemVariants } from '@/utils/animations';
 import { Plus, Loader2, AlertCircle, UserPlus } from 'lucide-react';
 import api from '@/services/api';
 import AddCustomerModal from '@/components/modals/AddCustomerModal';
+import PageHeader from '@/components/ui/PageHeader';
+import Button from '@/components/ui/Button';
+import EmptyState from '@/components/ui/EmptyState';
 
 export default function CustomersList() {
   const [customers, setCustomers] = useState([]);
@@ -38,19 +41,15 @@ export default function CustomersList() {
       exit="exit"
       className="max-w-6xl mx-auto space-y-8 min-w-0"
     >
-      <header className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-neutral-900">Customers</h1>
-          <p className="text-neutral-500 mt-1">Customer numbers are assigned automatically.</p>
-        </div>
-        <button
-          onClick={() => setIsAddOpen(true)}
-          className="inline-flex items-center gap-2 px-4 py-2.5 bg-forest-green text-warm-ivory rounded-xl font-medium shadow-md shadow-forest-green/20 hover:bg-forest-green/90 transition-colors"
-        >
-          <Plus className="w-4 h-4" />
-          Add Customer
-        </button>
-      </header>
+      <PageHeader
+        title="Customers"
+        description="Customer numbers are assigned automatically."
+        action={
+          <Button onClick={() => setIsAddOpen(true)}>
+            <Plus className="w-4 h-4" /> Add Customer
+          </Button>
+        }
+      />
 
       {error && (
         <div className="p-4 bg-muted-red/10 border border-muted-red/20 rounded-2xl flex items-center gap-3 text-muted-red">
@@ -78,11 +77,17 @@ export default function CustomersList() {
               <tbody>
                 {customers.length === 0 ? (
                   <tr>
-                    <td colSpan="3" className="text-center py-12 text-neutral-500">
-                      <div className="flex flex-col items-center gap-3">
-                        <UserPlus className="w-8 h-8 text-neutral-300" />
-                        <p>No customers yet. Add your first customer to get started.</p>
-                      </div>
+                    <td colSpan="3" className="text-center py-8">
+                      <EmptyState
+                        icon={UserPlus}
+                        title="No customers yet"
+                        description="Add your first customer to get started."
+                        action={
+                          <Button onClick={() => setIsAddOpen(true)} size="sm">
+                            <Plus className="w-4 h-4" /> Add Customer
+                          </Button>
+                        }
+                      />
                     </td>
                   </tr>
                 ) : (

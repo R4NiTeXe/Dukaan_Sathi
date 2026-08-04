@@ -12,6 +12,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeRaw from 'rehype-raw';
 import AIStatusNotice from '@/components/ui/AIStatusNotice';
+import Button from '@/components/ui/Button';
 
 const presetQuestions = [
   { title: "Today's Summary", icon: FileText, color: "text-blue-500 dark:text-blue-400", bg: "bg-blue-500/10" },
@@ -108,7 +109,7 @@ export default function AIAdvisor() {
         <div className="px-6 mt-auto pb-6">
           <button 
             onClick={() => setMessages([])}
-            className="w-full py-3 bg-off-white border border-soft-stone rounded-xl text-xs font-bold text-forest-green flex items-center justify-center gap-2 hover:bg-forest-green/5 transition-colors"
+            className="w-full py-3 bg-off-white border border-soft-stone rounded-xl text-xs font-bold text-forest-green flex items-center justify-center gap-2 hover:bg-forest-green/5 transition-colors cursor-pointer"
           >
             <Plus className="w-4 h-4" /> New Chat
           </button>
@@ -141,7 +142,7 @@ export default function AIAdvisor() {
                 <BotMessageSquare className="w-full h-full text-sage-green/40 absolute z-10 drop-shadow-md" strokeWidth={1} />
               </div>
               
-              <h2 className="text-2xl font-bold text-neutral-900 mb-2 flex items-center justify-center gap-2">
+              <h2 className="text-2xl font-bold text-neutral-900 mb-2 flex items-center justify-center gap-2 font-heading">
                 Namaste! <Bot className="w-7 h-7 text-sage-green" />
               </h2>
               <p className="text-sm text-neutral-500 mb-8">I&apos;m here to help you grow your business smarter.</p>

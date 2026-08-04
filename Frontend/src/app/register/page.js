@@ -6,6 +6,7 @@ import { motion } from 'framer-motion';
 import { Store, Mail, Lock, User, Eye, EyeOff, AlertCircle, Loader2 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { SHOP_TYPES } from '@/constants/navigation';
+import Button from '@/components/ui/Button';
 
 export default function RegisterPage() {
   const { register } = useAuth();
@@ -44,7 +45,7 @@ export default function RegisterPage() {
           <div className="mx-auto w-12 h-12 rounded-xl bg-forest-green flex items-center justify-center text-warm-ivory mb-4 shadow-sm">
             <Store className="w-6 h-6" />
           </div>
-          <h1 className="text-2xl font-bold text-neutral-900 tracking-tight">Create an account</h1>
+          <h1 className="text-2xl font-bold text-neutral-900 tracking-tight font-heading">Create an account</h1>
           <p className="text-neutral-500 mt-2 text-sm">Join Dukaan Saathi to manage your store</p>
         </div>
 
@@ -170,14 +171,13 @@ export default function RegisterPage() {
             </div>
           </div>
 
-          <button 
-            type="submit" 
-            disabled={isLoading}
-            className="w-full mt-2 py-3.5 px-4 bg-forest-green text-warm-ivory rounded-2xl font-semibold shadow-lg shadow-forest-green/20 hover:bg-forest-green/90 transition-all disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+          <Button 
+            type="submit"
+            loading={isLoading}
+            className="w-full mt-2 py-3.5"
           >
-            {isLoading && <Loader2 className="w-5 h-5 animate-spin" />}
             {isLoading ? 'Creating account...' : 'Create Account'}
-          </button>
+          </Button>
         </form>
 
         <p className="mt-8 text-center text-sm text-neutral-500">

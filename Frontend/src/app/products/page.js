@@ -3,14 +3,19 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { pageVariants, listItemVariants } from '@/utils/animations';
-import { Search, AlertCircle, Loader2, PackageOpen, TrendingDown, Sparkles } from 'lucide-react';
+import { Search, AlertCircle, Loader2, PackageOpen, TrendingDown, Sparkles, Plus } from 'lucide-react';
 import api from '@/services/api';
+import PageHeader from '@/components/ui/PageHeader';
+import Button from '@/components/ui/Button';
+import EmptyState from '@/components/ui/EmptyState';
+import AddProductModal from '@/components/modals/AddProductModal';
 
 export default function ProductsList() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [search, setSearch] = useState('');
+  const [isAddOpen, setIsAddOpen] = useState(false);
 
   const fetchProducts = useCallback(async () => {
     try {
@@ -49,16 +54,15 @@ export default function ProductsList() {
       exit="exit"
       className="max-w-6xl mx-auto space-y-8 min-w-0"
     >
-      <header className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div className="flex flex-col gap-2">
-          <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-neutral-900">Products Catalog</h1>
-          <p className="text-neutral-500 mt-0.5">Manage your store&apos;s items.</p>
-          <p className="text-xs text-neutral-400 flex items-center gap-1.5">
-            <Sparkles className="w-3.5 h-3.5 text-sage-green" />
-            Items sold more than 15 times in a month are auto-added to your inventory.
-          </p>
-        </div>
-      </header>
+      <PageHeader
+        title="Products Catalog"
+        description="Manage your store's items."
+        action={
+          <Button onClick={() => setIsAddOpen(true)}>
+            <Plus className="w-4 h-4" /> Add Product
+          </Button>
+        }
+      />
 
       {/* Cool Inventory Health Banner */}
       {!loading && products.length > 0 && (
@@ -87,6 +91,11 @@ export default function ProductsList() {
           </div>
         </motion.div>
       )}
+
+      <p className="text-xs text-neutral-400 flex items-center gap-1.5 -mt-4">
+        <Sparkles className="w-3.5 h-3.5 text-sage-green" />
+        Items sold more than 15 times in a month are auto-added to your inventory.
+      </p>
 
       {error && (
         <div className="p-4 bg-muted-red/10 border border-muted-red/20 rounded-2xl flex items-center gap-3 text-muted-red">
@@ -126,8 +135,18 @@ export default function ProductsList() {
               <tbody>
                 {products.length === 0 ? (
                   <tr>
-                    <td colSpan="3" className="text-center py-8 text-neutral-500">
-                      No products found.
+                    <td colSpan="3" className="text-center py-8">
+                      <EmptyState
+                        title="No products found"
+                        description={search ? "Try a different search term." : "Add your first product to get started."}
+                        action={
+                          !search && (
+                            <Button onClick={() => setIsAddOpen(true)} size="sm">
+                              <Plus className="w-4 h-4" /> Add Product
+                            </Button>
+                          )
+                        }
+                      />
                     </td>
                   </tr>
                 ) : (
@@ -164,6 +183,12 @@ export default function ProductsList() {
           )}
         </div>
       </div>
+
+      <AddProductModal
+        isOpen={isAddOpen}
+        onClose={() => setIsAddOpen(false)}
+        onProductAdded={fetchProducts}
+      />
     </motion.div>
   );
 }

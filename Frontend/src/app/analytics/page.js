@@ -9,6 +9,8 @@ import {
 } from 'recharts';
 import { TrendingUp, ReceiptText, Wallet, BarChart3, Loader2, AlertCircle } from 'lucide-react';
 import api from '@/services/api';
+import PageHeader from '@/components/ui/PageHeader';
+import Badge from '@/components/ui/Badge';
 
 const PAYMENT_COLORS = {
   cash: 'var(--color-forest-green)',
@@ -90,17 +92,11 @@ export default function AnalyticsDashboard() {
       exit="exit"
       className="max-w-7xl mx-auto space-y-6 min-w-0"
     >
-      <header className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-off-white rounded-2xl p-4 md:p-6 pb-2 border border-soft-stone">
-        <div className="flex items-center gap-3">
-          <div className="text-forest-green">
-            <BarChart3 className="w-6 h-6" />
-          </div>
-          <div>
-            <h1 className="text-xl font-bold tracking-tight text-neutral-900">Analytics</h1>
-            <p className="text-[12px] text-neutral-500">Track your business growth</p>
-          </div>
-        </div>
-      </header>
+      <PageHeader
+        title="Analytics"
+        description="Track your business growth"
+        icon={BarChart3}
+      />
 
       {/* KPI Overview */}
       <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 px-4 md:px-6 bg-off-white pt-2">

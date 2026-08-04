@@ -114,7 +114,7 @@ export default function Dashboard() {
       className="max-w-7xl mx-auto space-y-8 min-w-0"
     >
       <header className="mb-6 md:mb-10">
-        <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-neutral-900">
+        <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-neutral-900 font-heading">
           {getGreeting()}, {user?.ownerName?.split(' ')[0] || 'Store Owner'}!
         </h1>
         <div className="mt-3 flex items-center gap-3">

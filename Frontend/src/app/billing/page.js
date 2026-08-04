@@ -17,6 +17,7 @@ import api from "@/services/api";
 import { useAuth } from "@/context/AuthContext";
 import AIStatusNotice from '@/components/ui/AIStatusNotice';
 import { LANGUAGES } from '@/constants/navigation';
+import Button from '@/components/ui/Button';
 
 const LANG_MAP = {
   en: "en-IN",
@@ -448,7 +449,7 @@ export default function VoiceBilling() {
       <AIStatusNotice />
 
       <header className="mb-8 text-center">
-        <h1 className="text-3xl font-bold tracking-tight text-neutral-900 flex items-center justify-center gap-3">
+        <h1 className="text-3xl font-bold tracking-tight text-neutral-900 flex items-center justify-center gap-3 font-heading">
           <Sparkles className="w-6 h-6 text-emerald" />
           AI Voice Billing
         </h1>
@@ -540,14 +541,14 @@ export default function VoiceBilling() {
               rows={4}
             />
             {!isRecording && transcript && (
-              <button 
+              <Button 
                 onClick={() => extractItemsFromTranscript(transcript)}
-                disabled={isExtracting}
-                className="w-full mt-2 py-2.5 bg-forest-green text-warm-ivory rounded-xl font-medium shadow-md shadow-forest-green/20 hover:bg-forest-green/90 transition-all flex justify-center items-center gap-2"
+                loading={isExtracting}
+                className="w-full mt-2"
               >
-                {isExtracting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+                <Sparkles className="w-4 h-4" />
                 {isExtracting ? "Extracting..." : "Extract Items"}
-              </button>
+              </Button>
             )}
             {extractError && (
               <p className="mt-2 px-4 py-2 bg-muted-red/10 border border-muted-red/20 rounded-xl text-muted-red text-sm text-center">
@@ -697,18 +698,14 @@ export default function VoiceBilling() {
                   )}
 
                   <div className="flex gap-4">
-                    <button 
+                    <Button 
                       onClick={handleSaveBill}
-                      disabled={isSaving}
-                      className="flex-1 py-3 px-4 rounded-xl font-medium bg-forest-green text-warm-ivory hover:bg-forest-green/90 transition-colors flex items-center justify-center gap-2 shadow-lg shadow-forest-green/20"
+                      loading={isSaving}
+                      className="flex-1"
                     >
-                      {isSaving ? (
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                      ) : (
-                        <Check className="w-4 h-4" />
-                      )}
+                      <Check className="w-4 h-4" />
                       {isSaving ? "Saving..." : "Save Bill"}
-                    </button>
+                    </Button>
                   </div>
                 </motion.div>
               )}

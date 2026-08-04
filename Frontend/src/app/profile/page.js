@@ -18,6 +18,10 @@ import {
 import api from '@/services/api';
 import { useAuth } from '@/context/AuthContext';
 import { LANGUAGES, SHOP_TYPES } from '@/constants/navigation';
+import PageHeader from '@/components/ui/PageHeader';
+import Button from '@/components/ui/Button';
+import Input from '@/components/ui/Input';
+import Select from '@/components/ui/Select';
 
 export default function ProfilePage() {
   const { user, refreshProfile } = useAuth();
@@ -110,14 +114,10 @@ export default function ProfilePage() {
       exit="exit"
       className="max-w-6xl mx-auto space-y-8 min-w-0"
     >
-      <header className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-neutral-900">
-            Shop Profile
-          </h1>
-          <p className="text-neutral-500 mt-1">Manage your shop and payment details.</p>
-        </div>
-      </header>
+      <PageHeader
+        title="Shop Profile"
+        description="Manage your shop and payment details."
+      />
 
       {setupMode && !user?.upiQrCode && (
         <div className="p-4 bg-sage-green/10 border border-sage-green/30 rounded-2xl flex items-center gap-3 text-forest-green">
@@ -187,14 +187,15 @@ export default function ProfilePage() {
                       disabled={qrUploading}
                     />
                   </label>
-                  <button
+                  <Button
+                    variant="danger"
                     onClick={handleQrRemove}
                     disabled={qrUploading}
-                    className="flex-1 flex justify-center items-center gap-2 px-4 py-2.5 bg-muted-red/10 text-muted-red rounded-xl font-medium hover:bg-muted-red/20 transition-colors disabled:opacity-70 text-sm"
+                    className="flex-1"
                   >
                     <Trash2 className="w-4 h-4" />
                     Remove
-                  </button>
+                  </Button>
                 </div>
               </div>
             ) : (
@@ -222,61 +223,42 @@ export default function ProfilePage() {
         {/* Right Column: Form */}
         <div className="lg:col-span-2">
           <form onSubmit={handleSave} className="bg-off-white rounded-[24px] p-6 md:p-8 shadow-[var(--shadow-soft)] border border-soft-stone space-y-6">
-            <h2 className="text-lg font-bold text-neutral-900 flex items-center gap-2 mb-2">
+            <h2 className="text-lg font-bold text-neutral-900 flex items-center gap-2 mb-2 font-heading">
               <Store className="w-5 h-5 text-forest-green" /> Shop Details
             </h2>
 
-            <div className="space-y-1.5">
-              <label className="text-sm font-medium text-neutral-700">Owner Name</label>
-              <input
-                type="text"
-                required
-                value={form.ownerName || ''}
-                onChange={(e) => set('ownerName', e.target.value)}
-                className="w-full px-4 py-3 bg-warm-ivory border border-soft-stone rounded-xl text-sm focus:outline-none focus:border-sage-green focus:ring-1 focus:ring-sage-green transition-all"
-              />
-            </div>
+            <Input
+              label="Owner Name"
+              type="text"
+              required
+              value={form.ownerName || ''}
+              onChange={(e) => set('ownerName', e.target.value)}
+            />
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-              <div className="space-y-1.5">
-                <label className="text-sm font-medium text-neutral-700">Shop Name</label>
-                <input
-                  type="text"
-                  required
-                  value={form.shopName || ''}
-                  onChange={(e) => set('shopName', e.target.value)}
-                  className="w-full px-4 py-3 bg-warm-ivory border border-soft-stone rounded-xl text-sm focus:outline-none focus:border-sage-green focus:ring-1 focus:ring-sage-green transition-all"
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="text-sm font-medium text-neutral-700">Shop Type</label>
-                <select
-                  value={form.shopType || 'grocery'}
-                  onChange={(e) => set('shopType', e.target.value)}
-                  className="w-full px-4 py-3 bg-warm-ivory border border-soft-stone rounded-xl text-sm focus:outline-none focus:border-sage-green transition-all text-neutral-700"
-                >
-                  {SHOP_TYPES.map((t) => (
-                    <option key={t.value} value={t.value}>
-                      {t.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-
-            <div className="space-y-1.5">
-              <label className="text-sm font-medium text-neutral-700 flex items-center gap-1.5">
-                <MapPin className="w-4 h-4 text-neutral-400" /> Shop Address (optional)
-              </label>
-              <input
+              <Input
+                label="Shop Name"
                 type="text"
-                value={form.shopAddress || ''}
-                onChange={(e) => set('shopAddress', e.target.value)}
-                placeholder="123 Street, City"
-                className="w-full px-4 py-3 bg-warm-ivory border border-soft-stone rounded-xl text-sm focus:outline-none focus:border-sage-green focus:ring-1 focus:ring-sage-green transition-all"
+                required
+                value={form.shopName || ''}
+                onChange={(e) => set('shopName', e.target.value)}
+              />
+
+              <Select
+                label="Shop Type"
+                value={form.shopType || 'grocery'}
+                onChange={(e) => set('shopType', e.target.value)}
+                options={SHOP_TYPES}
               />
             </div>
+
+            <Input
+              label="Shop Address (optional)"
+              type="text"
+              value={form.shopAddress || ''}
+              onChange={(e) => set('shopAddress', e.target.value)}
+              placeholder="123 Street, City"
+            />
 
             <div className="space-y-1.5">
               <label className="text-sm font-medium text-neutral-700 flex items-center gap-1.5">
@@ -285,7 +267,7 @@ export default function ProfilePage() {
               <select
                 value={form.preferredLanguage || 'en'}
                 onChange={(e) => set('preferredLanguage', e.target.value)}
-                className="w-full px-4 py-3 bg-warm-ivory border border-soft-stone rounded-xl text-sm focus:outline-none focus:border-sage-green transition-all text-neutral-700"
+                className="w-full px-4 py-3 bg-warm-ivory border border-soft-stone rounded-xl text-sm focus:outline-none focus:border-sage-green focus:ring-2 focus:ring-sage-green/20 transition-all text-neutral-700"
               >
                 {LANGUAGES.map((l) => (
                   <option key={l.value} value={l.value}>
@@ -299,14 +281,14 @@ export default function ProfilePage() {
             </div>
 
             <div className="pt-4 mt-4 border-t border-soft-stone/50">
-              <button
+              <Button
                 type="submit"
-                disabled={loading}
-                className="w-full sm:w-auto px-8 py-3 bg-forest-green text-warm-ivory rounded-xl font-medium shadow-md shadow-forest-green/20 hover:bg-forest-green/90 transition-colors flex items-center justify-center gap-2 disabled:opacity-70"
+                loading={loading}
+                className="w-full sm:w-auto"
               >
-                {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                <Save className="w-4 h-4" />
                 Save Changes
-              </button>
+              </Button>
             </div>
           </form>
         </div>
