@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Search, Bell, User, Menu, X, LogOut, Settings
@@ -14,7 +14,9 @@ import { navItems } from '@/constants/navigation';
 export default function Topbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const pathname = usePathname();
+  const router = useRouter();
   const { logout, user } = useAuth();
 
   // Close mobile menu when route changes
@@ -61,16 +63,27 @@ export default function Topbar() {
         </button>
 
         <div className="flex-1 max-w-xl min-w-0 mx-1 md:mx-4">
-          <div className="relative group min-w-0">
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (searchQuery.trim()) {
+                router.push(`/products?search=${encodeURIComponent(searchQuery.trim())}`);
+                setSearchQuery('');
+              }
+            }}
+            className="relative group min-w-0"
+          >
             <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
               <Search className="h-4 w-4 text-neutral-400 group-focus-within:text-forest-green transition-colors" />
             </div>
             <input
               type="text"
-              className="block w-full min-w-0 pl-10 pr-4 py-2.5 bg-off-white border border-soft-stone rounded-2xl text-sm placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-sage-green/30 focus:border-sage-green transition-all shadow-[var(--shadow-soft)] hover:shadow-md"
-              placeholder="Search bills or products..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="block w-full min-w-0 pl-10 pr-4 py-2.5 bg-off-white border border-soft-stone rounded-2xl text-sm placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-sage-green/30 focus:border-sage-green transition-all shadow-[var(--shadow-soft)] hover:shadow-md cursor-text"
+              placeholder="Search products..."
             />
-          </div>
+          </form>
         </div>
 
         <div className="flex items-center gap-2 md:gap-4 ml-4 md:ml-6">
@@ -126,7 +139,7 @@ export default function Topbar() {
       )}
       
       {/* Mobile Slide-over Drawer */}
-      <div className={`md:hidden fixed inset-y-0 left-0 w-[45vw] max-w-[200px] bg-off-white shadow-2xl z-50 flex flex-col pt-6 pb-8 border-r border-soft-stone transition-transform duration-300 ease-in-out ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+      <div className={`md:hidden fixed inset-y-0 left-0 w-64 bg-off-white shadow-2xl z-50 flex flex-col pt-6 pb-8 border-r border-soft-stone transition-transform duration-300 ease-in-out ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
         <div className="px-4 mb-8 flex items-center justify-between">
           <div className="w-9 h-9 rounded-lg bg-forest-green flex items-center justify-center text-warm-ivory font-bold shadow-sm">
             DS

@@ -9,6 +9,7 @@ import PageHeader from '@/components/ui/PageHeader';
 import Button from '@/components/ui/Button';
 import EmptyState from '@/components/ui/EmptyState';
 import AddProductModal from '@/components/modals/AddProductModal';
+import { SkeletonLine } from '@/components/ui/Skeleton';
 
 export default function ProductsList() {
   const [products, setProducts] = useState([]);
@@ -120,8 +121,14 @@ export default function ProductsList() {
 
         <div className="overflow-x-auto">
           {loading ? (
-            <div className="flex justify-center p-8">
-              <Loader2 className="w-8 h-8 animate-spin text-forest-green" />
+            <div className="space-y-3 p-4">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <div key={i} className="flex items-center gap-4">
+                  <SkeletonLine className="h-4 w-1/3" />
+                  <SkeletonLine className="h-4 w-1/6 ml-auto" />
+                  <SkeletonLine className="h-4 w-1/6" />
+                </div>
+              ))}
             </div>
           ) : (
             <table className="w-full text-left border-collapse">

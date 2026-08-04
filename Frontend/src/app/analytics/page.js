@@ -11,6 +11,7 @@ import { TrendingUp, ReceiptText, Wallet, BarChart3, Loader2, AlertCircle } from
 import api from '@/services/api';
 import PageHeader from '@/components/ui/PageHeader';
 import Badge from '@/components/ui/Badge';
+import { SkeletonLine, SkeletonCard } from '@/components/ui/Skeleton';
 
 const PAYMENT_COLORS = {
   cash: 'var(--color-forest-green)',
@@ -67,8 +68,20 @@ export default function AnalyticsDashboard() {
 
   if (loading) {
     return (
-      <div className="flex h-[80vh] items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-forest-green" />
+      <div className="max-w-7xl mx-auto space-y-6 min-w-0">
+        <div className="flex items-center gap-3">
+          <SkeletonLine className="h-6 w-6 rounded-lg" />
+          <div className="space-y-2">
+            <SkeletonLine className="h-5 w-24" />
+            <SkeletonLine className="h-3 w-32" />
+          </div>
+        </div>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <SkeletonCard key={i} />
+          ))}
+        </div>
+        <SkeletonCard className="min-h-[300px]" />
       </div>
     );
   }

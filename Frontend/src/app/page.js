@@ -12,6 +12,7 @@ import {
 import api from '@/services/api';
 import { useAuth } from '@/context/AuthContext';
 import { LANGUAGES } from '@/constants/navigation';
+import { SkeletonLine, SkeletonCard } from '@/components/ui/Skeleton';
 
 const getGreeting = () => {
   const hour = new Date().getHours();
@@ -99,8 +100,19 @@ export default function Dashboard() {
 
   if (loading) {
     return (
-      <div className="flex h-[80vh] items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-forest-green" />
+      <div className="max-w-7xl mx-auto space-y-8 min-w-0">
+        <div className="space-y-3 mb-6 md:mb-10">
+          <SkeletonLine className="h-8 w-1/3" />
+          <SkeletonLine className="h-4 w-1/2" />
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <SkeletonCard className="min-h-[220px]" />
+          <SkeletonCard className="min-h-[220px]" />
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <SkeletonCard className="lg:col-span-2 min-h-[320px]" />
+          <SkeletonCard className="min-h-[320px]" />
+        </div>
       </div>
     );
   }
