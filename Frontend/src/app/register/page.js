@@ -50,7 +50,7 @@ export default function RegisterPage() {
         </div>
 
         {error && (
-          <div className="mb-6 p-4 bg-muted-red/10 border border-muted-red/20 rounded-2xl flex flex-col gap-1 text-muted-red text-sm">
+          <div role="alert" className="mb-6 p-4 bg-muted-red/10 border border-muted-red/20 rounded-2xl flex flex-col gap-1 text-muted-red text-sm">
             <div className="flex items-center gap-2 font-medium">
               <AlertCircle className="w-5 h-5 shrink-0" />
               <span>Registration Failed</span>

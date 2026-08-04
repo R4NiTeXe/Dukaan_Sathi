@@ -75,7 +75,7 @@ export default function AnalyticsDashboard() {
 
   if (error) {
     return (
-      <div className="p-4 bg-muted-red/10 border border-muted-red/20 rounded-2xl flex items-center gap-3 text-muted-red max-w-7xl mx-auto">
+      <div role="alert" className="p-4 bg-muted-red/10 border border-muted-red/20 rounded-2xl flex items-center gap-3 text-muted-red max-w-7xl mx-auto">
         <AlertCircle className="w-5 h-5 shrink-0" />
         <p>{error}</p>
       </div>

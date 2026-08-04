@@ -98,7 +98,7 @@ export default function ProductsList() {
       </p>
 
       {error && (
-        <div className="p-4 bg-muted-red/10 border border-muted-red/20 rounded-2xl flex items-center gap-3 text-muted-red">
+        <div role="alert" className="p-4 bg-muted-red/10 border border-muted-red/20 rounded-2xl flex items-center gap-3 text-muted-red">
           <AlertCircle className="w-5 h-5 shrink-0" />
           <p>{error}</p>
         </div>

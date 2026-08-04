@@ -44,7 +44,7 @@ export default function BillDetails({ params }) {
   if (error || !bill) {
     return (
       <div className="max-w-4xl mx-auto space-y-8 min-w-0">
-        <div className="p-4 bg-muted-red/10 border border-muted-red/20 rounded-2xl flex items-center gap-3 text-muted-red">
+        <div role="alert" className="p-4 bg-muted-red/10 border border-muted-red/20 rounded-2xl flex items-center gap-3 text-muted-red">
           <AlertCircle className="w-5 h-5 shrink-0" />
           <p>{error || "Bill not found"}</p>
         </div>

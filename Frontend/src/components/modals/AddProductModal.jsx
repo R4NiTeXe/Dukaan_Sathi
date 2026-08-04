@@ -43,7 +43,7 @@ export default function AddProductModal({ isOpen, onClose, onProductAdded }) {
       <form className="space-y-5" onSubmit={handleSubmit}>
         
         {error && (
-          <div className="p-3 bg-muted-red/10 border border-muted-red/20 rounded-xl flex items-center gap-2 text-muted-red text-sm">
+          <div role="alert" className="p-3 bg-muted-red/10 border border-muted-red/20 rounded-xl flex items-center gap-2 text-muted-red text-sm">
             <AlertCircle className="w-4 h-4 shrink-0" />
             <p>{error}</p>
           </div>

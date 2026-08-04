@@ -43,7 +43,7 @@ export default function LoginPage() {
         </div>
 
         {error && (
-          <div className="mb-6 p-4 bg-muted-red/10 border border-muted-red/20 rounded-2xl flex items-center gap-3 text-muted-red text-sm">
+          <div role="alert" className="mb-6 p-4 bg-muted-red/10 border border-muted-red/20 rounded-2xl flex items-center gap-3 text-muted-red text-sm">
             <AlertCircle className="w-5 h-5 shrink-0" />
             <p>{error}</p>
           </div>

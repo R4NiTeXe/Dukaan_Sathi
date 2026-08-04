@@ -23,6 +23,7 @@ export default function MobileNav() {
           <Link 
             href="/billing"
             className="flex items-center justify-center w-16 h-16 bg-forest-green text-warm-ivory rounded-full shadow-[var(--shadow-hover)] border-4 border-warm-ivory hover:scale-105 active:scale-95 transition-transform"
+            aria-label="Go to voice billing"
           >
             <Mic className="w-7 h-7" />
           </Link>

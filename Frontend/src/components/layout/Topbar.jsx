@@ -53,8 +53,9 @@ export default function Topbar() {
         
         {/* Hamburger Menu (Mobile Only) */}
         <button 
-          className="md:hidden p-2 -ml-2 mr-2 text-neutral-600 hover:bg-soft-stone/50 rounded-xl transition-colors"
+          className="md:hidden p-2 -ml-2 mr-2 text-neutral-600 hover:bg-soft-stone/50 rounded-xl transition-colors cursor-pointer"
           onClick={() => setIsMobileMenuOpen(true)}
+          aria-label="Open menu"
         >
           <Menu className="w-6 h-6" />
         </button>
@@ -78,7 +79,9 @@ export default function Topbar() {
           <div id="profile-menu-container" className="relative">
             <button 
               onClick={() => setIsProfileOpen(!isProfileOpen)}
-              className="w-9 h-9 md:w-10 md:h-10 rounded-full bg-sage-green/20 border border-sage-green/30 flex items-center justify-center text-forest-green font-medium shadow-sm hover:shadow-md transition-shadow focus:outline-none"
+              className="w-9 h-9 md:w-10 md:h-10 rounded-full bg-sage-green/20 border border-sage-green/30 flex items-center justify-center text-forest-green font-medium shadow-sm hover:shadow-md transition-shadow focus:outline-none cursor-pointer"
+              aria-label="User menu"
+              aria-expanded={isProfileOpen}
             >
               {user?.ownerName ? user.ownerName.charAt(0).toUpperCase() : <User className="h-4 w-4 md:h-5 md:w-5" />}
             </button>
@@ -130,7 +133,8 @@ export default function Topbar() {
           </div>
           <button 
             onClick={() => setIsMobileMenuOpen(false)}
-            className="p-2 -mr-2 text-neutral-500 hover:bg-soft-stone/50 rounded-full transition-colors"
+            className="p-2 -mr-2 text-neutral-500 hover:bg-soft-stone/50 rounded-full transition-colors cursor-pointer"
+            aria-label="Close menu"
           >
             <X className="w-5 h-5" />
           </button>

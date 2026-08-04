@@ -508,7 +508,7 @@ export default function VoiceBilling() {
           )}
 
           {micError && !isRecording && (
-            <p className="mt-3 px-4 py-2 bg-muted-red/10 border border-muted-red/20 rounded-xl text-muted-red text-sm text-center max-w-xs">
+            <p role="alert" className="mt-3 px-4 py-2 bg-muted-red/10 border border-muted-red/20 rounded-xl text-muted-red text-sm text-center max-w-xs">
               {micError}
             </p>
           )}
@@ -551,7 +551,7 @@ export default function VoiceBilling() {
               </Button>
             )}
             {extractError && (
-              <p className="mt-2 px-4 py-2 bg-muted-red/10 border border-muted-red/20 rounded-xl text-muted-red text-sm text-center">
+              <p role="alert" className="mt-2 px-4 py-2 bg-muted-red/10 border border-muted-red/20 rounded-xl text-muted-red text-sm text-center">
                 {extractError}
               </p>
             )}
@@ -602,6 +602,7 @@ export default function VoiceBilling() {
                             type="number"
                             min="0"
                             step="any"
+                            inputMode="decimal"
                             value={item.quantity}
                             onChange={(e) => updateItem(idx, 'quantity', e.target.value)}
                             className="w-16 px-2 py-1 bg-off-white border border-soft-stone rounded-lg text-sm text-neutral-700 focus:outline-none focus:border-sage-green"
@@ -611,6 +612,7 @@ export default function VoiceBilling() {
                             type="number"
                             min="0"
                             step="any"
+                            inputMode="decimal"
                             value={item.price}
                             onChange={(e) => updateItem(idx, 'price', e.target.value)}
                             className="w-20 px-2 py-1 bg-off-white border border-soft-stone rounded-lg text-sm text-neutral-700 focus:outline-none focus:border-sage-green"
@@ -650,7 +652,7 @@ export default function VoiceBilling() {
                   </div>
 
                   {saveError && (
-                    <p className="text-muted-red text-sm mb-4 text-center">{saveError}</p>
+                    <p role="alert" className="text-muted-red text-sm mb-4 text-center">{saveError}</p>
                   )}
 
                   <div className="grid grid-cols-2 gap-4 mb-6">
