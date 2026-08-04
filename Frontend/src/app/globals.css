@@ -21,8 +21,16 @@
   --color-muted-indigo: var(--theme-info);
   
   --font-sans: var(--font-inter), sans-serif;
+  --font-heading: var(--font-calistoga), serif;
   
-  --radius-premium: 20px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  
+  --shadow-card: 0 4px 20px -2px rgba(0, 0, 0, 0.05);
+  --shadow-card-hover: 0 12px 30px -4px rgba(0, 0, 0, 0.08);
+  --shadow-button: 0 4px 12px -2px rgba(0, 0, 0, 0.1);
   
   --shadow-soft: var(--theme-shadow-soft);
   --shadow-hover: var(--theme-shadow-hover);
@@ -40,16 +48,16 @@
     --theme-bg-surface: #fdfdfd;
     --theme-border-color: #e5e5e5;
     
-    --theme-text-primary: #171717; /* neutral-900 */
-    --theme-text-secondary: #262626; /* neutral-800 */
-    --theme-text-muted: #404040; /* neutral-700/600 */
-    --theme-text-tertiary: #737373; /* neutral-500/400 */
+    --theme-text-primary: #171717;
+    --theme-text-secondary: #262626;
+    --theme-text-muted: #404040;
+    --theme-text-tertiary: #737373;
     
-    --theme-accent-primary: #2c5530; /* forest-green */
-    --theme-accent-secondary: #839788; /* sage-green */
-    --theme-success: #10b981; /* emerald */
-    --theme-danger: #d97777; /* muted-red */
-    --theme-info: #5c6b9c; /* muted-indigo */
+    --theme-accent-primary: #2c5530;
+    --theme-accent-secondary: #839788;
+    --theme-success: #10b981;
+    --theme-danger: #d97777;
+    --theme-info: #5c6b9c;
     
     --theme-shadow-soft: 0 4px 20px -2px rgba(0, 0, 0, 0.05);
     --theme-shadow-hover: 0 12px 30px -4px rgba(0, 0, 0, 0.08);
@@ -64,9 +72,9 @@
     --theme-text-primary: #f5f5f5;
     --theme-text-secondary: #e5e5e5;
     --theme-text-muted: #a3a3a3;
-    --theme-text-tertiary: #737373;
+    --theme-text-tertiary: #9ca3af;
     
-    --theme-accent-primary: #4ade80; /* lighter green for dark mode */
+    --theme-accent-primary: #4ade80;
     --theme-accent-secondary: #839788; 
     --theme-success: #34d399; 
     --theme-danger: #f87171; 
@@ -74,5 +82,14 @@
     
     --theme-shadow-soft: 0 4px 20px -2px rgba(0, 0, 0, 0.3);
     --theme-shadow-hover: 0 12px 30px -4px rgba(0, 0, 0, 0.4);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
   }
 }

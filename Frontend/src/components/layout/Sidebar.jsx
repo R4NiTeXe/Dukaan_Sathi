@@ -3,26 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { 
-  LayoutDashboard, 
-  Mic, 
-  ReceiptText, 
-  Users, 
-  Package,
-  BarChart,
-  BotMessageSquare,
-  Settings
-} from 'lucide-react';
-
-const navItems = [
-  { name: 'Dashboard', href: '/', icon: LayoutDashboard },
-  { name: 'Voice Billing', href: '/billing', icon: Mic },
-  { name: 'Bills', href: '/bills', icon: ReceiptText },
-  { name: 'Products', href: '/products', icon: Package },
-  { name: 'Analytics', href: '/analytics', icon: BarChart },
-  { name: 'AI Advisor', href: '/advisor', icon: BotMessageSquare },
-  { name: 'Profile', href: '/profile', icon: Settings },
-];
+import { navItems } from '@/constants/navigation';
 
 export default function Sidebar() {
   const pathname = usePathname();

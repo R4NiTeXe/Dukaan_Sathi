@@ -11,6 +11,7 @@ import {
 } from 'recharts';
 import api from '@/services/api';
 import { useAuth } from '@/context/AuthContext';
+import { LANGUAGES } from '@/constants/navigation';
 
 const getGreeting = () => {
   const hour = new Date().getHours();

@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { Store, Mail, Lock, User, Eye, EyeOff, AlertCircle, Loader2 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
+import { SHOP_TYPES } from '@/constants/navigation';
 
 export default function RegisterPage() {
   const { register } = useAuth();
@@ -107,12 +108,11 @@ export default function RegisterPage() {
                 onChange={(e) => setFormData({ ...formData, shopType: e.target.value })}
                 className="w-full px-4 py-3 bg-warm-ivory border border-soft-stone rounded-2xl text-sm focus:outline-none focus:border-sage-green focus:ring-2 focus:ring-sage-green/20 transition-all shadow-sm appearance-none"
               >
-                <option value="grocery">Grocery</option>
-                <option value="stationery">Stationery</option>
-                <option value="pharmacy">Pharmacy</option>
-                <option value="electronics">Electronics</option>
-                <option value="clothing">Clothing</option>
-                <option value="other">Other</option>
+                {SHOP_TYPES.map((t) => (
+                  <option key={t.value} value={t.value}>
+                    {t.label}
+                  </option>
+                ))}
               </select>
             </div>
           </div>

@@ -5,21 +5,11 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  Search, Bell, User, Menu, X, LogOut, Settings,
-  LayoutDashboard, Mic, ReceiptText, Users as UsersIcon, Package, BarChart, BotMessageSquare
+  Search, Bell, User, Menu, X, LogOut, Settings
 } from 'lucide-react';
 import ThemeToggle from '@/components/layout/ThemeToggle';
 import { useAuth } from '@/context/AuthContext';
-
-const navItems = [
-  { name: 'Dashboard', href: '/', icon: LayoutDashboard },
-  { name: 'Voice Billing', href: '/billing', icon: Mic },
-  { name: 'Bills', href: '/bills', icon: ReceiptText },
-  { name: 'Products', href: '/products', icon: Package },
-  { name: 'Analytics', href: '/analytics', icon: BarChart },
-  { name: 'AI Advisor', href: '/advisor', icon: BotMessageSquare },
-  { name: 'Profile', href: '/profile', icon: Settings },
-];
+import { navItems } from '@/constants/navigation';
 
 export default function Topbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);

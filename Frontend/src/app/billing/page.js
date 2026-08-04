@@ -16,18 +16,13 @@ import {
 import api from "@/services/api";
 import { useAuth } from "@/context/AuthContext";
 import AIStatusNotice from '@/components/ui/AIStatusNotice';
+import { LANGUAGES } from '@/constants/navigation';
 
 const LANG_MAP = {
   en: "en-IN",
   hi: "hi-IN",
   bn: "bn-IN",
 };
-
-const LANGUAGE_OPTIONS = [
-  { value: "en", label: "English" },
-  { value: "hi", label: "Hindi" },
-  { value: "bn", label: "Bengali" },
-];
 
 export default function VoiceBilling() {
   const { user } = useAuth();
@@ -528,7 +523,7 @@ export default function VoiceBilling() {
               disabled={isRecording}
               className="px-3 py-1.5 bg-warm-ivory border border-soft-stone rounded-lg text-sm focus:outline-none focus:border-sage-green transition-all text-neutral-700 disabled:opacity-60"
             >
-              {LANGUAGE_OPTIONS.map((opt) => (
+              {LANGUAGES.map((opt) => (
                 <option key={opt.value} value={opt.value}>
                   {opt.label}
                 </option>

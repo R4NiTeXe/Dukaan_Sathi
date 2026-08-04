@@ -17,21 +17,7 @@ import {
 } from 'lucide-react';
 import api from '@/services/api';
 import { useAuth } from '@/context/AuthContext';
-
-const LANGUAGES = [
-  { value: 'en', label: 'English' },
-  { value: 'hi', label: 'Hindi' },
-  { value: 'bn', label: 'Bengali' },
-];
-
-const SHOP_TYPES = [
-  { value: 'grocery', label: 'Grocery' },
-  { value: 'stationery', label: 'Stationery' },
-  { value: 'pharmacy', label: 'Pharmacy' },
-  { value: 'electronics', label: 'Electronics' },
-  { value: 'clothing', label: 'Clothing' },
-  { value: 'other', label: 'Other' },
-];
+import { LANGUAGES, SHOP_TYPES } from '@/constants/navigation';
 
 export default function ProfilePage() {
   const { user, refreshProfile } = useAuth();

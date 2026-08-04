@@ -1,9 +1,10 @@
-import { Inter } from "next/font/google";
+import { Inter, Calistoga } from "next/font/google";
 import AppLayout from "@/components/layout/AppLayout";
 import { ThemeProvider } from "next-themes";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
+const calistoga = Calistoga({ subsets: ["latin"], variable: "--font-calistoga", weight: "400" });
 
 export const metadata = {
   title: "Dukaan Saathi | AI Billing Platform",
@@ -16,7 +17,7 @@ export default function RootLayout({ children }) {
     <html lang="en" suppressHydrationWarning>
       <body
         suppressHydrationWarning
-        className={`${inter.variable} font-sans antialiased bg-warm-ivory text-neutral-900 flex overflow-x-hidden max-w-[100vw]`}
+        className={`${inter.variable} ${calistoga.variable} font-sans antialiased bg-warm-ivory text-neutral-900 flex overflow-x-hidden max-w-[100vw]`}
       >
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <AppLayout>
