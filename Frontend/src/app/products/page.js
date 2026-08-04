@@ -67,7 +67,7 @@ export default function ProductsList() {
 
       {/* Cool Inventory Health Banner */}
       {!loading && products.length > 0 && (
-        <motion.div variants={listItemVariants} className="bg-gradient-to-r from-neutral-900 via-[#1e293b] to-neutral-900 rounded-[24px] p-6 text-white shadow-lg relative overflow-hidden flex flex-col sm:flex-row items-center justify-between gap-6">
+        <motion.div variants={listItemVariants} className="bg-gradient-to-r from-neutral-900 via-[#1e293b] to-neutral-900 rounded-2xl p-6 text-white shadow-lg relative overflow-hidden flex flex-col sm:flex-row items-center justify-between gap-6">
           <div className="absolute top-0 right-1/4 opacity-[0.03] transform rotate-45 scale-150">
             <PackageOpen className="w-64 h-64" />
           </div>
@@ -105,7 +105,7 @@ export default function ProductsList() {
         </div>
       )}
 
-      <div className="bg-off-white rounded-[24px] p-4 md:p-6 shadow-[var(--shadow-soft)] border border-soft-stone min-w-0">
+      <div className="bg-off-white rounded-2xl p-4 md:p-6 shadow-[var(--shadow-soft)] border border-soft-stone min-w-0">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
           <div className="relative w-full md:w-80">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-400" />
@@ -114,7 +114,7 @@ export default function ProductsList() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search products by name..."
-              className="w-full pl-10 pr-4 py-2.5 bg-warm-ivory border border-soft-stone rounded-xl text-sm focus:outline-none focus:border-sage-green focus:ring-1 focus:ring-sage-green transition-all shadow-sm"
+              className="w-full pl-10 pr-4 py-2.5 bg-warm-ivory border border-soft-stone rounded-xl text-sm focus:outline-none focus:border-sage-green focus:ring-2 focus:ring-sage-green/20 transition-all shadow-sm"
             />
           </div>
         </div>

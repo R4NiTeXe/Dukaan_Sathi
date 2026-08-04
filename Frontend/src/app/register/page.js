@@ -39,7 +39,7 @@ export default function RegisterPage() {
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="w-full max-w-md bg-off-white rounded-[32px] p-8 shadow-[var(--shadow-hover)] border border-soft-stone"
+        className="w-full max-w-md bg-off-white rounded-xl p-8 shadow-[var(--shadow-hover)] border border-soft-stone"
       >
         <div className="text-center mb-8">
           <div className="mx-auto w-12 h-12 rounded-xl bg-forest-green flex items-center justify-center text-warm-ivory mb-4 shadow-sm">
@@ -50,7 +50,7 @@ export default function RegisterPage() {
         </div>
 
         {error && (
-          <div role="alert" className="mb-6 p-4 bg-muted-red/10 border border-muted-red/20 rounded-2xl flex flex-col gap-1 text-muted-red text-sm">
+          <div role="alert" className="mb-6 p-4 bg-muted-red/10 border border-muted-red/20 rounded-xl flex flex-col gap-1 text-muted-red text-sm">
             <div className="flex items-center gap-2 font-medium">
               <AlertCircle className="w-5 h-5 shrink-0" />
               <span>Registration Failed</span>
@@ -78,7 +78,7 @@ export default function RegisterPage() {
                 value={formData.ownerName}
                 onChange={(e) => setFormData({ ...formData, ownerName: e.target.value })}
                 placeholder="Rahul Sharma"
-                className="w-full pl-11 pr-4 py-3 bg-warm-ivory border border-soft-stone rounded-2xl text-sm focus:outline-none focus:border-sage-green focus:ring-2 focus:ring-sage-green/20 transition-all shadow-sm"
+                className="w-full pl-11 pr-4 py-3 bg-warm-ivory border border-soft-stone rounded-xl text-sm focus:outline-none focus:border-sage-green focus:ring-2 focus:ring-sage-green/20 transition-all shadow-sm"
               />
             </div>
           </div>
@@ -95,7 +95,7 @@ export default function RegisterPage() {
                 value={formData.shopName}
                 onChange={(e) => setFormData({ ...formData, shopName: e.target.value })}
                 placeholder="Sharma Kirana Store"
-                className="w-full pl-11 pr-4 py-3 bg-warm-ivory border border-soft-stone rounded-2xl text-sm focus:outline-none focus:border-sage-green focus:ring-2 focus:ring-sage-green/20 transition-all shadow-sm"
+                className="w-full pl-11 pr-4 py-3 bg-warm-ivory border border-soft-stone rounded-xl text-sm focus:outline-none focus:border-sage-green focus:ring-2 focus:ring-sage-green/20 transition-all shadow-sm"
               />
             </div>
           </div>
@@ -107,7 +107,7 @@ export default function RegisterPage() {
                 required
                 value={formData.shopType}
                 onChange={(e) => setFormData({ ...formData, shopType: e.target.value })}
-                className="w-full px-4 py-3 bg-warm-ivory border border-soft-stone rounded-2xl text-sm focus:outline-none focus:border-sage-green focus:ring-2 focus:ring-sage-green/20 transition-all shadow-sm appearance-none"
+                className="w-full px-4 py-3 bg-warm-ivory border border-soft-stone rounded-xl text-sm focus:outline-none focus:border-sage-green focus:ring-2 focus:ring-sage-green/20 transition-all shadow-sm appearance-none"
               >
                 {SHOP_TYPES.map((t) => (
                   <option key={t.value} value={t.value}>
@@ -134,7 +134,7 @@ export default function RegisterPage() {
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 placeholder="name@store.com"
-                className="w-full pl-11 pr-4 py-3 bg-warm-ivory border border-soft-stone rounded-2xl text-sm focus:outline-none focus:border-sage-green focus:ring-2 focus:ring-sage-green/20 transition-all shadow-sm"
+                className="w-full pl-11 pr-4 py-3 bg-warm-ivory border border-soft-stone rounded-xl text-sm focus:outline-none focus:border-sage-green focus:ring-2 focus:ring-sage-green/20 transition-all shadow-sm"
               />
             </div>
           </div>
@@ -153,7 +153,7 @@ export default function RegisterPage() {
                 value={formData.password}
                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                 placeholder="••••••••"
-                className="w-full pl-11 pr-12 py-3 bg-warm-ivory border border-soft-stone rounded-2xl text-sm focus:outline-none focus:border-sage-green focus:ring-2 focus:ring-sage-green/20 transition-all shadow-sm"
+                className="w-full pl-11 pr-12 py-3 bg-warm-ivory border border-soft-stone rounded-xl text-sm focus:outline-none focus:border-sage-green focus:ring-2 focus:ring-sage-green/20 transition-all shadow-sm"
               />
               <button
                 type="button"

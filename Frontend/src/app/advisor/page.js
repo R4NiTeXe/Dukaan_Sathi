@@ -84,7 +84,7 @@ export default function AIAdvisor() {
       initial="initial"
       animate="animate"
       exit="exit"
-      className="max-w-6xl mx-auto h-[calc(100dvh-140px)] md:h-[calc(100vh-120px)] flex flex-col md:flex-row bg-off-white rounded-[24px] md:rounded-[32px] shadow-[var(--shadow-soft)] border border-soft-stone overflow-hidden min-w-0"
+      className="max-w-6xl mx-auto h-[calc(100dvh-140px)] md:h-[calc(100vh-120px)] flex flex-col md:flex-row bg-off-white rounded-2xl shadow-[var(--shadow-soft)] border border-soft-stone overflow-hidden min-w-0"
     >
       {/* Left Sidebar - Removed Recent Chats since there's no backend for it, kept clear layout */}
       <div className="hidden md:flex w-72 flex-col border-r border-soft-stone bg-warm-ivory">
@@ -150,7 +150,7 @@ export default function AIAdvisor() {
               <div className="w-full text-left">
               
               {/* Highlighted 'What I Can Do' Section */}
-              <div className="mb-8 p-6 bg-gradient-to-br from-forest-green/10 to-emerald/5 border-2 border-forest-green/20 rounded-[20px] shadow-sm relative overflow-hidden">
+              <div className="mb-8 p-6 bg-gradient-to-br from-forest-green/10 to-emerald/5 border-2 border-forest-green/20 rounded-2xl shadow-sm relative overflow-hidden">
                 <div className="absolute -right-6 -top-6 w-32 h-32 bg-forest-green/10 rounded-full blur-3xl"></div>
                 <h3 className="text-sm font-extrabold text-forest-green mb-4 flex items-center gap-2 uppercase tracking-wider">
                   <Sparkles className="w-5 h-5" /> What I Can Do For You
@@ -177,7 +177,7 @@ export default function AIAdvisor() {
                   <button
                     key={idx}
                     onClick={() => handleSend(q.title)}
-                    className="flex items-center gap-3 p-3.5 bg-off-white border border-soft-stone rounded-[16px] hover:border-sage-green hover:shadow-sm transition-all text-left"
+                    className="flex items-center gap-3 p-3.5 bg-off-white border border-soft-stone rounded-xl hover:border-sage-green hover:shadow-sm transition-all text-left cursor-pointer"
                   >
                     <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${q.bg} ${q.color}`}>
                       <q.icon className="w-5 h-5" />

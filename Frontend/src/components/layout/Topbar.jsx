@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  Search, Bell, User, Menu, X, LogOut, Settings
+  Search, User, Menu, X, LogOut, Settings
 } from 'lucide-react';
 import ThemeToggle from '@/components/layout/ThemeToggle';
 import { useAuth } from '@/context/AuthContext';

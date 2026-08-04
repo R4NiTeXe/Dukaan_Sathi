@@ -146,7 +146,7 @@ export default function Dashboard() {
       {/* Cool Action Banners */}
       <motion.div variants={listVariants} initial="hidden" animate="show" className="mb-8 grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* AI Action */}
-        <motion.div variants={listItemVariants} className="bg-gradient-to-br from-forest-green to-sage-green rounded-[24px] p-6 md:p-8 text-warm-ivory shadow-lg relative overflow-hidden flex flex-col justify-between min-h-[220px]">
+        <motion.div variants={listItemVariants} className="bg-gradient-to-br from-forest-green to-sage-green rounded-2xl p-6 md:p-8 text-warm-ivory shadow-lg relative overflow-hidden flex flex-col justify-between min-h-[220px]">
           <div className="absolute -top-4 -right-4 opacity-10 transform rotate-12">
             <BotMessageSquare className="w-40 h-40" />
           </div>
@@ -154,13 +154,13 @@ export default function Dashboard() {
             <h2 className="text-2xl font-bold mb-2">Need Business Advice?</h2>
             <p className="text-warm-ivory/80 max-w-[85%] text-sm md:text-base">Your AI advisor is ready to analyze your latest shop data and give you personalized recommendations.</p>
           </div>
-          <Link href="/advisor" className="relative z-10 mt-6 bg-warm-ivory text-forest-green text-sm font-bold px-6 py-3 rounded-xl w-max shadow-md hover:shadow-xl hover:scale-105 transition-all">
+          <Link href="/advisor" className="relative z-10 mt-6 bg-warm-ivory text-forest-green text-sm font-bold px-6 py-3 rounded-xl w-max shadow-md hover:shadow-xl transition-all cursor-pointer">
             Chat with AI
           </Link>
         </motion.div>
 
         {/* Voice Billing Action */}
-        <motion.div variants={listItemVariants} className="bg-gradient-to-br from-[#1e293b] to-[#0f172a] rounded-[24px] p-6 md:p-8 text-white shadow-lg relative overflow-hidden flex flex-col justify-between min-h-[220px]">
+        <motion.div variants={listItemVariants} className="bg-gradient-to-br from-[#1e293b] to-[#0f172a] rounded-2xl p-6 md:p-8 text-white shadow-lg relative overflow-hidden flex flex-col justify-between min-h-[220px]">
           <div className="absolute -bottom-8 -right-8 opacity-10 transform -rotate-12">
             <Receipt className="w-48 h-48" />
           </div>
@@ -168,7 +168,7 @@ export default function Dashboard() {
             <h2 className="text-2xl font-bold mb-2">Generate a New Bill</h2>
             <p className="text-white/70 max-w-[85%] text-sm md:text-base">Use our advanced Voice AI feature to quickly extract items, quantities, and prices from speech.</p>
           </div>
-          <Link href="/billing" className="relative z-10 mt-6 bg-[#2dd4bf]/20 border border-[#2dd4bf]/30 text-[#2dd4bf] text-sm font-bold px-6 py-3 rounded-xl w-max shadow-md hover:bg-[#2dd4bf]/30 hover:scale-105 transition-all">
+          <Link href="/billing" className="relative z-10 mt-6 bg-[#2dd4bf]/20 border border-[#2dd4bf]/30 text-[#2dd4bf] text-sm font-bold px-6 py-3 rounded-xl w-max shadow-md hover:bg-[#2dd4bf]/30 transition-all cursor-pointer">
             Start Voice Billing
           </Link>
         </motion.div>

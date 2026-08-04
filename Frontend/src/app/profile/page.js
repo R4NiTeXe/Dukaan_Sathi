@@ -147,7 +147,7 @@ export default function ProfilePage() {
         {/* Left Column: Summary & QR */}
         <div className="lg:col-span-1 space-y-8">
           {/* Profile Summary Card */}
-          <div className="bg-gradient-to-b from-forest-green to-[#1e293b] rounded-[24px] p-6 shadow-lg border border-soft-stone flex flex-col items-center text-center text-warm-ivory relative overflow-hidden">
+          <div className="bg-gradient-to-b from-forest-green to-[#1e293b] rounded-2xl p-6 shadow-lg border border-soft-stone flex flex-col items-center text-center text-warm-ivory relative overflow-hidden">
              <div className="absolute top-0 right-0 p-4 opacity-10">
                <Store className="w-24 h-24" />
              </div>
@@ -162,7 +162,7 @@ export default function ProfilePage() {
           </div>
 
           {/* QR Code Section */}
-          <div className="bg-off-white rounded-[24px] p-6 shadow-[var(--shadow-soft)] border border-soft-stone flex flex-col">
+          <div className="bg-off-white rounded-2xl p-6 shadow-[var(--shadow-soft)] border border-soft-stone flex flex-col">
             <h2 className="text-lg font-bold text-neutral-900 flex items-center gap-2 mb-6">
               <QrCode className="w-5 h-5 text-forest-green" /> UPI QR Code
             </h2>
@@ -222,7 +222,7 @@ export default function ProfilePage() {
 
         {/* Right Column: Form */}
         <div className="lg:col-span-2">
-          <form onSubmit={handleSave} className="bg-off-white rounded-[24px] p-6 md:p-8 shadow-[var(--shadow-soft)] border border-soft-stone space-y-6">
+          <form onSubmit={handleSave} className="bg-off-white rounded-2xl p-6 md:p-8 shadow-[var(--shadow-soft)] border border-soft-stone space-y-6">
             <h2 className="text-lg font-bold text-neutral-900 flex items-center gap-2 mb-2 font-heading">
               <Store className="w-5 h-5 text-forest-green" /> Shop Details
             </h2>

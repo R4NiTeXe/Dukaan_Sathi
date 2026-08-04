@@ -59,7 +59,7 @@ export default function CustomersList() {
         </div>
       )}
 
-      <div className="bg-off-white rounded-[24px] p-4 md:p-6 shadow-[var(--shadow-soft)] border border-soft-stone min-w-0">
+      <div className="bg-off-white rounded-2xl p-4 md:p-6 shadow-[var(--shadow-soft)] border border-soft-stone min-w-0">
         
         <div className="overflow-x-auto">
           {loading ? (

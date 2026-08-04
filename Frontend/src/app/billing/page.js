@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { pageVariants, cardHover, listItemVariants } from "@/utils/animations";
+import { pageVariants, listItemVariants } from "@/utils/animations";
 import {
   Mic,
   MicOff,

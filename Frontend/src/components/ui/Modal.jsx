@@ -35,7 +35,7 @@ export default function Modal({ isOpen, onClose, title, children }) {
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
               transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-              className="w-full max-w-lg bg-warm-ivory rounded-[24px] shadow-[var(--shadow-hover)] border border-soft-stone overflow-hidden pointer-events-auto flex flex-col max-h-[90vh]"
+              className="w-full max-w-lg bg-warm-ivory rounded-2xl shadow-[var(--shadow-hover)] border border-soft-stone overflow-hidden pointer-events-auto flex flex-col max-h-[90vh]"
             >
               {/* Header */}
               <div className="flex items-center justify-between px-6 py-4 border-b border-soft-stone bg-off-white/50">

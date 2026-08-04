@@ -25,7 +25,7 @@ export default function Sidebar() {
           const Icon = item.icon;
 
           return (
-            <Link key={item.name} href={item.href} className="relative block">
+            <Link key={item.name} href={item.href} className="relative block cursor-pointer">
               {isActive && (
                 <motion.div
                   layoutId="active-nav-bg"

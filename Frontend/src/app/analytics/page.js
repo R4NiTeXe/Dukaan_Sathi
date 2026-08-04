@@ -119,7 +119,7 @@ export default function AnalyticsDashboard() {
           { title: 'Avg. Bill Value', value: `₹${summary?.totalBills ? Math.round(summary.totalRevenue / summary.totalBills).toLocaleString() : 0}`, change: 'Per Order', icon: TrendingUp, iconColor: 'text-emerald', iconBg: 'bg-emerald/10' },
           { title: 'Unpaid Bills', value: summary?.unpaidBills || 0, change: 'Pending', icon: AlertCircle, iconColor: 'text-muted-red', iconBg: 'bg-muted-red/10' }
         ].map((kpi, idx) => (
-          <motion.div key={idx} variants={listItemVariants} initial="hidden" animate="show" transition={{ delay: idx * 0.1 }} className="bg-off-white rounded-[16px] p-5 border border-soft-stone shadow-sm">
+          <motion.div key={idx} variants={listItemVariants} initial="hidden" animate="show" transition={{ delay: idx * 0.1 }} className="bg-off-white rounded-xl p-5 border border-soft-stone shadow-sm">
             <div className="flex items-center gap-2 mb-3">
               <kpi.icon className={`w-4 h-4 ${kpi.iconColor}`} />
               <h3 className="text-[13px] font-bold text-neutral-700">{kpi.title}</h3>
@@ -134,7 +134,7 @@ export default function AnalyticsDashboard() {
 
       <div className="grid grid-cols-1 gap-4 px-4 md:px-6 bg-off-white pb-6 rounded-b-2xl">
         {/* Payment Mode Analysis */}
-        <div className="bg-off-white rounded-[16px] p-5 border border-soft-stone shadow-sm flex flex-col">
+        <div className="bg-off-white rounded-xl p-5 border border-soft-stone shadow-sm flex flex-col">
           <h3 className="text-[14px] font-bold text-neutral-900 mb-6">Payment Mode Analysis</h3>
           <div className="flex-1 w-full flex flex-col">
             {summary?.paymentModes?.length > 0 ? (

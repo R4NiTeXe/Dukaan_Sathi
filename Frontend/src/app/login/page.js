@@ -32,7 +32,7 @@ export default function LoginPage() {
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="w-full max-w-md bg-off-white rounded-[32px] p-8 shadow-[var(--shadow-hover)] border border-soft-stone"
+        className="w-full max-w-md bg-off-white rounded-2xl p-8 shadow-[var(--shadow-hover)] border border-soft-stone"
       >
         <div className="text-center mb-8">
           <div className="mx-auto w-12 h-12 rounded-xl bg-forest-green flex items-center justify-center text-warm-ivory mb-4 shadow-sm">
@@ -66,7 +66,7 @@ export default function LoginPage() {
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 placeholder="name@store.com"
-                className="w-full pl-11 pr-4 py-3.5 bg-warm-ivory border border-soft-stone rounded-2xl text-sm focus:outline-none focus:border-sage-green focus:ring-2 focus:ring-sage-green/20 transition-all shadow-sm"
+                className="w-full pl-11 pr-4 py-3.5 bg-warm-ivory border border-soft-stone rounded-xl text-sm focus:outline-none focus:border-sage-green focus:ring-2 focus:ring-sage-green/20 transition-all shadow-sm"
               />
             </div>
           </div>
@@ -84,7 +84,7 @@ export default function LoginPage() {
                 value={formData.password}
                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                 placeholder="••••••••"
-                className="w-full pl-11 pr-12 py-3.5 bg-warm-ivory border border-soft-stone rounded-2xl text-sm focus:outline-none focus:border-sage-green focus:ring-2 focus:ring-sage-green/20 transition-all shadow-sm"
+                className="w-full pl-11 pr-12 py-3.5 bg-warm-ivory border border-soft-stone rounded-xl text-sm focus:outline-none focus:border-sage-green focus:ring-2 focus:ring-sage-green/20 transition-all shadow-sm"
               />
               <button
                 type="button"
