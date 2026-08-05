@@ -1,21 +1,19 @@
-import { Inter, Calistoga } from "next/font/google";
-import AppLayout from "@/components/layout/AppLayout";
-import { ThemeProvider } from "next-themes";
-import "./globals.css";
+import { Inter, Calistoga } from 'next/font/google';
+import AppLayout from '@/components/layout/AppLayout';
+import { ThemeProvider } from 'next-themes';
+import './globals.css';
 
-const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
-const calistoga = Calistoga({ subsets: ["latin"], variable: "--font-calistoga", weight: "400" });
+const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
+const calistoga = Calistoga({ subsets: ['latin'], variable: '--font-calistoga', weight: '400' });
 
 export const metadata = {
-  title: "Dukaan Saathi | AI Billing Platform",
-  description:
-    "AI-powered billing and business operating system for local Indian businesses.",
+  title: 'Dukaan Saathi | AI Billing Platform',
+  description: 'AI-powered billing and business operating system for local Indian businesses.',
   openGraph: {
-    title: "Dukaan Saathi | AI Billing Platform",
-    description:
-      "AI-powered billing and business operating system for local Indian businesses.",
-    type: "website",
-    locale: "en_IN",
+    title: 'Dukaan Saathi | AI Billing Platform',
+    description: 'AI-powered billing and business operating system for local Indian businesses.',
+    type: 'website',
+    locale: 'en_IN',
   },
 };
 
@@ -24,12 +22,10 @@ export default function RootLayout({ children }) {
     <html lang="en" suppressHydrationWarning>
       <body
         suppressHydrationWarning
-        className={`${inter.variable} ${calistoga.variable} font-sans antialiased bg-warm-ivory text-neutral-900 flex overflow-x-hidden max-w-[100vw]`}
+        className={`${inter.variable} ${calistoga.variable} bg-warm-ivory flex max-w-[100vw] overflow-x-hidden font-sans text-neutral-900 antialiased`}
       >
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          <AppLayout>
-            {children}
-          </AppLayout>
+          <AppLayout>{children}</AppLayout>
         </ThemeProvider>
       </body>
     </html>

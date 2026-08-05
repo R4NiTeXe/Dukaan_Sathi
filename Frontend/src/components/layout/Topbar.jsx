@@ -4,9 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Search, User, Menu, X, LogOut, Settings
-} from 'lucide-react';
+import { Search, User, Menu, X, LogOut, Settings } from 'lucide-react';
 import ThemeToggle from '@/components/layout/ThemeToggle';
 import { useAuth } from '@/context/AuthContext';
 import { navItems } from '@/constants/navigation';
@@ -51,18 +49,17 @@ export default function Topbar() {
 
   return (
     <>
-      <header className="h-16 md:h-20 bg-warm-ivory border-b border-soft-stone px-4 md:px-8 flex items-center justify-between sticky top-0 z-20">
-        
+      <header className="bg-warm-ivory border-soft-stone sticky top-0 z-20 flex h-16 items-center justify-between border-b px-4 md:h-20 md:px-8">
         {/* Hamburger Menu (Mobile Only) */}
-        <button 
-          className="md:hidden p-2 -ml-2 mr-2 text-neutral-600 hover:bg-soft-stone/50 rounded-xl transition-colors cursor-pointer"
+        <button
+          className="hover:bg-soft-stone/50 mr-2 -ml-2 cursor-pointer rounded-xl p-2 text-neutral-600 transition-colors md:hidden"
           onClick={() => setIsMobileMenuOpen(true)}
           aria-label="Open menu"
         >
-          <Menu className="w-6 h-6" />
+          <Menu className="h-6 w-6" />
         </button>
 
-        <div className="flex-1 max-w-xl min-w-0 mx-1 md:mx-4">
+        <div className="mx-1 max-w-xl min-w-0 flex-1 md:mx-4">
           <form
             onSubmit={(e) => {
               e.preventDefault();
@@ -71,32 +68,36 @@ export default function Topbar() {
                 setSearchQuery('');
               }
             }}
-            className="relative group min-w-0"
+            className="group relative min-w-0"
           >
-            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-              <Search className="h-4 w-4 text-neutral-400 group-focus-within:text-forest-green transition-colors" />
+            <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
+              <Search className="group-focus-within:text-forest-green h-4 w-4 text-neutral-400 transition-colors" />
             </div>
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="block w-full min-w-0 pl-10 pr-4 py-2.5 bg-off-white border border-soft-stone rounded-2xl text-sm placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-sage-green/30 focus:border-sage-green transition-all shadow-[var(--shadow-soft)] hover:shadow-md cursor-text"
+              className="bg-off-white border-soft-stone focus:ring-sage-green/30 focus:border-sage-green block w-full min-w-0 cursor-text rounded-2xl border py-2.5 pr-4 pl-10 text-sm placeholder-neutral-400 shadow-[var(--shadow-soft)] transition-all hover:shadow-md focus:ring-2 focus:outline-none"
               placeholder="Search products..."
             />
           </form>
         </div>
 
-        <div className="flex items-center gap-2 md:gap-4 ml-4 md:ml-6">
+        <div className="ml-4 flex items-center gap-2 md:ml-6 md:gap-4">
           <ThemeToggle />
 
           <div id="profile-menu-container" className="relative">
-            <button 
+            <button
               onClick={() => setIsProfileOpen(!isProfileOpen)}
-              className="w-9 h-9 md:w-10 md:h-10 rounded-full bg-sage-green/20 border border-sage-green/30 flex items-center justify-center text-forest-green font-medium shadow-sm hover:shadow-md transition-shadow focus:outline-none cursor-pointer"
+              className="bg-sage-green/20 border-sage-green/30 text-forest-green flex h-9 w-9 cursor-pointer items-center justify-center rounded-full border font-medium shadow-sm transition-shadow hover:shadow-md focus:outline-none md:h-10 md:w-10"
               aria-label="User menu"
               aria-expanded={isProfileOpen}
             >
-              {user?.ownerName ? user.ownerName.charAt(0).toUpperCase() : <User className="h-4 w-4 md:h-5 md:w-5" />}
+              {user?.ownerName ? (
+                user.ownerName.charAt(0).toUpperCase()
+              ) : (
+                <User className="h-4 w-4 md:h-5 md:w-5" />
+              )}
             </button>
 
             {/* Profile Dropdown */}
@@ -106,21 +107,25 @@ export default function Topbar() {
                   initial={{ opacity: 0, y: 10, scale: 0.95 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                  transition={{ duration: 0.15, ease: "easeOut" }}
-                  className="absolute right-0 mt-3 w-56 bg-warm-ivory border border-soft-stone rounded-2xl shadow-[var(--shadow-medium)] overflow-hidden z-50 py-2"
+                  transition={{ duration: 0.15, ease: 'easeOut' }}
+                  className="bg-warm-ivory border-soft-stone absolute right-0 z-50 mt-3 w-56 overflow-hidden rounded-2xl border py-2 shadow-[var(--shadow-medium)]"
                 >
-                  <div className="px-4 py-3 border-b border-soft-stone bg-off-white/50 mb-1">
-                    <p className="text-sm font-semibold text-neutral-900 truncate">{user?.ownerName || 'Shop Owner'}</p>
-                    <p className="text-xs text-neutral-500 truncate mt-0.5">{user?.email || 'admin@shop.com'}</p>
+                  <div className="border-soft-stone bg-off-white/50 mb-1 border-b px-4 py-3">
+                    <p className="truncate text-sm font-semibold text-neutral-900">
+                      {user?.ownerName || 'Shop Owner'}
+                    </p>
+                    <p className="mt-0.5 truncate text-xs text-neutral-500">
+                      {user?.email || 'admin@shop.com'}
+                    </p>
                   </div>
-                  <button 
+                  <button
                     onClick={() => {
                       setIsProfileOpen(false);
                       logout();
                     }}
-                    className="w-full flex items-center px-4 py-2.5 text-sm text-red-600 hover:bg-red-50/50 transition-colors"
+                    className="flex w-full items-center px-4 py-2.5 text-sm text-red-600 transition-colors hover:bg-red-50/50"
                   >
-                    <LogOut className="w-4 h-4 mr-3" />
+                    <LogOut className="mr-3 h-4 w-4" />
                     Sign Out
                   </button>
                 </motion.div>
@@ -132,46 +137,53 @@ export default function Topbar() {
 
       {/* Mobile Slide-over Drawer Backdrop */}
       {isMobileMenuOpen && (
-        <div 
+        <div
           onClick={() => setIsMobileMenuOpen(false)}
-          className="md:hidden fixed inset-0 bg-neutral-900/40 backdrop-blur-sm z-40 transition-opacity"
+          className="fixed inset-0 z-40 bg-neutral-900/40 backdrop-blur-sm transition-opacity md:hidden"
         />
       )}
-      
+
       {/* Mobile Slide-over Drawer */}
-      <div 
+      <div
         role="dialog"
         aria-modal="true"
         aria-label="Navigation menu"
-        className={`md:hidden fixed inset-y-0 left-0 w-64 bg-off-white shadow-2xl z-50 flex flex-col pt-6 pb-8 border-r border-soft-stone transition-transform duration-300 ease-in-out ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}
+        className={`bg-off-white border-soft-stone fixed inset-y-0 left-0 z-50 flex w-64 flex-col border-r pt-6 pb-8 shadow-2xl transition-transform duration-300 ease-in-out md:hidden ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}
       >
-        <div className="px-4 mb-8 flex items-center justify-between">
-          <div className="w-9 h-9 rounded-lg bg-forest-green flex items-center justify-center text-warm-ivory font-bold shadow-sm">
+        <div className="mb-8 flex items-center justify-between px-4">
+          <div className="bg-forest-green text-warm-ivory flex h-9 w-9 items-center justify-center rounded-lg font-bold shadow-sm">
             DS
           </div>
-          <button 
+          <button
             onClick={() => setIsMobileMenuOpen(false)}
-            className="p-2 -mr-2 text-neutral-500 hover:bg-soft-stone/50 rounded-full transition-colors cursor-pointer"
+            className="hover:bg-soft-stone/50 -mr-2 cursor-pointer rounded-full p-2 text-neutral-500 transition-colors"
             aria-label="Close menu"
           >
-            <X className="w-5 h-5" />
+            <X className="h-5 w-5" />
           </button>
         </div>
 
-        <nav className="flex-1 px-4 space-y-1 overflow-y-auto">
+        <nav className="flex-1 space-y-1 overflow-y-auto px-4">
           {navItems.map((item) => {
             const isActive = pathname === item.href;
             const Icon = item.icon;
 
             return (
-              <Link key={item.name} href={item.href} className="relative block" onClick={() => setIsMobileMenuOpen(false)}>
-                {isActive && (
-                  <div className="absolute inset-0 bg-sage-green/10 rounded-xl" />
-                )}
-                <div className={`relative flex items-center px-4 py-3.5 rounded-xl transition-colors text-sm whitespace-nowrap ${
-                  isActive ? 'text-forest-green font-medium' : 'text-neutral-600 hover:text-neutral-900 hover:bg-soft-stone/50'
-                }`}>
-                  <Icon className="w-5 h-5 mr-3" strokeWidth={isActive ? 2.5 : 2} />
+              <Link
+                key={item.name}
+                href={item.href}
+                className="relative block"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                {isActive && <div className="bg-sage-green/10 absolute inset-0 rounded-xl" />}
+                <div
+                  className={`relative flex items-center rounded-xl px-4 py-3.5 text-sm whitespace-nowrap transition-colors ${
+                    isActive
+                      ? 'text-forest-green font-medium'
+                      : 'hover:bg-soft-stone/50 text-neutral-600 hover:text-neutral-900'
+                  }`}
+                >
+                  <Icon className="mr-3 h-5 w-5" strokeWidth={isActive ? 2.5 : 2} />
                   {item.name}
                 </div>
               </Link>

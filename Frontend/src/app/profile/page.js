@@ -112,16 +112,13 @@ export default function ProfilePage() {
       initial="initial"
       animate="animate"
       exit="exit"
-      className="max-w-6xl mx-auto space-y-8 min-w-0"
+      className="mx-auto max-w-6xl min-w-0 space-y-8"
     >
-      <PageHeader
-        title="Shop Profile"
-        description="Manage your shop and payment details."
-      />
+      <PageHeader title="Shop Profile" description="Manage your shop and payment details." />
 
       {setupMode && !user?.upiQrCode && (
-        <div className="p-4 bg-sage-green/10 border border-sage-green/30 rounded-2xl flex items-center gap-3 text-forest-green">
-          <QrCode className="w-5 h-5 shrink-0" />
+        <div className="bg-sage-green/10 border-sage-green/30 text-forest-green flex items-center gap-3 rounded-2xl border p-4">
+          <QrCode className="h-5 w-5 shrink-0" />
           <p className="text-sm">
             Welcome! Upload your UPI QR code below so customers can pay you.
           </p>
@@ -129,42 +126,52 @@ export default function ProfilePage() {
       )}
 
       {message && (
-        <div className="p-4 bg-emerald/10 border border-emerald/20 rounded-2xl flex items-center gap-3 text-emerald">
-          <CheckCircle2 className="w-5 h-5 shrink-0" />
+        <div className="bg-emerald/10 border-emerald/20 text-emerald flex items-center gap-3 rounded-2xl border p-4">
+          <CheckCircle2 className="h-5 w-5 shrink-0" />
           <p>{message}</p>
         </div>
       )}
 
       {error && (
-        <div role="alert" className="p-4 bg-muted-red/10 border border-muted-red/20 rounded-2xl flex items-center gap-3 text-muted-red">
-          <AlertCircle className="w-5 h-5 shrink-0" />
+        <div
+          role="alert"
+          className="bg-muted-red/10 border-muted-red/20 text-muted-red flex items-center gap-3 rounded-2xl border p-4"
+        >
+          <AlertCircle className="h-5 w-5 shrink-0" />
           <p>{error}</p>
         </div>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
         {/* Left Column: Summary & QR */}
-        <div className="lg:col-span-1 space-y-8">
+        <div className="space-y-8 lg:col-span-1">
           {/* Profile Summary Card */}
-          <div className="bg-gradient-to-b from-forest-green to-[#1e293b] rounded-2xl p-6 shadow-lg border border-soft-stone flex flex-col items-center text-center text-warm-ivory relative overflow-hidden">
-             <div className="absolute top-0 right-0 p-4 opacity-10">
-               <Store className="w-24 h-24" />
-             </div>
-             <div className="w-24 h-24 rounded-full bg-warm-ivory text-forest-green flex items-center justify-center text-4xl font-bold mb-4 shadow-xl border-4 border-white/20 relative z-10">
-               {form?.shopName ? form.shopName.charAt(0).toUpperCase() : <Store className="w-10 h-10" />}
-             </div>
-             <h2 className="text-2xl font-bold mb-1 relative z-10">{form.shopName || 'Your Shop'}</h2>
-             <p className="text-sm text-warm-ivory/80 mb-4 relative z-10">{form.ownerName || 'Owner'}</p>
-             <span className="px-4 py-1.5 bg-white/20 backdrop-blur-sm rounded-full text-xs font-semibold uppercase tracking-wider relative z-10 border border-white/10">
-               {form.shopType || 'Shop'}
-             </span>
+          <div className="from-forest-green border-soft-stone text-warm-ivory relative flex flex-col items-center overflow-hidden rounded-2xl border bg-gradient-to-b to-[#1e293b] p-6 text-center shadow-lg">
+            <div className="absolute top-0 right-0 p-4 opacity-10">
+              <Store className="h-24 w-24" />
+            </div>
+            <div className="bg-warm-ivory text-forest-green relative z-10 mb-4 flex h-24 w-24 items-center justify-center rounded-full border-4 border-white/20 text-4xl font-bold shadow-xl">
+              {form?.shopName ? (
+                form.shopName.charAt(0).toUpperCase()
+              ) : (
+                <Store className="h-10 w-10" />
+              )}
+            </div>
+            <h2 className="relative z-10 mb-1 text-2xl font-bold">
+              {form.shopName || 'Your Shop'}
+            </h2>
+            <p className="text-warm-ivory/80 relative z-10 mb-4 text-sm">
+              {form.ownerName || 'Owner'}
+            </p>
+            <span className="relative z-10 rounded-full border border-white/10 bg-white/20 px-4 py-1.5 text-xs font-semibold tracking-wider uppercase backdrop-blur-sm">
+              {form.shopType || 'Shop'}
+            </span>
           </div>
 
           {/* QR Code Section */}
-          <div className="bg-off-white rounded-2xl p-6 shadow-[var(--shadow-soft)] border border-soft-stone flex flex-col">
-            <h2 className="text-lg font-bold text-neutral-900 flex items-center gap-2 mb-6">
-              <QrCode className="w-5 h-5 text-forest-green" /> UPI QR Code
+          <div className="bg-off-white border-soft-stone flex flex-col rounded-2xl border p-6 shadow-[var(--shadow-soft)]">
+            <h2 className="mb-6 flex items-center gap-2 text-lg font-bold text-neutral-900">
+              <QrCode className="text-forest-green h-5 w-5" /> UPI QR Code
             </h2>
 
             {user?.upiQrCode ? (
@@ -173,11 +180,11 @@ export default function ProfilePage() {
                 <img
                   src={user.upiQrCode}
                   alt="UPI QR code"
-                  className="w-48 h-48 rounded-2xl border-2 border-sage-green/30 object-contain bg-warm-ivory p-2 shadow-sm"
+                  className="border-sage-green/30 bg-warm-ivory h-48 w-48 rounded-2xl border-2 object-contain p-2 shadow-sm"
                 />
-                <div className="flex gap-3 w-full">
-                  <label className="flex-1 flex justify-center items-center gap-2 px-4 py-2.5 bg-emerald/10 text-emerald rounded-xl font-medium hover:bg-emerald/20 transition-colors cursor-pointer text-sm">
-                    <Upload className="w-4 h-4" />
+                <div className="flex w-full gap-3">
+                  <label className="bg-emerald/10 text-emerald hover:bg-emerald/20 flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium transition-colors">
+                    <Upload className="h-4 w-4" />
                     Replace
                     <input
                       type="file"
@@ -193,19 +200,19 @@ export default function ProfilePage() {
                     disabled={qrUploading}
                     className="flex-1"
                   >
-                    <Trash2 className="w-4 h-4" />
+                    <Trash2 className="h-4 w-4" />
                     Remove
                   </Button>
                 </div>
               </div>
             ) : (
-              <label className="flex flex-col items-center justify-center gap-3 p-8 border-2 border-dashed border-soft-stone rounded-2xl cursor-pointer hover:border-sage-green hover:bg-sage-green/5 transition-colors h-48">
+              <label className="border-soft-stone hover:border-sage-green hover:bg-sage-green/5 flex h-48 cursor-pointer flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed p-8 transition-colors">
                 {qrUploading ? (
-                  <Loader2 className="w-8 h-8 animate-spin text-forest-green" />
+                  <Loader2 className="text-forest-green h-8 w-8 animate-spin" />
                 ) : (
-                  <QrCode className="w-10 h-10 text-neutral-300" />
+                  <QrCode className="h-10 w-10 text-neutral-300" />
                 )}
-                <span className="text-sm text-neutral-500 text-center px-4">
+                <span className="px-4 text-center text-sm text-neutral-500">
                   {qrUploading ? 'Uploading...' : 'Click to upload your UPI QR code'}
                 </span>
                 <input
@@ -222,9 +229,12 @@ export default function ProfilePage() {
 
         {/* Right Column: Form */}
         <div className="lg:col-span-2">
-          <form onSubmit={handleSave} className="bg-off-white rounded-2xl p-6 md:p-8 shadow-[var(--shadow-soft)] border border-soft-stone space-y-6">
-            <h2 className="text-lg font-bold text-neutral-900 flex items-center gap-2 mb-2 font-heading">
-              <Store className="w-5 h-5 text-forest-green" /> Shop Details
+          <form
+            onSubmit={handleSave}
+            className="bg-off-white border-soft-stone space-y-6 rounded-2xl border p-6 shadow-[var(--shadow-soft)] md:p-8"
+          >
+            <h2 className="font-heading mb-2 flex items-center gap-2 text-lg font-bold text-neutral-900">
+              <Store className="text-forest-green h-5 w-5" /> Shop Details
             </h2>
 
             <Input
@@ -235,7 +245,7 @@ export default function ProfilePage() {
               onChange={(e) => set('ownerName', e.target.value)}
             />
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
               <Input
                 label="Shop Name"
                 type="text"
@@ -261,13 +271,13 @@ export default function ProfilePage() {
             />
 
             <div className="space-y-1.5">
-              <label className="text-sm font-medium text-neutral-700 flex items-center gap-1.5">
-                <Languages className="w-4 h-4 text-neutral-400" /> Preferred Language
+              <label className="flex items-center gap-1.5 text-sm font-medium text-neutral-700">
+                <Languages className="h-4 w-4 text-neutral-400" /> Preferred Language
               </label>
               <select
                 value={form.preferredLanguage || 'en'}
                 onChange={(e) => set('preferredLanguage', e.target.value)}
-                className="w-full px-4 py-3 bg-warm-ivory border border-soft-stone rounded-xl text-sm focus:outline-none focus:border-sage-green focus:ring-2 focus:ring-sage-green/20 transition-all text-neutral-700"
+                className="bg-warm-ivory border-soft-stone focus:border-sage-green focus:ring-sage-green/20 w-full rounded-xl border px-4 py-3 text-sm text-neutral-700 transition-all focus:ring-2 focus:outline-none"
               >
                 {LANGUAGES.map((l) => (
                   <option key={l.value} value={l.value}>
@@ -275,18 +285,14 @@ export default function ProfilePage() {
                   </option>
                 ))}
               </select>
-              <p className="text-xs text-neutral-400 pt-1">
+              <p className="pt-1 text-xs text-neutral-400">
                 Used as the default language for voice billing.
               </p>
             </div>
 
-            <div className="pt-4 mt-4 border-t border-soft-stone/50">
-              <Button
-                type="submit"
-                loading={loading}
-                className="w-full sm:w-auto"
-              >
-                <Save className="w-4 h-4" />
+            <div className="border-soft-stone/50 mt-4 border-t pt-4">
+              <Button type="submit" loading={loading} className="w-full sm:w-auto">
+                <Save className="h-4 w-4" />
                 Save Changes
               </Button>
             </div>

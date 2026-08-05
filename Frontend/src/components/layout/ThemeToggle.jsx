@@ -13,20 +13,16 @@ export default function ThemeToggle() {
   }, []);
 
   if (!mounted) {
-    return <div className="w-10 h-10 rounded-full" />;
+    return <div className="h-10 w-10 rounded-full" />;
   }
 
   return (
     <button
       onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-      className="w-10 h-10 rounded-full bg-soft-stone/30 hover:bg-soft-stone/50 flex items-center justify-center text-neutral-500 transition-colors"
+      className="bg-soft-stone/30 hover:bg-soft-stone/50 flex h-10 w-10 items-center justify-center rounded-full text-neutral-500 transition-colors"
       aria-label="Toggle Dark Mode"
     >
-      {theme === 'dark' ? (
-        <Sun className="w-5 h-5" />
-      ) : (
-        <Moon className="w-5 h-5" />
-      )}
+      {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
     </button>
   );
 }

@@ -1,29 +1,26 @@
-import { Bill } from '../models/Bill.model.js'
-import {
-  revenueByPeriod,
-  topProductsByRevenue,
-} from '../helpers/stats.helper.js'
+import { Bill } from '../models/Bill.model.js';
+import { revenueByPeriod, topProductsByRevenue } from '../helpers/stats.helper.js';
 
 const startOfDay = () => {
-  const d = new Date()
-  d.setHours(0, 0, 0, 0)
-  return d
-}
+  const d = new Date();
+  d.setHours(0, 0, 0, 0);
+  return d;
+};
 
 const startOfWeek = () => {
-  const d = startOfDay()
-  const day = d.getDay()
-  const diff = day === 0 ? 6 : day - 1
-  d.setDate(d.getDate() - diff)
-  return d
-}
+  const d = startOfDay();
+  const day = d.getDay();
+  const diff = day === 0 ? 6 : day - 1;
+  d.setDate(d.getDate() - diff);
+  return d;
+};
 
 const startOfMonth = () => {
-  const d = new Date()
-  d.setDate(1)
-  d.setHours(0, 0, 0, 0)
-  return d
-}
+  const d = new Date();
+  d.setDate(1);
+  d.setHours(0, 0, 0, 0);
+  return d;
+};
 
 export const dashboardSummary = async (userId) => {
   const [result] = await Bill.aggregate([
@@ -31,9 +28,7 @@ export const dashboardSummary = async (userId) => {
     {
       $facet: {
         totalBills: [{ $count: 'count' }],
-        totalRevenue: [
-          { $group: { _id: null, total: { $sum: '$totalAmount' } } },
-        ],
+        totalRevenue: [{ $group: { _id: null, total: { $sum: '$totalAmount' } } }],
         todayRevenue: [
           { $match: { createdAt: { $gte: startOfDay() } } },
           { $group: { _id: null, total: { $sum: '$totalAmount' } } },
@@ -42,10 +37,7 @@ export const dashboardSummary = async (userId) => {
           { $match: { createdAt: { $gte: startOfMonth() } } },
           { $group: { _id: null, total: { $sum: '$totalAmount' } } },
         ],
-        billsThisWeek: [
-          { $match: { createdAt: { $gte: startOfWeek() } } },
-          { $count: 'count' },
-        ],
+        billsThisWeek: [{ $match: { createdAt: { $gte: startOfWeek() } } }, { $count: 'count' }],
         recentBills: [
           { $sort: { createdAt: -1 } },
           { $limit: 5 },
@@ -103,24 +95,17 @@ export const dashboardSummary = async (userId) => {
           {
             $group: {
               _id: {
-                $cond: [
-                  { $eq: ['$paymentStatus', 'pending'] },
-                  'unpaid',
-                  '$paymentMethod'
-                ]
+                $cond: [{ $eq: ['$paymentStatus', 'pending'] }, 'unpaid', '$paymentMethod'],
               },
               total: { $sum: '$totalAmount' },
               count: { $sum: 1 },
             },
           },
         ],
-        unpaidBills: [
-          { $match: { paymentStatus: 'pending' } },
-          { $count: 'count' },
-        ],
+        unpaidBills: [{ $match: { paymentStatus: 'pending' } }, { $count: 'count' }],
       },
     },
-  ])
+  ]);
 
   return {
     totalBills: result.totalBills[0]?.count || 0,
@@ -132,37 +117,37 @@ export const dashboardSummary = async (userId) => {
     topCustomers: result.topCustomers || [],
     paymentModes: result.paymentModes || [],
     unpaidBills: result.unpaidBills?.[0]?.count || 0,
-  }
-}
+  };
+};
 
 export const monthlyRevenue = async (userId) => {
-  const monthsAgo = new Date()
-  monthsAgo.setDate(1)
-  monthsAgo.setMonth(monthsAgo.getMonth() - 5)
+  const monthsAgo = new Date();
+  monthsAgo.setDate(1);
+  monthsAgo.setMonth(monthsAgo.getMonth() - 5);
 
   return revenueByPeriod(userId, {
     since: monthsAgo,
     format: '%Y-%m',
     outputKey: 'month',
-  })
-}
+  });
+};
 
 export const weeklyRevenue = async (userId) => {
-  const sevenDaysAgo = new Date()
-  sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 6)
-  sevenDaysAgo.setHours(0, 0, 0, 0)
+  const sevenDaysAgo = new Date();
+  sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 6);
+  sevenDaysAgo.setHours(0, 0, 0, 0);
 
   return revenueByPeriod(userId, {
     since: sevenDaysAgo,
     format: '%Y-%m-%d',
     outputKey: 'date',
-  })
-}
+  });
+};
 
 export const topProducts = async (userId, limit = 10) => {
-  const safeLimit = Math.min(Math.max(parseInt(limit, 10) || 10, 1), 50)
-  return topProductsByRevenue(userId, safeLimit)
-}
+  const safeLimit = Math.min(Math.max(parseInt(limit, 10) || 10, 1), 50);
+  return topProductsByRevenue(userId, safeLimit);
+};
 
 export const customerReport = async (userId) => {
   return Bill.aggregate([
@@ -195,5 +180,5 @@ export const customerReport = async (userId) => {
         lastPurchase: 1,
       },
     },
-  ])
-}
+  ]);
+};

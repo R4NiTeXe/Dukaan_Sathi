@@ -1,7 +1,7 @@
-import mongoose from 'mongoose'
-import bcrypt from 'bcrypt'
-import jwt from 'jsonwebtoken'
-import config from '../config/index.js'
+import mongoose from 'mongoose';
+import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
+import config from '../config/index.js';
 
 const userSchema = new mongoose.Schema(
   {
@@ -30,14 +30,7 @@ const userSchema = new mongoose.Schema(
     },
     shopType: {
       type: String,
-      enum: [
-        'grocery',
-        'stationery',
-        'pharmacy',
-        'electronics',
-        'clothing',
-        'other',
-      ],
+      enum: ['grocery', 'stationery', 'pharmacy', 'electronics', 'clothing', 'other'],
       required: true,
     },
     shopAddress: {
@@ -61,17 +54,17 @@ const userSchema = new mongoose.Schema(
   {
     timestamps: true,
   }
-)
+);
 
 userSchema.pre('save', async function (next) {
-  if (!this.isModified('password')) return next()
-  this.password = await bcrypt.hash(this.password, 10)
-  next()
-})
+  if (!this.isModified('password')) return next();
+  this.password = await bcrypt.hash(this.password, 10);
+  next();
+});
 
 userSchema.methods.isPasswordCorrect = function (password) {
-  return bcrypt.compare(password, this.password)
-}
+  return bcrypt.compare(password, this.password);
+};
 
 userSchema.methods.generateAccessToken = function () {
   return jwt.sign(
@@ -82,27 +75,27 @@ userSchema.methods.generateAccessToken = function () {
     },
     config.jwt.secret,
     { expiresIn: config.jwt.expiry }
-  )
-}
+  );
+};
 
 userSchema.methods.generateRefreshToken = function () {
   return jwt.sign({ _id: this._id }, config.jwt.refreshSecret, {
     expiresIn: config.jwt.refreshExpiry,
-  })
-}
+  });
+};
 
 userSchema.methods.setRefreshToken = async function (token) {
-  this.refreshToken = await bcrypt.hash(token, 10)
-  await this.save()
-}
+  this.refreshToken = await bcrypt.hash(token, 10);
+  await this.save();
+};
 
 userSchema.methods.verifyRefreshToken = async function (token) {
-  return bcrypt.compare(token, this.refreshToken || '')
-}
+  return bcrypt.compare(token, this.refreshToken || '');
+};
 
 userSchema.methods.clearRefreshToken = async function () {
-  this.refreshToken = null
-  await this.save()
-}
+  this.refreshToken = null;
+  await this.save();
+};
 
-export const User = mongoose.model('User', userSchema)
+export const User = mongoose.model('User', userSchema);

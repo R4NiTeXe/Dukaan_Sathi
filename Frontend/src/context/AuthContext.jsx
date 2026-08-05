@@ -16,7 +16,7 @@ export function AuthProvider({ children }) {
     // Check if user is logged in on mount
     const storedUser = localStorage.getItem('user');
     const token = localStorage.getItem('accessToken');
-    
+
     if (storedUser && token) {
       setUser(JSON.parse(storedUser));
     }
@@ -47,9 +47,9 @@ export function AuthProvider({ children }) {
         return { success: true };
       }
     } catch (error) {
-      return { 
-        success: false, 
-        message: error.response?.data?.message || 'Login failed. Please check your credentials.' 
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Login failed. Please check your credentials.',
       };
     }
   };
@@ -66,9 +66,9 @@ export function AuthProvider({ children }) {
         return { success: true };
       }
     } catch (error) {
-      return { 
-        success: false, 
-        message: error.response?.data?.message || 'Registration failed.' 
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Registration failed.',
       };
     }
   };

@@ -12,7 +12,9 @@ export default function Modal({ isOpen, onClose, title, children }) {
     } else {
       document.body.style.overflow = 'unset';
     }
-    return () => { document.body.style.overflow = 'unset'; };
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
   }, [isOpen]);
 
   return (
@@ -29,30 +31,28 @@ export default function Modal({ isOpen, onClose, title, children }) {
           />
 
           {/* Modal Container */}
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
+          <div className="pointer-events-none fixed inset-0 z-50 flex items-center justify-center p-4">
             <motion.div
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
               transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-              className="w-full max-w-lg bg-warm-ivory rounded-2xl shadow-[var(--shadow-hover)] border border-soft-stone overflow-hidden pointer-events-auto flex flex-col max-h-[90vh]"
+              className="bg-warm-ivory border-soft-stone pointer-events-auto flex max-h-[90vh] w-full max-w-lg flex-col overflow-hidden rounded-2xl border shadow-[var(--shadow-hover)]"
             >
               {/* Header */}
-              <div className="flex items-center justify-between px-6 py-4 border-b border-soft-stone bg-off-white/50">
+              <div className="border-soft-stone bg-off-white/50 flex items-center justify-between border-b px-6 py-4">
                 <h2 className="text-lg font-bold text-neutral-900">{title}</h2>
-                <button 
+                <button
                   onClick={onClose}
-                  className="p-2 text-neutral-400 hover:text-neutral-900 hover:bg-soft-stone/50 rounded-full transition-colors cursor-pointer"
+                  className="hover:bg-soft-stone/50 cursor-pointer rounded-full p-2 text-neutral-400 transition-colors hover:text-neutral-900"
                   aria-label="Close"
                 >
-                  <X className="w-5 h-5" />
+                  <X className="h-5 w-5" />
                 </button>
               </div>
 
               {/* Body */}
-              <div className="p-6 overflow-y-auto">
-                {children}
-              </div>
+              <div className="overflow-y-auto p-6">{children}</div>
             </motion.div>
           </div>
         </>

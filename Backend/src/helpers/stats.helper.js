@@ -1,5 +1,5 @@
-import mongoose from 'mongoose'
-import { Bill } from '../models/Bill.model.js'
+import mongoose from 'mongoose';
+import { Bill } from '../models/Bill.model.js';
 
 export const revenueByPeriod = async (userId, { since, format, outputKey }) => {
   return Bill.aggregate([
@@ -20,8 +20,8 @@ export const revenueByPeriod = async (userId, { since, format, outputKey }) => {
         billCount: 1,
       },
     },
-  ])
-}
+  ]);
+};
 
 export const topProductsByRevenue = async (userId, limit) => {
   return Bill.aggregate([
@@ -54,8 +54,8 @@ export const topProductsByRevenue = async (userId, limit) => {
         timesSold: 1,
       },
     },
-  ])
-}
+  ]);
+};
 
 export const customerPurchaseSummary = async (customerId) => {
   const [result] = await Bill.aggregate([
@@ -67,6 +67,6 @@ export const customerPurchaseSummary = async (customerId) => {
         lastPurchase: { $max: '$createdAt' },
       },
     },
-  ])
-  return result || null
-}
+  ]);
+  return result || null;
+};

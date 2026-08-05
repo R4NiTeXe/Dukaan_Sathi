@@ -9,17 +9,17 @@ export default function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="hidden md:flex w-64 h-screen bg-off-white border-r border-soft-stone fixed left-0 top-0 flex-col pt-6 pb-8">
-      <div className="px-6 mb-10">
-        <h1 className="text-xl font-bold tracking-tight text-neutral-900 flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-forest-green flex items-center justify-center text-warm-ivory">
+    <aside className="bg-off-white border-soft-stone fixed top-0 left-0 hidden h-screen w-64 flex-col border-r pt-6 pb-8 md:flex">
+      <div className="mb-10 px-6">
+        <h1 className="flex items-center gap-2 text-xl font-bold tracking-tight text-neutral-900">
+          <div className="bg-forest-green text-warm-ivory flex h-8 w-8 items-center justify-center rounded-lg">
             DS
           </div>
           Dukaan Saathi
         </h1>
       </div>
 
-      <nav className="flex-1 px-4 space-y-1">
+      <nav className="flex-1 space-y-1 px-4">
         {navItems.map((item) => {
           const isActive = pathname === item.href;
           const Icon = item.icon;
@@ -29,16 +29,20 @@ export default function Sidebar() {
               {isActive && (
                 <motion.div
                   layoutId="active-nav-bg"
-                  className="absolute inset-0 bg-sage-green/10 rounded-xl"
+                  className="bg-sage-green/10 absolute inset-0 rounded-xl"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ duration: 0.2 }}
                 />
               )}
-              <div className={`relative flex items-center px-4 py-3 rounded-xl transition-colors ${
-                isActive ? 'text-forest-green font-medium' : 'text-neutral-500 hover:text-neutral-900 hover:bg-soft-stone/50'
-              }`}>
-                <Icon className="w-5 h-5 mr-3" strokeWidth={isActive ? 2.5 : 2} />
+              <div
+                className={`relative flex items-center rounded-xl px-4 py-3 transition-colors ${
+                  isActive
+                    ? 'text-forest-green font-medium'
+                    : 'hover:bg-soft-stone/50 text-neutral-500 hover:text-neutral-900'
+                }`}
+              >
+                <Icon className="mr-3 h-5 w-5" strokeWidth={isActive ? 2.5 : 2} />
                 {item.name}
               </div>
             </Link>

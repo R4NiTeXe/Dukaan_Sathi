@@ -1,10 +1,10 @@
-import { Router } from 'express'
-import { extract, saveBill } from '../controllers/billing.controller.js'
-import { verifyJWT } from '../middlewares/auth.middleware.js'
+import { Router } from 'express';
+import { extract, saveBill } from '../controllers/billing.controller.js';
+import { verifyJWT } from '../middlewares/auth.middleware.js';
 
-const router = Router()
+const router = Router();
 
-router.post('/extract', verifyJWT, extract)
-router.post('/save', verifyJWT, saveBill)
+router.post('/extract', verifyJWT, extract);
+router.post('/save', verifyJWT, saveBill);
 
-export default router
+export default router;

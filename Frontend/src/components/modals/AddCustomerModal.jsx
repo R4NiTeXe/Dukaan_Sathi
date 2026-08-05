@@ -32,22 +32,26 @@ export default function AddCustomerModal({ isOpen, onClose, onCustomerAdded }) {
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Add New Customer">
       <form className="space-y-5" onSubmit={handleSubmit}>
-        
         {error && (
-          <div role="alert" className="p-3 bg-muted-red/10 border border-muted-red/20 rounded-xl flex items-center gap-2 text-muted-red text-sm">
-            <AlertCircle className="w-4 h-4 shrink-0" />
+          <div
+            role="alert"
+            className="bg-muted-red/10 border-muted-red/20 text-muted-red flex items-center gap-2 rounded-xl border p-3 text-sm"
+          >
+            <AlertCircle className="h-4 w-4 shrink-0" />
             <p>{error}</p>
           </div>
         )}
 
         {created ? (
-          <div className="p-4 bg-sage-green/10 border border-sage-green/30 rounded-xl text-center">
-            <p className="text-sm text-neutral-600 mb-1">Customer created with number</p>
-            <p className="font-mono font-bold text-forest-green text-lg">{created.customerNumber}</p>
+          <div className="bg-sage-green/10 border-sage-green/30 rounded-xl border p-4 text-center">
+            <p className="mb-1 text-sm text-neutral-600">Customer created with number</p>
+            <p className="text-forest-green font-mono text-lg font-bold">
+              {created.customerNumber}
+            </p>
           </div>
         ) : (
-          <div className="p-4 bg-warm-ivory border border-soft-stone rounded-xl flex items-start gap-3">
-            <Sparkles className="w-5 h-5 text-forest-green shrink-0 mt-0.5" />
+          <div className="bg-warm-ivory border-soft-stone flex items-start gap-3 rounded-xl border p-4">
+            <Sparkles className="text-forest-green mt-0.5 h-5 w-5 shrink-0" />
             <p className="text-sm text-neutral-600">
               A customer number (e.g. <span className="font-mono">CUST-…-001</span>) will be
               assigned automatically. No other details are needed.
@@ -55,23 +59,25 @@ export default function AddCustomerModal({ isOpen, onClose, onCustomerAdded }) {
           </div>
         )}
 
-        <div className="pt-4 flex gap-3">
-          <button 
-            type="button" 
+        <div className="flex gap-3 pt-4">
+          <button
+            type="button"
             onClick={onClose}
-            className="flex-1 py-2.5 px-4 bg-off-white border border-soft-stone rounded-xl text-sm font-medium hover:bg-soft-stone/50 transition-colors"
+            className="bg-off-white border-soft-stone hover:bg-soft-stone/50 flex-1 rounded-xl border px-4 py-2.5 text-sm font-medium transition-colors"
           >
             {created ? 'Close' : 'Cancel'}
           </button>
           {!created && (
-            <button 
-              type="submit" 
+            <button
+              type="submit"
               disabled={loading}
-              className="flex-1 py-2.5 px-4 bg-forest-green text-warm-ivory rounded-xl text-sm font-medium shadow-md shadow-forest-green/20 hover:bg-forest-green/90 transition-colors flex justify-center items-center"
+              className="bg-forest-green text-warm-ivory shadow-forest-green/20 hover:bg-forest-green/90 flex flex-1 items-center justify-center rounded-xl px-4 py-2.5 text-sm font-medium shadow-md transition-colors"
             >
-              {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : (
+              {loading ? (
+                <Loader2 className="h-5 w-5 animate-spin" />
+              ) : (
                 <>
-                  <UserPlus className="w-4 h-4 mr-2" />
+                  <UserPlus className="mr-2 h-4 w-4" />
                   Create Customer
                 </>
               )}

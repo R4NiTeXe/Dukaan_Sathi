@@ -40,27 +40,29 @@ export default function CustomersList() {
       initial="initial"
       animate="animate"
       exit="exit"
-      className="max-w-6xl mx-auto space-y-8 min-w-0"
+      className="mx-auto max-w-6xl min-w-0 space-y-8"
     >
       <PageHeader
         title="Customers"
         description="Customer numbers are assigned automatically."
         action={
           <Button onClick={() => setIsAddOpen(true)}>
-            <Plus className="w-4 h-4" /> Add Customer
+            <Plus className="h-4 w-4" /> Add Customer
           </Button>
         }
       />
 
       {error && (
-        <div role="alert" className="p-4 bg-muted-red/10 border border-muted-red/20 rounded-2xl flex items-center gap-3 text-muted-red">
-          <AlertCircle className="w-5 h-5 shrink-0" />
+        <div
+          role="alert"
+          className="bg-muted-red/10 border-muted-red/20 text-muted-red flex items-center gap-3 rounded-2xl border p-4"
+        >
+          <AlertCircle className="h-5 w-5 shrink-0" />
           <p>{error}</p>
         </div>
       )}
 
-      <div className="bg-off-white rounded-2xl p-4 md:p-6 shadow-[var(--shadow-soft)] border border-soft-stone min-w-0">
-        
+      <div className="bg-off-white border-soft-stone min-w-0 rounded-2xl border p-4 shadow-[var(--shadow-soft)] md:p-6">
         <div className="overflow-x-auto">
           {loading ? (
             <div className="space-y-3 p-4">
@@ -73,10 +75,10 @@ export default function CustomersList() {
               ))}
             </div>
           ) : (
-            <table className="w-full text-left border-collapse">
+            <table className="w-full border-collapse text-left">
               <thead>
-                <tr className="border-b border-soft-stone text-sm text-neutral-600">
-                  <th className="pb-4 font-medium pl-4">Customer No</th>
+                <tr className="border-soft-stone border-b text-sm text-neutral-600">
+                  <th className="pb-4 pl-4 font-medium">Customer No</th>
                   <th className="pb-4 font-medium">Total Purchases</th>
                   <th className="pb-4 font-medium">Added On</th>
                 </tr>
@@ -84,14 +86,14 @@ export default function CustomersList() {
               <tbody>
                 {customers.length === 0 ? (
                   <tr>
-                    <td colSpan="3" className="text-center py-8">
+                    <td colSpan="3" className="py-8 text-center">
                       <EmptyState
                         icon={UserPlus}
                         title="No customers yet"
                         description="Add your first customer to get started."
                         action={
                           <Button onClick={() => setIsAddOpen(true)} size="sm">
-                            <Plus className="w-4 h-4" /> Add Customer
+                            <Plus className="h-4 w-4" /> Add Customer
                           </Button>
                         }
                       />
@@ -99,21 +101,23 @@ export default function CustomersList() {
                   </tr>
                 ) : (
                   customers.map((customer, idx) => (
-                    <motion.tr 
+                    <motion.tr
                       key={customer._id}
                       variants={listItemVariants}
                       initial="hidden"
                       animate="show"
                       transition={{ delay: idx * 0.05 }}
-                      className="border-b border-soft-stone hover:bg-warm-ivory/50 transition-colors"
+                      className="border-soft-stone hover:bg-warm-ivory/50 border-b transition-colors"
                     >
                       <td className="py-4 pl-4">
-                        <span className="font-semibold text-neutral-900 font-mono">{customer.customerNumber}</span>
+                        <span className="font-mono font-semibold text-neutral-900">
+                          {customer.customerNumber}
+                        </span>
                       </td>
-                      <td className="py-4 text-forest-green font-semibold">
+                      <td className="text-forest-green py-4 font-semibold">
                         {customer.totalPurchases?.toLocaleString() || 0}
                       </td>
-                      <td className="py-4 text-neutral-500 text-sm">
+                      <td className="py-4 text-sm text-neutral-500">
                         {new Date(customer.createdAt).toLocaleDateString('en-GB')}
                       </td>
                     </motion.tr>

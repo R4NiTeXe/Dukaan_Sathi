@@ -1,15 +1,12 @@
-import { Router } from 'express'
-import {
-  createProduct,
-  listProducts,
-} from '../controllers/product.controller.js'
-import { verifyJWT } from '../middlewares/auth.middleware.js'
+import { Router } from 'express';
+import { createProduct, listProducts } from '../controllers/product.controller.js';
+import { verifyJWT } from '../middlewares/auth.middleware.js';
 
-const router = Router()
+const router = Router();
 
-router.use(verifyJWT)
+router.use(verifyJWT);
 
-router.post('/', createProduct)
-router.get('/', listProducts)
+router.post('/', createProduct);
+router.get('/', listProducts);
 
-export default router
+export default router;

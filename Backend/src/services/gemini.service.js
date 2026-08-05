@@ -1,9 +1,9 @@
-import { GoogleGenerativeAI } from '@google/generative-ai'
-import config from '../config/index.js'
+import { GoogleGenerativeAI } from '@google/generative-ai';
+import config from '../config/index.js';
 
-const GEMINI_MOCK = process.env.GEMINI_MOCK
+const GEMINI_MOCK = process.env.GEMINI_MOCK;
 
-const genAI = GEMINI_MOCK ? null : new GoogleGenerativeAI(config.gemini.apiKey)
+const genAI = GEMINI_MOCK ? null : new GoogleGenerativeAI(config.gemini.apiKey);
 
 const PROMPT = `You are a billing assistant for a local Indian shop.
 The shop owner describes items a customer is buying in Bengali, Hindi, or English.
@@ -30,19 +30,17 @@ Return ONLY a valid JSON array, no explanation, no markdown.
 Input: "{transcribed_text}"
 
 Output format:
-[{"productName": "...", "quantity": ..., "unit": "...", "price": ..., "pricePerUnit": false}]`
+[{"productName": "...", "quantity": ..., "unit": "...", "price": ..., "pricePerUnit": false}]`;
 
-const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
+const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const withTimeout = (promise, ms, message) =>
   Promise.race([
     promise,
-    new Promise((_, reject) =>
-      setTimeout(() => reject(new Error(message)), ms)
-    ),
-  ])
+    new Promise((_, reject) => setTimeout(() => reject(new Error(message)), ms)),
+  ]);
 
-const GENERATE_TIMEOUT_MS = 20000
+const GENERATE_TIMEOUT_MS = 20000;
 
 const ASSISTANT_PROMPT = `You are an AI assistant for a local shop owner.
 If the owner asks general knowledge questions or chats with you, answer normally. Do NOT introduce yourself repeatedly unless asked.
@@ -72,7 +70,7 @@ CRITICAL: When mentioning the payment status or payment mode of bills, you MUST 
 
 Never confuse Paid and Unpaid bills. Read the provided data carefully.
 If the owner asked in Bengali or Hindi, answer in that language but keep the HTML formatting.
-Return ONLY the answer text, no JSON.`
+Return ONLY the answer text, no JSON.`;
 
 const generateWithRetry = async (model, prompt, attempts = 3) => {
   for (let attempt = 1; attempt <= attempts; attempt++) {
@@ -81,81 +79,61 @@ const generateWithRetry = async (model, prompt, attempts = 3) => {
         model.generateContent(prompt),
         GENERATE_TIMEOUT_MS,
         'Gemini request timed out'
-      )
+      );
     } catch (error) {
-      const isRateLimit = /503|429|RESOURCE_EXHAUSTED|high demand/i.test(
-        error.message
-      )
-      if (!isRateLimit || attempt === attempts) throw error
-      await delay(2000 * attempt)
+      const isRateLimit = /503|429|RESOURCE_EXHAUSTED|high demand/i.test(error.message);
+      if (!isRateLimit || attempt === attempts) throw error;
+      await delay(2000 * attempt);
     }
   }
-  throw new Error('Gemini request failed after retries')
-}
+  throw new Error('Gemini request failed after retries');
+};
 
 export const extractBillItems = async (transcript, language = 'en') => {
   if (GEMINI_MOCK === 'ok') {
-    return [{ productName: 'Rice', quantity: 2, unit: 'kg', price: 200 }]
+    return [{ productName: 'Rice', quantity: 2, unit: 'kg', price: 200 }];
   }
-  const model = genAI.getGenerativeModel({ model: config.gemini.model })
+  const model = genAI.getGenerativeModel({ model: config.gemini.model });
   const result = await generateWithRetry(
     model,
-    PROMPT.replace('{transcribed_text}', transcript).replace(
-      '{language}',
-      language
-    )
-  )
-  const rawText = result.response.text().trim()
+    PROMPT.replace('{transcribed_text}', transcript).replace('{language}', language)
+  );
+  const rawText = result.response.text().trim();
 
   const cleaned = rawText
     .replace(/^```(?:json)?\s*/i, '')
     .replace(/```$/i, '')
-    .trim()
+    .trim();
 
   try {
-    const parsed = JSON.parse(cleaned)
+    const parsed = JSON.parse(cleaned);
     return parsed
-      .filter(
-        (item) =>
-          item &&
-          typeof item.productName === 'string' &&
-          item.productName.trim()
-      )
+      .filter((item) => item && typeof item.productName === 'string' && item.productName.trim())
       .map((item) => ({
         productName: item.productName.trim(),
-        quantity:
-          typeof item.quantity === 'number' && item.quantity > 0
-            ? item.quantity
-            : 1,
-        unit:
-          typeof item.unit === 'string' && item.unit.trim()
-            ? item.unit.trim()
-            : 'piece',
-        price:
-          typeof item.price === 'number' && item.price >= 0 ? item.price : 0,
+        quantity: typeof item.quantity === 'number' && item.quantity > 0 ? item.quantity : 1,
+        unit: typeof item.unit === 'string' && item.unit.trim() ? item.unit.trim() : 'piece',
+        price: typeof item.price === 'number' && item.price >= 0 ? item.price : 0,
         pricePerUnit: item.pricePerUnit === true,
       }))
-      .filter((item) => item.price > 0 || item.quantity > 0)
+      .filter((item) => item.price > 0 || item.quantity > 0);
   } catch (error) {
     throw new Error(`Gemini returned invalid JSON: ${rawText.slice(0, 200)}`, {
       cause: error,
-    })
+    });
   }
-}
+};
 
 export const askAssistant = async (dataContext, question, _user) => {
   if (GEMINI_MOCK === 'fail') {
-    throw new Error('Gemini is unavailable (mock fail mode)')
+    throw new Error('Gemini is unavailable (mock fail mode)');
   }
   if (!genAI) {
-    return 'Demo Mode: This is a placeholder AI response because GEMINI_MOCK is enabled.'
+    return 'Demo Mode: This is a placeholder AI response because GEMINI_MOCK is enabled.';
   }
   try {
-    const model = genAI.getGenerativeModel({ model: config.gemini.model })
-    const promptContext = ASSISTANT_PROMPT.replace(
-      '{data}',
-      JSON.stringify(dataContext)
-    )
+    const model = genAI.getGenerativeModel({ model: config.gemini.model });
+    const promptContext = ASSISTANT_PROMPT.replace('{data}', JSON.stringify(dataContext))
       .replace('{question}', question)
       .replace(
         '{current_date}',
@@ -165,45 +143,45 @@ export const askAssistant = async (dataContext, question, _user) => {
           month: 'long',
           day: 'numeric',
         })
-      )
+      );
 
     const result = await withTimeout(
       model.generateContent(promptContext),
       GENERATE_TIMEOUT_MS,
       'AI response timed out'
-    )
-    const text = (result.response.text() || '').trim()
+    );
+    const text = (result.response.text() || '').trim();
     if (!text) {
-      throw new Error('Gemini returned an empty response')
+      throw new Error('Gemini returned an empty response');
     }
-    return text
+    return text;
   } catch (error) {
-    console.error('Gemini Assistant Error:', error)
+    console.error('Gemini Assistant Error:', error);
     throw new Error('Failed to generate AI response: ' + error.message, {
       cause: error,
-    })
+    });
   }
-}
+};
 
-let lastGeminiPing = { at: 0, ok: false }
-const GEMINI_PING_TTL_MS = 2 * 60 * 1000
+let lastGeminiPing = { at: 0, ok: false };
+const GEMINI_PING_TTL_MS = 2 * 60 * 1000;
 
 // Performs a REAL generation test against the configured model. A token count
 // is not enough: a model that returns 404 or rejects prompts must be reported
 // as down. Green is only returned when the model genuinely answers.
 export const pingGemini = async () => {
-  const checkedAt = new Date().toISOString()
+  const checkedAt = new Date().toISOString();
   if (GEMINI_MOCK === 'ok') {
-    return { ok: true, model: config.gemini.model, checkedAt }
+    return { ok: true, model: config.gemini.model, checkedAt };
   }
   if (GEMINI_MOCK === 'fail') {
-    return { ok: false, model: config.gemini.model, checkedAt }
+    return { ok: false, model: config.gemini.model, checkedAt };
   }
   if (Date.now() - lastGeminiPing.at < GEMINI_PING_TTL_MS) {
-    return { ok: lastGeminiPing.ok, model: config.gemini.model, checkedAt }
+    return { ok: lastGeminiPing.ok, model: config.gemini.model, checkedAt };
   }
   try {
-    const model = genAI.getGenerativeModel({ model: config.gemini.model })
+    const model = genAI.getGenerativeModel({ model: config.gemini.model });
     const result = await withTimeout(
       model.generateContent({
         contents: [{ role: 'user', parts: [{ text: 'ping' }] }],
@@ -211,14 +189,14 @@ export const pingGemini = async () => {
       }),
       8000,
       'Gemini ping timed out'
-    )
-    const text = (result.response.text() || '').trim()
-    if (!text) throw new Error('Gemini returned an empty response')
-    lastGeminiPing = { at: Date.now(), ok: true }
-    return { ok: true, model: config.gemini.model, checkedAt }
+    );
+    const text = (result.response.text() || '').trim();
+    if (!text) throw new Error('Gemini returned an empty response');
+    lastGeminiPing = { at: Date.now(), ok: true };
+    return { ok: true, model: config.gemini.model, checkedAt };
   } catch (error) {
-    console.error('Gemini health check failed:', error.message)
-    lastGeminiPing = { at: Date.now(), ok: false }
-    return { ok: false, model: config.gemini.model, checkedAt }
+    console.error('Gemini health check failed:', error.message);
+    lastGeminiPing = { at: Date.now(), ok: false };
+    return { ok: false, model: config.gemini.model, checkedAt };
   }
-}
+};

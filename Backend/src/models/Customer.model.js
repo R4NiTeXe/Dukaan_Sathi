@@ -1,4 +1,4 @@
-import mongoose from 'mongoose'
+import mongoose from 'mongoose';
 
 const customerSchema = new mongoose.Schema(
   {
@@ -20,8 +20,8 @@ const customerSchema = new mongoose.Schema(
   {
     timestamps: true,
   }
-)
+);
 
-customerSchema.index({ userId: 1, customerNumber: 1 })
+customerSchema.index({ userId: 1, customerNumber: 1 });
 
-export const Customer = mongoose.model('Customer', customerSchema)
+export const Customer = mongoose.model('Customer', customerSchema);

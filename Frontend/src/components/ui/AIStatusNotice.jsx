@@ -34,13 +34,13 @@ export default function AIStatusNotice({ type = 'voice' }) {
 
   const messages = {
     voice: {
-      online: "Voice Billing System is ready to use",
-      offline: "Voice Billing is unavailable right now. Please try again later."
+      online: 'Voice Billing System is ready to use',
+      offline: 'Voice Billing is unavailable right now. Please try again later.',
     },
     advisor: {
-      online: "AI Advisor is online and ready to assist you",
-      offline: "AI Advisor is not responding due to a server issue."
-    }
+      online: 'AI Advisor is online and ready to assist you',
+      offline: 'AI Advisor is not responding due to a server issue.',
+    },
   };
 
   const currentMessages = messages[type] || messages.voice;
@@ -48,40 +48,40 @@ export default function AIStatusNotice({ type = 'voice' }) {
   return (
     <AnimatePresence mode="wait">
       {status === 'checking' && (
-        <motion.div 
+        <motion.div
           key="checking"
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95 }}
-          className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-neutral-100 text-neutral-500 text-sm font-medium rounded-xl border border-neutral-200 mb-6 shadow-sm"
+          className="mb-6 flex w-full items-center justify-center gap-2 rounded-xl border border-neutral-200 bg-neutral-100 px-4 py-3 text-sm font-medium text-neutral-500 shadow-sm"
         >
-          <Loader2 className="w-4 h-4 animate-spin" />
+          <Loader2 className="h-4 w-4 animate-spin" />
           Checking server status...
         </motion.div>
       )}
 
       {status === 'online' && (
-        <motion.div 
+        <motion.div
           key="online"
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95 }}
-          className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-emerald/10 text-emerald text-sm font-medium rounded-xl border border-emerald/20 mb-6 shadow-sm"
+          className="bg-emerald/10 text-emerald border-emerald/20 mb-6 flex w-full items-center justify-center gap-2 rounded-xl border px-4 py-3 text-sm font-medium shadow-sm"
         >
-          <CheckCircle2 className="w-4 h-4" />
+          <CheckCircle2 className="h-4 w-4" />
           {currentMessages.online}
         </motion.div>
       )}
 
       {status === 'offline' && (
-        <motion.div 
+        <motion.div
           key="offline"
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95 }}
-          className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-muted-red/10 text-muted-red text-sm font-medium rounded-xl border border-muted-red/20 mb-6 shadow-sm"
+          className="bg-muted-red/10 text-muted-red border-muted-red/20 mb-6 flex w-full items-center justify-center gap-2 rounded-xl border px-4 py-3 text-sm font-medium shadow-sm"
         >
-          <AlertTriangle className="w-4 h-4 shrink-0" />
+          <AlertTriangle className="h-4 w-4 shrink-0" />
           {currentMessages.offline}
         </motion.div>
       )}

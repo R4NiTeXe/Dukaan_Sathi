@@ -1,52 +1,43 @@
-import { saveBill as saveBillService } from '../services/billing.service.js'
-import { extractBillItems } from '../services/gemini.service.js'
-import {
-  saveBillSchema,
-  extractResponseSchema,
-} from '../validators/billing.validator.js'
-import ApiError from '../utils/ApiError.js'
-import ApiResponse from '../utils/ApiResponse.js'
-import asyncHandler from '../utils/asyncHandler.js'
+import { saveBill as saveBillService } from '../services/billing.service.js';
+import { extractBillItems } from '../services/gemini.service.js';
+import { saveBillSchema, extractResponseSchema } from '../validators/billing.validator.js';
+import ApiError from '../utils/ApiError.js';
+import ApiResponse from '../utils/ApiResponse.js';
+import asyncHandler from '../utils/asyncHandler.js';
 
 const extract = asyncHandler(async (req, res) => {
-  const { transcript, language } = req.body
+  const { transcript, language } = req.body;
 
   if (!transcript || !transcript.trim()) {
-    throw new ApiError(400, 'Transcript is required')
+    throw new ApiError(400, 'Transcript is required');
   }
 
-  const lang = ['en', 'hi', 'bn'].includes(language) ? language : 'en'
+  const lang = ['en', 'hi', 'bn'].includes(language) ? language : 'en';
 
-  let items
+  let items;
   try {
-    items = await extractBillItems(transcript.trim(), lang)
+    items = await extractBillItems(transcript.trim(), lang);
   } catch (error) {
-    throw new ApiError(502, `AI extraction failed: ${error.message}`)
+    throw new ApiError(502, `AI extraction failed: ${error.message}`);
   }
 
-  const validated = extractResponseSchema.safeParse(items)
+  const validated = extractResponseSchema.safeParse(items);
   if (!validated.success) {
-    throw new ApiError(
-      400,
-      'AI extraction failed validation',
-      validated.error.issues
-    )
+    throw new ApiError(400, 'AI extraction failed validation', validated.error.issues);
   }
 
-  return res
-    .status(200)
-    .json(new ApiResponse(200, { items: validated.data }, 'Items extracted'))
-})
+  return res.status(200).json(new ApiResponse(200, { items: validated.data }, 'Items extracted'));
+});
 
 const saveBill = asyncHandler(async (req, res) => {
-  const validated = saveBillSchema.safeParse(req.body)
+  const validated = saveBillSchema.safeParse(req.body);
   if (!validated.success) {
-    throw new ApiError(400, 'Invalid bill data', validated.error.issues)
+    throw new ApiError(400, 'Invalid bill data', validated.error.issues);
   }
 
-  const bill = await saveBillService(req.user._id, validated.data)
+  const bill = await saveBillService(req.user._id, validated.data);
 
-  return res.status(201).json(new ApiResponse(201, { bill }, 'Bill saved'))
-})
+  return res.status(201).json(new ApiResponse(201, { bill }, 'Bill saved'));
+});
 
-export { extract, saveBill }
+export { extract, saveBill };
