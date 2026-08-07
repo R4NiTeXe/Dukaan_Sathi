@@ -925,7 +925,6 @@ cd Frontend && npm run build && npm start
 | 🔄 Planned | Offline mode with service workers |
 | 🔄 Planned | Multi-shop / employee accounts |
 | 🔄 Planned | GST calculation & compliance |
-| 🔄 Planned | Barcode scanner integration |
 | 🔄 Planned | Automated daily/monthly email reports |
 
 ---

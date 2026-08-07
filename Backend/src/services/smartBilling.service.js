@@ -25,7 +25,6 @@ const toCatalogEntry = (product) => ({
   unit: product.unit || 'piece',
   category: product.category || 'other',
   taxRate: Number(product.taxRate) || 0,
-  barcode: product.barcode || null,
   autoAdded: product.autoAdded === true,
 });
 
@@ -40,7 +39,7 @@ export const getUserCatalog = async (userId) => {
 
   const products = await Product.find(
     { userId },
-    'name price unit category taxRate barcode aliases searchKeys autoAdded'
+    'name price unit category taxRate aliases searchKeys autoAdded'
   )
     .lean()
     .limit(5000);
@@ -103,7 +102,6 @@ export const matchCatalogItems = async ({ userId, items }) => {
       catalogUnitPrice: useCatalogPrice ? roundMoney(unitPrice) : undefined,
       category: product.category,
       taxRate: product.taxRate,
-      barcode: product.barcode || undefined,
       spokenPrice: spokenPrice > 0 ? spokenPrice : undefined,
       unit: product.unit || item.unit || 'piece',
       // price is the line total (qty × unit), matching the billing table's
@@ -159,12 +157,6 @@ export const suggestProducts = async ({ userId, query, limit = 8 }) => {
 
   scored.sort((a, b) => b.score - a.score || a.name.localeCompare(b.name));
   return scored.slice(0, Number(limit) || 8);
-};
-
-export const findProductByBarcode = async ({ userId, barcode }) => {
-  const code = String(barcode || '').trim();
-  if (!code) return null;
-  return Product.findOne({ userId, barcode: code }).lean();
 };
 
 // Instant learning: after the cashier confirms a price for a new item, create

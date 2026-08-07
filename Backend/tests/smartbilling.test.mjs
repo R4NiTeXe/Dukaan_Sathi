@@ -25,7 +25,7 @@ before(async () => {
   });
   token = reg.json.data.accessToken;
 
-  // Seed the catalog: Rice + Sugar + a barcoded product.
+  // Seed the catalog: Rice + Sugar.
   await request(baseUrl, 'POST', '/api/v1/products', {
     token,
     body: { name: 'Rice', price: 100, unit: 'kg', category: 'grocery', taxRate: 5 },
@@ -33,10 +33,6 @@ before(async () => {
   await request(baseUrl, 'POST', '/api/v1/products', {
     token,
     body: { name: 'Sugar', price: 50, unit: 'kg', category: 'grocery', taxRate: 5 },
-  });
-  await request(baseUrl, 'POST', '/api/v1/products', {
-    token,
-    body: { name: 'Cola 500ml', price: 35, unit: 'bottle', barcode: '8901234567890' },
   });
 });
 
@@ -170,15 +166,6 @@ test('search returns empty for nonsense queries', async () => {
   const r = await request(baseUrl, 'GET', '/api/v1/products/search?q=zzzzzz', { token });
   assert.equal(r.status, 200);
   assert.equal(r.json.data.results.length, 0);
-});
-
-test('barcode lookup returns the product and 404s for unknown codes', async () => {
-  const r = await request(baseUrl, 'GET', '/api/v1/products/barcode/8901234567890', { token });
-  assert.equal(r.status, 200);
-  assert.equal(r.json.data.product.name, 'Cola 500ml');
-
-  const missing = await request(baseUrl, 'GET', '/api/v1/products/barcode/999999999', { token });
-  assert.equal(missing.status, 404);
 });
 
 test('update product updates the default price used by extraction', async () => {

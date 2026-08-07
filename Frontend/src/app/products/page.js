@@ -215,11 +215,6 @@ export default function ProductsList() {
                               </span>
                             )}
                             {product.taxRate > 0 && <span>GST {product.taxRate}%</span>}
-                            {product.barcode && (
-                              <span className="max-w-[160px] truncate font-mono">
-                                #{product.barcode}
-                              </span>
-                            )}
                           </div>
                         </td>
                         <td className="py-4 text-right font-medium text-neutral-900">

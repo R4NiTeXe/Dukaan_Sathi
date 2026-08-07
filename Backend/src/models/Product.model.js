@@ -37,11 +37,6 @@ const productSchema = new mongoose.Schema(
       min: 0,
       max: 100,
     },
-    barcode: {
-      type: String,
-      default: null,
-      trim: true,
-    },
     aliases: {
       type: [String],
       default: [],
@@ -58,7 +53,6 @@ const productSchema = new mongoose.Schema(
 );
 
 productSchema.index({ userId: 1, name: 1 });
-productSchema.index({ userId: 1, barcode: 1 }, { sparse: true });
 productSchema.index({ userId: 1, searchKeys: 1 });
 
 productSchema.pre('save', function (next) {

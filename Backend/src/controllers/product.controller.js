@@ -5,14 +5,13 @@ import { monthlySalesCounts } from '../helpers/productAutoAdd.helper.js';
 import { buildSearchKeys } from '../helpers/smartMatch.helper.js';
 import {
   suggestProducts,
-  findProductByBarcode,
   invalidateCatalogCache,
 } from '../services/smartBilling.service.js';
 import ApiError from '../utils/ApiError.js';
 import ApiResponse from '../utils/ApiResponse.js';
 import asyncHandler from '../utils/asyncHandler.js';
 
-const PRODUCT_SELECT = 'name price unit stock category taxRate barcode aliases autoAdded';
+const PRODUCT_SELECT = 'name price unit stock category taxRate aliases autoAdded';
 
 const createProduct = asyncHandler(async (req, res) => {
   const validated = createProductSchema.parse(req.body);
@@ -75,18 +74,6 @@ const searchProducts = asyncHandler(async (req, res) => {
   return res.status(200).json(new ApiResponse(200, { results }, 'Suggestions fetched'));
 });
 
-// Barcode lookup for hardware scanners / manual code entry.
-const getProductByBarcode = asyncHandler(async (req, res) => {
-  const product = await findProductByBarcode({
-    userId: req.user._id,
-    barcode: req.params.code,
-  });
-  if (!product) {
-    throw new ApiError(404, 'No product found for this barcode');
-  }
-  return res.status(200).json(new ApiResponse(200, { product }, 'Product found'));
-});
-
 const updateProduct = asyncHandler(async (req, res) => {
   const productId = req.params.id;
   if (!mongoose.isValidObjectId(productId)) {
@@ -146,7 +133,6 @@ export {
   createProduct,
   listProducts,
   searchProducts,
-  getProductByBarcode,
   updateProduct,
   deleteProduct,
 };
