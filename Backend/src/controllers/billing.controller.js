@@ -1,5 +1,6 @@
 import { saveBill as saveBillService } from '../services/billing.service.js';
 import { extractBillItems } from '../services/gemini.service.js';
+import { matchCatalogItems } from '../services/smartBilling.service.js';
 import { saveBillSchema, extractResponseSchema } from '../validators/billing.validator.js';
 import ApiError from '../utils/ApiError.js';
 import ApiResponse from '../utils/ApiResponse.js';
@@ -26,7 +27,14 @@ const extract = asyncHandler(async (req, res) => {
     throw new ApiError(400, 'AI extraction failed validation', validated.error.issues);
   }
 
-  return res.status(200).json(new ApiResponse(200, { items: validated.data }, 'Items extracted'));
+  // Smart Billing: enrich every extracted item with the shop's saved catalog.
+  // Known items get their stored price/unit/tax; unknown items keep Gemini's
+  // output and are flagged so the UI can ask for a price (and learn it).
+  const enriched = await matchCatalogItems({ userId: req.user._id, items: validated.data });
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, { items: enriched }, 'Items extracted'));
 });
 
 const saveBill = asyncHandler(async (req, res) => {

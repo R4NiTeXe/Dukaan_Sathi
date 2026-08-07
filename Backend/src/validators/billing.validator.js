@@ -6,6 +6,11 @@ export const billItemSchema = z.object({
   unit: z.string().min(1, 'Unit is required'),
   price: z.number().nonnegative('Price cannot be negative'),
   pricePerUnit: z.boolean().optional(),
+  // Smart Billing flags (optional, backward compatible):
+  isNewConfirmed: z.boolean().optional(),
+  category: z.string().optional(),
+  taxRate: z.number().min(0).max(100).optional(),
+  matchedProductId: z.string().optional(),
 });
 
 export const extractResponseSchema = z

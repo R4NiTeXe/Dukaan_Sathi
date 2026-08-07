@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import { buildSearchKeys } from '../helpers/smartMatch.helper.js';
 
 const productSchema = new mongoose.Schema(
   {
@@ -25,6 +26,31 @@ const productSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    category: {
+      type: String,
+      default: 'other',
+      trim: true,
+    },
+    taxRate: {
+      type: Number,
+      default: 0,
+      min: 0,
+      max: 100,
+    },
+    barcode: {
+      type: String,
+      default: null,
+      trim: true,
+    },
+    aliases: {
+      type: [String],
+      default: [],
+    },
+    searchKeys: {
+      type: [String],
+      select: false,
+      default: [],
+    },
   },
   {
     timestamps: true,
@@ -32,5 +58,12 @@ const productSchema = new mongoose.Schema(
 );
 
 productSchema.index({ userId: 1, name: 1 });
+productSchema.index({ userId: 1, barcode: 1 }, { sparse: true });
+productSchema.index({ userId: 1, searchKeys: 1 });
+
+productSchema.pre('save', function (next) {
+  this.searchKeys = buildSearchKeys(this.name, this.aliases);
+  next();
+});
 
 export const Product = mongoose.model('Product', productSchema);
