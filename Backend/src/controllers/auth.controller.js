@@ -1,6 +1,6 @@
 ﻿import { User } from '../models/User.model.js';
 import { registerSchema, loginSchema, updateProfileSchema } from '../validators/auth.validator.js';
-import { uploadQRCode, deleteImage } from '../services/cloudinary.service.js';
+import { uploadQRCode, uploadAvatar, deleteImage } from '../services/cloudinary.service.js';
 import ApiError from '../utils/ApiError.js';
 import ApiResponse from '../utils/ApiResponse.js';
 import asyncHandler from '../utils/asyncHandler.js';
@@ -33,13 +33,7 @@ const register = asyncHandler(async (req, res) => {
     new ApiResponse(
       201,
       {
-        user: {
-          _id: user._id,
-          ownerName: user.ownerName,
-          email: user.email,
-          shopName: user.shopName,
-          preferredLanguage: user.preferredLanguage,
-        },
+        user: publicUserFields(user),
         accessToken,
       },
       'Registration successful'
@@ -70,18 +64,24 @@ const login = asyncHandler(async (req, res) => {
     new ApiResponse(
       200,
       {
-        user: {
-          _id: user._id,
-          ownerName: user.ownerName,
-          email: user.email,
-          shopName: user.shopName,
-          preferredLanguage: user.preferredLanguage,
-        },
+        user: publicUserFields(user),
         accessToken,
       },
       'Login successful'
     )
   );
+});
+
+// Keep client-visible user data consistent and leak-free across endpoints.
+const publicUserFields = (user) => ({
+  _id: user._id,
+  ownerName: user.ownerName,
+  email: user.email,
+  shopName: user.shopName,
+  shopType: user.shopType,
+  shopAddress: user.shopAddress,
+  preferredLanguage: user.preferredLanguage,
+  avatar: user.avatar || null,
 });
 
 const getProfile = asyncHandler(async (req, res) => {
@@ -90,20 +90,36 @@ const getProfile = asyncHandler(async (req, res) => {
 
 const updateProfile = asyncHandler(async (req, res) => {
   let updates = {};
-  const previousUser = await User.findById(req.user._id).select('upiQrCode');
+  const previousUser = await User.findById(req.user._id).select('upiQrCode avatar');
 
-  if (req.file) {
-    const url = await uploadQRCode(req.file);
+  const uploadedFiles = req.files || {};
+  const qrFile = uploadedFiles.upiQrCode?.[0];
+  const avatarFile = uploadedFiles.avatar?.[0];
+
+  if (qrFile) {
+    const url = await uploadQRCode(qrFile);
     updates.upiQrCode = url;
+  }
+
+  if (avatarFile) {
+    const url = await uploadAvatar(avatarFile);
+    updates.avatar = url;
   }
 
   if (req.body && Object.keys(req.body).length > 0) {
     const validated = updateProfileSchema.parse(req.body);
     updates = { ...validated, ...updates };
+
+    if (validated.avatar === '') {
+      updates.avatar = null;
+    }
+    if (validated.upiQrCode === '') {
+      updates.upiQrCode = null;
+    }
   }
 
   if (Object.keys(updates).length === 0) {
-    throw new ApiError(400, 'At least one field or a QR image must be provided');
+    throw new ApiError(400, 'At least one field or an image must be provided');
   }
 
   const user = await User.findByIdAndUpdate(
@@ -112,13 +128,31 @@ const updateProfile = asyncHandler(async (req, res) => {
     { new: true, runValidators: true }
   ).select('-password');
 
+  // Clean up replaced/removed images from Cloudinary.
+  const previousImageTasks = [];
+
   if (
     updates.upiQrCode &&
     previousUser?.upiQrCode &&
     previousUser.upiQrCode !== updates.upiQrCode
   ) {
-    await deleteImage(previousUser.upiQrCode);
+    previousImageTasks.push(deleteImage(previousUser.upiQrCode));
   }
+  if (updates.upiQrCode === null && previousUser?.upiQrCode) {
+    previousImageTasks.push(deleteImage(previousUser.upiQrCode));
+  }
+  if (
+    updates.avatar &&
+    previousUser?.avatar &&
+    previousUser.avatar !== updates.avatar
+  ) {
+    previousImageTasks.push(deleteImage(previousUser.avatar));
+  }
+  if (updates.avatar === null && previousUser?.avatar) {
+    previousImageTasks.push(deleteImage(previousUser.avatar));
+  }
+
+  await Promise.all(previousImageTasks);
 
   return res.status(200).json(new ApiResponse(200, { user }, 'Profile updated'));
 });

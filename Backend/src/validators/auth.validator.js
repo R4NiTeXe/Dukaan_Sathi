@@ -9,6 +9,7 @@ export const registerSchema = z.object({
   shopAddress: z.string().optional(),
   preferredLanguage: z.enum(['bn', 'hi', 'en']).default('en'),
   upiQrCode: z.string().optional(),
+  avatar: z.string().optional(),
 });
 
 export const loginSchema = z.object({
@@ -25,5 +26,6 @@ export const updateProfileSchema = z.object({
   shopAddress: z.string().optional(),
   preferredLanguage: z.enum(['bn', 'hi', 'en']).optional(),
   upiQrCode: z.string().optional(),
+  avatar: z.string().optional(),
 });
 export const refreshSchema = z.object({});

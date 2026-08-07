@@ -11,8 +11,11 @@ const fileFilter = (req, file, cb) => {
   }
 };
 
-export const uploadImage = multer({
+export const uploadImages = multer({
   storage,
   limits: { fileSize: 5 * 1024 * 1024 },
   fileFilter,
-}).single('upiQrCode');
+}).fields([
+  { name: 'upiQrCode', maxCount: 1 },
+  { name: 'avatar', maxCount: 1 },
+]);
