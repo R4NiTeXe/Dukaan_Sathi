@@ -1,4 +1,4 @@
-import { saveBill as saveBillService } from '../services/billing.service.js';
+import { saveBill as saveBillService, getRecentProducts } from '../services/billing.service.js';
 import { extractBillItems } from '../services/gemini.service.js';
 import { matchCatalogItems } from '../services/smartBilling.service.js';
 import { saveBillSchema, extractResponseSchema } from '../validators/billing.validator.js';
@@ -48,4 +48,9 @@ const saveBill = asyncHandler(async (req, res) => {
   return res.status(201).json(new ApiResponse(201, { bill }, 'Bill saved'));
 });
 
-export { extract, saveBill };
+const recentProducts = asyncHandler(async (req, res) => {
+  const products = await getRecentProducts(req.user._id, req.query.limit);
+  return res.status(200).json(new ApiResponse(200, { products }, 'Recent products fetched'));
+});
+
+export { extract, saveBill, recentProducts };
