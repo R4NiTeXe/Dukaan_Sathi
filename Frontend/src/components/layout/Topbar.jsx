@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Menu, X, LogOut, Settings, UserRound, PencilLine, ChevronDown } from 'lucide-react';
+import { Search, Menu, X, LogOut, Store, ChevronDown } from 'lucide-react';
 import ThemeToggle from '@/components/layout/ThemeToggle';
 import Avatar from '@/components/ui/Avatar';
 import { useAuth } from '@/context/AuthContext';
@@ -134,28 +134,10 @@ export default function Topbar() {
                     href="/profile"
                     role="menuitem"
                     onClick={() => setIsProfileOpen(false)}
-                    className="flex w-full items-center px-4 py-2.5 text-sm text-neutral-700 transition-colors hover:bg-soft-stone/50 hover:text-neutral-900"
+                    className="flex w-full items-center rounded-xl px-4 py-2.5 text-sm text-neutral-700 transition-colors hover:bg-soft-stone/50 hover:text-neutral-900"
                   >
-                    <UserRound className="mr-3 h-4 w-4 text-neutral-400" />
-                    My Profile
-                  </Link>
-                  <Link
-                    href="/profile?edit=1"
-                    role="menuitem"
-                    onClick={() => setIsProfileOpen(false)}
-                    className="flex w-full items-center px-4 py-2.5 text-sm text-neutral-700 transition-colors hover:bg-soft-stone/50 hover:text-neutral-900"
-                  >
-                    <PencilLine className="mr-3 h-4 w-4 text-neutral-400" />
-                    Edit Profile
-                  </Link>
-                  <Link
-                    href="/settings"
-                    role="menuitem"
-                    onClick={() => setIsProfileOpen(false)}
-                    className="flex w-full items-center px-4 py-2.5 text-sm text-neutral-700 transition-colors hover:bg-soft-stone/50 hover:text-neutral-900"
-                  >
-                    <Settings className="mr-3 h-4 w-4 text-neutral-400" />
-                    Settings
+                    <Store className="mr-3 h-4 w-4 text-neutral-400" />
+                    Shop Profile
                   </Link>
 
                   <div className="border-soft-stone/50 my-1 border-t" />
@@ -166,7 +148,7 @@ export default function Topbar() {
                       setIsProfileOpen(false);
                       logout();
                     }}
-                    className="text-muted-red flex w-full items-center px-4 py-2.5 text-sm transition-colors hover:bg-red-50/50"
+                    className="text-muted-red flex w-full items-center rounded-xl px-4 py-2.5 text-sm transition-colors hover:bg-red-50/50"
                   >
                     <LogOut className="mr-3 h-4 w-4" />
                     Logout
