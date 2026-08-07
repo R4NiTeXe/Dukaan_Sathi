@@ -1,6 +1,6 @@
 <div align="center">
 
-# Dukaan Saathi
+# 🛒 Dukaan Saathi
 
 ### AI-Powered Billing & Business Intelligence Platform for Local Indian Shops
 
@@ -39,6 +39,18 @@ Voice-driven bill generation · Real-time analytics · AI business advisor · Mu
 It replaces manual paper billing with an **AI voice-to-bill pipeline** powered by **Google Gemini**, allowing shop owners to speak a customer's purchase in **Bengali, Hindi, or English** and receive a structured bill in seconds.
 
 Beyond billing, Dukaan Saathi delivers a **real-time analytics dashboard**, **customer management**, **product inventory tracking**, and an **AI business advisor** that answers natural-language questions about the shop's performance using real database numbers.
+
+---
+
+## Problem vs Solution
+
+| Problem | Solution |
+|---|---|
+| Manual paper billing is slow and error-prone | AI voice-to-bill generates a structured bill in seconds from natural speech |
+| No visibility into business performance | Real-time analytics dashboard with revenue trends, top products, and payment breakdowns |
+| Language barriers with English-only software | Full billing in Bengali, Hindi, and English |
+| No time for complex software training | Tap-to-speak interface — no training required |
+| Manual Cash vs UPI tracking | Automatic payment mode and status tracking on every bill |
 
 ---
 
