@@ -9,7 +9,7 @@ import { useAuth } from '@/context/AuthContext';
 import AIStatusNotice from '@/components/ui/AIStatusNotice';
 import { LANGUAGES, CATEGORIES } from '@/constants/navigation';
 import Button from '@/components/ui/Button';
-import ProductSuggest from '@/components/billing/ProductSuggest';
+import RecentBills from '@/components/billing/RecentBills';
 import PriceUpdateModal from '@/components/billing/PriceUpdateModal';
 import AmbiguousProductModal from '@/components/billing/AmbiguousProductModal';
 
@@ -497,9 +497,41 @@ export default function VoiceBilling() {
     );
   };
 
-  // Add an item picked from the catalog auto-suggest dropdown.
-  const addFromSuggest = (item) => {
-    setExtractedItems((prev) => [...prev, item]);
+  // Add a product from the Recent Bills quick-pick list. If the product is
+  // already on the bill, its quantity grows instead of duplicating the line.
+  const addRecentProduct = (product, qty) => {
+    const addQty = Math.max(1, Number(qty) || 1);
+    const unitPrice = Number(product.unitPrice) || 0;
+
+    setExtractedItems((prev) => {
+      const normalized = (name) => (name || '').trim().toLowerCase();
+      const existingIdx = prev.findIndex(
+        (entry) => normalized(entry.productName || entry.name) === normalized(product.productName)
+      );
+      if (existingIdx === -1) {
+        return [
+          ...prev,
+          {
+            productName: product.productName,
+            quantity: addQty,
+            unit: product.unit || 'piece',
+            price: round2(unitPrice * addQty),
+            pricePerUnit: false,
+            match: 'catalog',
+          },
+        ];
+      }
+      return prev.map((entry, i) => {
+        if (i !== existingIdx) return entry;
+        const newQty = (Number(entry.quantity) || 0) + addQty;
+        return {
+          ...entry,
+          quantity: newQty,
+          price: round2(unitPrice * newQty),
+          pricePerUnit: false,
+        };
+      });
+    });
     setShowSuccessToast(false);
   };
 
@@ -674,9 +706,6 @@ export default function VoiceBilling() {
               className="bg-warm-ivory border-soft-stone focus:border-sage-green focus:ring-sage-green min-h-[100px] w-full resize-none rounded-2xl border px-6 py-4 transition-all focus:ring-1 focus:outline-none"
               rows={4}
             />
-            <div className="mt-3">
-              <ProductSuggest onAddItem={addFromSuggest} />
-            </div>
             {!isRecording && transcript && (
               <Button
                 onClick={() => extractItemsFromTranscript(transcript)}
@@ -911,6 +940,8 @@ export default function VoiceBilling() {
           )}
         </motion.div>
       </div>
+
+      <RecentBills onAddProduct={addRecentProduct} className="mt-8" />
 
       <AmbiguousProductModal
         item={ambiguousItem}
