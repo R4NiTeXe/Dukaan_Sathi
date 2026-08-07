@@ -497,7 +497,7 @@ export default function VoiceBilling() {
     );
   };
 
-  // Add an item picked from the catalog auto-suggest dropdown or barcode scan.
+  // Add an item picked from the catalog auto-suggest dropdown.
   const addFromSuggest = (item) => {
     setExtractedItems((prev) => [...prev, item]);
     setShowSuccessToast(false);

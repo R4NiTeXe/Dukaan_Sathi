@@ -1,10 +1,10 @@
 'use client';
 
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { Search, ScanBarcode, AlertTriangle, IndianRupee } from 'lucide-react';
+import { Search, IndianRupee } from 'lucide-react';
 import api from '@/services/api';
 
-// Debounced product auto-suggest + barcode lookup for the Smart Billing input.
+// Debounced product auto-suggest for the Smart Billing input.
 // Emits fully-priced item rows via onAddItem, so the cashier never types a
 // price for a product that already exists in the shop's catalog.
 export default function ProductSuggest({ onAddItem }) {
@@ -12,10 +12,6 @@ export default function ProductSuggest({ onAddItem }) {
   const [results, setResults] = useState([]);
   const [open, setOpen] = useState(false);
   const [loadingSuggest, setLoadingSuggest] = useState(false);
-  const [scanMode, setScanMode] = useState(false);
-  const [barcode, setBarcode] = useState('');
-  const [barcodeBusy, setBarcodeBusy] = useState(false);
-  const [barcodeError, setBarcodeError] = useState('');
   const debounceRef = useRef(null);
   const containerRef = useRef(null);
 
@@ -79,30 +75,6 @@ export default function ProductSuggest({ onAddItem }) {
     });
   };
 
-  const lookupBarcode = async () => {
-    const code = barcode.trim();
-    if (!code) return;
-    setBarcodeBusy(true);
-    setBarcodeError('');
-    try {
-      const { data } = await api.get(`/products/barcode/${encodeURIComponent(code)}`);
-      const product = data.data?.product;
-      if (product) {
-        addItem(product);
-        setBarcode('');
-        setScanMode(false);
-      }
-    } catch (err) {
-      if (err.response?.status === 404) {
-        setBarcodeError('No product found for this barcode in your catalog.');
-      } else {
-        setBarcodeError('Barcode lookup failed. Try again.');
-      }
-    } finally {
-      setBarcodeBusy(false);
-    }
-  };
-
   return (
     <div ref={containerRef} className="w-full">
       <div className="flex gap-2">
@@ -121,22 +93,6 @@ export default function ProductSuggest({ onAddItem }) {
             <div className="absolute top-1/2 right-3 h-4 w-4 -translate-y-1/2 animate-spin rounded-full border-2 border-neutral-300 border-t-sage-green" />
           )}
         </div>
-        <button
-          type="button"
-          onClick={() => {
-            setScanMode((v) => !v);
-            setBarcodeError('');
-          }}
-          className={`flex items-center gap-1.5 rounded-xl border px-3 py-2 text-sm font-medium transition-colors ${
-            scanMode
-              ? 'bg-forest-green text-warm-ivory border-forest-green'
-              : 'border-soft-stone bg-warm-ivory text-neutral-600 hover:bg-soft-stone/40'
-          }`}
-          aria-label="Enter barcode"
-        >
-          <ScanBarcode className="h-4 w-4" />
-          <span className="hidden sm:inline">Barcode</span>
-        </button>
       </div>
 
       {open && results.length > 0 && (
@@ -168,39 +124,6 @@ export default function ProductSuggest({ onAddItem }) {
             </li>
           ))}
         </ul>
-      )}
-
-      {scanMode && (
-        <div className="mt-2 flex gap-2 rounded-xl border border-soft-stone bg-off-white/60 p-2">
-          <input
-            type="text"
-            autoFocus
-            value={barcode}
-            onChange={(e) => setBarcode(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && lookupBarcode()}
-            placeholder="Scan or type barcode / EAN code…"
-            className="bg-warm-ivory border-soft-stone focus:border-sage-green w-full rounded-lg border px-3 py-2 text-sm focus:outline-none"
-            aria-label="Barcode"
-          />
-          <button
-            type="button"
-            onClick={lookupBarcode}
-            disabled={barcodeBusy}
-            className="bg-forest-green text-warm-ivory shrink-0 rounded-lg px-4 py-2 text-sm font-medium transition-opacity disabled:opacity-50"
-          >
-            {barcodeBusy ? '…' : 'Add'}
-          </button>
-        </div>
-      )}
-
-      {barcodeError && (
-        <p
-          role="alert"
-          className="text-muted-red mt-2 flex items-center gap-1.5 text-xs"
-        >
-          <AlertTriangle className="h-3.5 w-3.5" />
-          {barcodeError}
-        </p>
       )}
     </div>
   );
