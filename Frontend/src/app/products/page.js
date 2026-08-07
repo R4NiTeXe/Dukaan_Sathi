@@ -114,7 +114,8 @@ export default function ProductsList() {
 
       <p className="-mt-4 flex items-center gap-1.5 text-xs text-neutral-400">
         <Sparkles className="text-sage-green h-3.5 w-3.5" />
-        Items sold more than 15 times in a month are auto-added to your inventory.
+        New items get learned instantly when you confirm their price during Smart Billing; items
+        sold 15× in a month are auto-added too.
       </p>
 
       {error && (
@@ -206,7 +207,20 @@ export default function ProductsList() {
                               </span>
                             )}
                           </div>
-                          <div className="mt-0.5 text-xs text-neutral-400">{product.unit}</div>
+                          <div className="mt-0.5 flex flex-wrap items-center gap-x-2 text-xs text-neutral-400">
+                            {product.unit}
+                            {product.category && product.category !== 'other' && (
+                              <span className="bg-sage-green/10 text-sage-green rounded-full border border-transparent px-1.5 py-px text-[10px]">
+                                {product.category}
+                              </span>
+                            )}
+                            {product.taxRate > 0 && <span>GST {product.taxRate}%</span>}
+                            {product.barcode && (
+                              <span className="max-w-[160px] truncate font-mono">
+                                #{product.barcode}
+                              </span>
+                            )}
+                          </div>
                         </td>
                         <td className="py-4 text-right font-medium text-neutral-900">
                           ₹{product.price}

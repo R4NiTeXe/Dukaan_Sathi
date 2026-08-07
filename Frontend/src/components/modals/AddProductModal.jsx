@@ -2,14 +2,18 @@
 
 import { useState } from 'react';
 import Modal from '@/components/ui/Modal';
-import { Package, Hash, IndianRupee, Loader2, AlertCircle } from 'lucide-react';
+import { Package, Hash, IndianRupee, Loader2, AlertCircle, Percent, Tag } from 'lucide-react';
 import api from '@/services/api';
+import { CATEGORIES } from '@/constants/navigation';
 
 export default function AddProductModal({ isOpen, onClose, onProductAdded }) {
   const [formData, setFormData] = useState({
     name: '',
     unit: 'kg',
     price: '',
+    category: 'other',
+    taxRate: '0',
+    barcode: '',
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -23,12 +27,14 @@ export default function AddProductModal({ isOpen, onClose, onProductAdded }) {
       const payload = {
         ...formData,
         price: Number(formData.price),
+        taxRate: Number(formData.taxRate),
+        barcode: formData.barcode.trim() || null,
       };
 
       const response = await api.post('/products', payload);
       if (response.data.success) {
         if (onProductAdded) onProductAdded();
-        setFormData({ name: '', unit: 'kg', price: '' });
+        setFormData({ name: '', unit: 'kg', price: '', category: 'other', taxRate: '0', barcode: '' });
         onClose();
       }
     } catch (err) {
@@ -98,6 +104,63 @@ export default function AddProductModal({ isOpen, onClose, onProductAdded }) {
               placeholder="0.00"
               className="bg-off-white border-soft-stone focus:border-sage-green w-full rounded-xl border py-2.5 pr-4 pl-10 text-sm transition-all focus:outline-none"
             />
+          </div>
+        </div>
+
+        <div className="space-y-1.5">
+          <label className="text-sm font-medium text-neutral-700">Category</label>
+          <div className="relative">
+            <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+              <Tag className="h-4 w-4 text-neutral-400" />
+            </div>
+            <select
+              value={formData.category}
+              onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+              className="bg-off-white border-soft-stone focus:border-sage-green w-full rounded-xl border px-4 py-2.5 pl-10 text-sm text-neutral-700 transition-all focus:outline-none"
+            >
+              {CATEGORIES.map((cat) => (
+                <option key={cat.value} value={cat.value}>
+                  {cat.label}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-1.5">
+            <label className="text-sm font-medium text-neutral-700">Tax (%)</label>
+            <div className="relative">
+              <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                <Percent className="h-4 w-4 text-neutral-400" />
+              </div>
+              <input
+                type="number"
+                min="0"
+                max="100"
+                step="0.5"
+                value={formData.taxRate}
+                onChange={(e) => setFormData({ ...formData, taxRate: e.target.value })}
+                placeholder="0"
+                className="bg-off-white border-soft-stone focus:border-sage-green w-full rounded-xl border py-2.5 pr-4 pl-10 text-sm transition-all focus:outline-none"
+              />
+            </div>
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-sm font-medium text-neutral-700">Barcode (optional)</label>
+            <div className="relative">
+              <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                <Hash className="h-4 w-4 text-neutral-400" />
+              </div>
+              <input
+                type="text"
+                value={formData.barcode}
+                onChange={(e) => setFormData({ ...formData, barcode: e.target.value })}
+                placeholder="890… "
+                className="bg-off-white border-soft-stone focus:border-sage-green w-full rounded-xl border py-2.5 pr-4 pl-10 text-sm transition-all focus:outline-none"
+              />
+            </div>
           </div>
         </div>
 

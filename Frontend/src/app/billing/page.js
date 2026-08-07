@@ -7,8 +7,13 @@ import { Mic, MicOff, Check, X, Loader2, Sparkles, Plus, ReceiptText } from 'luc
 import api from '@/services/api';
 import { useAuth } from '@/context/AuthContext';
 import AIStatusNotice from '@/components/ui/AIStatusNotice';
-import { LANGUAGES } from '@/constants/navigation';
+import { LANGUAGES, CATEGORIES } from '@/constants/navigation';
 import Button from '@/components/ui/Button';
+import ProductSuggest from '@/components/billing/ProductSuggest';
+import PriceUpdateModal from '@/components/billing/PriceUpdateModal';
+import AmbiguousProductModal from '@/components/billing/AmbiguousProductModal';
+
+const round2 = (value) => Math.round((Number(value) || 0) * 100) / 100;
 
 const LANG_MAP = {
   en: 'en-IN',
@@ -30,6 +35,11 @@ export default function VoiceBilling() {
   const [paymentMethod, setPaymentMethod] = useState('cash');
   const [paymentStatus, setPaymentStatus] = useState('paid');
   const [showSuccessToast, setShowSuccessToast] = useState(false);
+  const [ambiguousItem, setAmbiguousItem] = useState(null);
+  const [priceChanges, setPriceChanges] = useState([]);
+  const [showPriceUpdateModal, setShowPriceUpdateModal] = useState(false);
+  const [updatingDefaults, setUpdatingDefaults] = useState(false);
+  const [savedNewCount, setSavedNewCount] = useState(0);
 
   const SpeechRecognition =
     typeof window !== 'undefined'
@@ -104,6 +114,11 @@ export default function VoiceBilling() {
           setExtractError('No items could be recognized. Try speaking item names clearly.');
         } else {
           setExtractedItems(response.data.data.items);
+          // Ask for clarification when an item matches several catalog products.
+          const firstAmbiguous = (response.data.data.items || []).find(
+            (item) => item.match === 'ambiguous'
+          );
+          setAmbiguousItem(firstAmbiguous || null);
         }
       }
     } catch (err) {
@@ -353,20 +368,57 @@ export default function VoiceBilling() {
     setSaveError('');
     try {
       const payload = {
-        items: extractedItems.map((item) => ({
-          productName: item.productName || item.name, // Fallback if name is returned
-          quantity: Number(item.quantity) || 1,
-          unit: item.unit || 'piece',
-          price: Number(item.price) || 0,
-          pricePerUnit: item.pricePerUnit === true,
-        })),
+        items: extractedItems.map((item) => {
+          const quantity = Number(item.quantity) || 1;
+          return {
+            productName: item.productName || item.name,
+            quantity,
+            unit: item.unit || 'piece',
+            price: Number(item.price) || 0,
+            pricePerUnit: item.pricePerUnit === true,
+            matchedProductId: item.matchedProductId,
+            // New products with a confirmed price get learned into the catalog.
+            isNewConfirmed: item.match === 'new' && (Number(item.price) || 0) > 0,
+            category: item.match === 'new' ? item.category || user?.shopType || 'other' : undefined,
+            taxRate: item.match === 'new' ? Number(item.taxRate) || 0 : undefined,
+          };
+        }),
         paymentMethod,
         paymentStatus,
       };
       const response = await api.post('/billing/save', payload);
       if (response.data.success) {
-        setShowSuccessToast(true);
-        setTimeout(() => setShowSuccessToast(false), 3000);
+        // Detect catalog items billed at a different price -> ask to update default.
+        const changed = extractedItems
+          .filter((item) => item.matchedProductId && Number(item.catalogUnitPrice) > 0)
+          .map((item) => {
+            const quantity = Number(item.quantity) || 1;
+            const newUnitPrice = round2((Number(item.price) || 0) / quantity);
+            return {
+              item,
+              newUnitPrice,
+              oldUnitPrice: Number(item.catalogUnitPrice),
+            };
+          })
+          .filter(({ newUnitPrice, oldUnitPrice }) =>
+            Math.abs(newUnitPrice - oldUnitPrice) > 0.005
+          );
+        if (changed.length > 0) {
+          setPriceChanges(
+            changed.map(({ item, newUnitPrice, oldUnitPrice }) => ({
+              productId: item.matchedProductId,
+              name: item.catalogName || item.productName,
+              unit: item.catalogUnit || item.unit,
+              oldPrice: oldUnitPrice,
+              newPrice: newUnitPrice,
+            }))
+          );
+          setShowPriceUpdateModal(true);
+        } else {
+          setShowSuccessToast(true);
+          setTimeout(() => setShowSuccessToast(false), 3000);
+        }
+
         pausedRef.current = false;
         setTranscript('');
         setExtractedItems([]);
@@ -386,6 +438,30 @@ export default function VoiceBilling() {
       }
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const confirmPriceUpdates = async () => {
+    if (priceChanges.length === 0) {
+      setShowPriceUpdateModal(false);
+      return;
+    }
+    setUpdatingDefaults(true);
+    try {
+      await Promise.all(
+        priceChanges.map((change) =>
+          api.put(`/products/${change.productId}`, { price: change.newPrice })
+        )
+      );
+      setShowPriceUpdateModal(false);
+      setPriceChanges([]);
+      setShowSuccessToast(true);
+      setTimeout(() => setShowSuccessToast(false), 3000);
+    } catch (err) {
+      console.error(err);
+      setSaveError('Bill saved, but updating the default price failed.');
+    } finally {
+      setUpdatingDefaults(false);
     }
   };
 
@@ -418,6 +494,49 @@ export default function VoiceBilling() {
         }
         return updatedItem;
       })
+    );
+  };
+
+  // Add an item picked from the catalog auto-suggest dropdown or barcode scan.
+  const addFromSuggest = (item) => {
+    setExtractedItems((prev) => [...prev, item]);
+    setShowSuccessToast(false);
+  };
+
+  // Resolve an ambiguous (duplicate-name) item: pick a catalog candidate or
+  // treat it as brand new. Continues prompting if more ambiguous items remain.
+  const resolveAmbiguous = (item, candidate, asNew) => {
+    setExtractedItems((prev) =>
+      prev.map((entry, idx) => {
+        if (entry !== item || !entry.ambiguous) return entry;
+        if (asNew) {
+          return { ...entry, match: 'new' };
+        }
+        const quantity = Number(entry.quantity) || 1;
+        return {
+          ...entry,
+          match: 'catalog',
+          matchedProductId: candidate._id,
+          productName: candidate.name,
+          catalogName: candidate.name,
+          catalogUnit: candidate.unit,
+          catalogUnitPrice: Number(candidate.price) || 0,
+          unit: candidate.unit,
+          price: round2((Number(candidate.price) || 0) * quantity),
+          pricePerUnit: false,
+        };
+      })
+    );
+    const next = extractedItems.find(
+      (entry) => entry !== item && entry.match === 'ambiguous'
+    );
+    setAmbiguousItem(next || null);
+  };
+
+  // Price/unit/category inputs for a newly recognized (not-yet-catalogued) item.
+  const updateNewItem = (idx, field, value) => {
+    setExtractedItems((prev) =>
+      prev.map((entry, i) => (i === idx ? { ...entry, [field]: value } : entry))
     );
   };
 
@@ -555,6 +674,9 @@ export default function VoiceBilling() {
               className="bg-warm-ivory border-soft-stone focus:border-sage-green focus:ring-sage-green min-h-[100px] w-full resize-none rounded-2xl border px-6 py-4 transition-all focus:ring-1 focus:outline-none"
               rows={4}
             />
+            <div className="mt-3">
+              <ProductSuggest onAddItem={addFromSuggest} />
+            </div>
             {!isRecording && transcript && (
               <Button
                 onClick={() => extractItemsFromTranscript(transcript)}
@@ -604,8 +726,18 @@ export default function VoiceBilling() {
                       className="bg-warm-ivory border-soft-stone group flex items-center justify-between rounded-xl border p-4"
                     >
                       <div>
-                        <p className="font-semibold text-neutral-800">
+                        <p className="flex flex-wrap items-center gap-2 font-semibold text-neutral-800">
                           {item.productName || item.name}
+                          {item.match === 'new' && (
+                            <span className="bg-muted-indigo/10 text-muted-indigo border-muted-indigo/20 rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase">
+                              New
+                            </span>
+                          )}
+                          {item.match === 'catalog' && Number(item.catalogUnitPrice) > 0 && (
+                            <span className="bg-emerald/10 text-emerald border-emerald/20 rounded-full border px-2 py-0.5 text-[10px] font-semibold">
+                              Saved ₹{item.catalogUnitPrice}/{item.catalogUnit}
+                            </span>
+                          )}
                         </p>
                         <div className="mt-1.5 flex items-center gap-2">
                           <label className="text-xs text-neutral-400">Qty</label>
@@ -626,12 +758,63 @@ export default function VoiceBilling() {
                             inputMode="decimal"
                             value={item.price}
                             onChange={(e) => updateItem(idx, 'price', e.target.value)}
-                            className="bg-off-white border-soft-stone focus:border-sage-green w-20 rounded-lg border px-2 py-1 text-sm text-neutral-700 focus:outline-none"
+                            className={`w-20 rounded-lg border px-2 py-1 text-sm focus:outline-none ${
+                              item.match === 'new' && (Number(item.price) || 0) <= 0
+                                ? 'border-amber-300 bg-amber-50 text-amber-800 focus:border-amber-400'
+                                : 'bg-off-white border-soft-stone focus:border-sage-green text-neutral-700'
+                            }`}
                           />
                           {item.pricePerUnit && (
                             <span className="text-[10px] text-neutral-400">per {item.unit}</span>
                           )}
                         </div>
+
+                        {/* First-time product: ask for price + category + tax once. */}
+                        {item.match === 'new' && (Number(item.price) || 0) <= 0 && (
+                          <div className="mt-3 space-y-2">
+                            <p className="flex items-center gap-1.5 text-xs font-medium text-amber-700">
+                              <Sparkles className="h-3 w-3" />
+                              New product — set a price to add it to your catalog automatically.
+                            </p>
+                            <div className="flex flex-wrap items-center gap-2">
+                              <label className="text-[10px] text-neutral-400">Price ₹</label>
+                              <input
+                                type="number"
+                                min="0"
+                                step="0.01"
+                                inputMode="decimal"
+                                placeholder="e.g. 20"
+                                value={item.price || ''}
+                                onChange={(e) => updateNewItem(idx, 'price', e.target.value)}
+                                className="bg-off-white border-amber-300 focus:border-amber-400 w-24 rounded-lg border px-2 py-1 text-sm focus:outline-none"
+                                aria-label={`Set price for ${item.productName}`}
+                              />
+                              <label className="text-[10px] text-neutral-400">Category</label>
+                              <select
+                                value={item.category || user?.shopType || 'other'}
+                                onChange={(e) => updateNewItem(idx, 'category', e.target.value)}
+                                className="bg-off-white border-soft-stone focus:border-sage-green rounded-lg border px-2 py-1 text-xs focus:outline-none"
+                              >
+                                {CATEGORIES.map((cat) => (
+                                  <option key={cat.value} value={cat.value}>
+                                    {cat.label}
+                                  </option>
+                                ))}
+                              </select>
+                              <label className="text-[10px] text-neutral-400">Tax %</label>
+                              <input
+                                type="number"
+                                min="0"
+                                max="100"
+                                step="0.5"
+                                value={item.taxRate ?? 0}
+                                onChange={(e) => updateNewItem(idx, 'taxRate', e.target.value)}
+                                className="bg-off-white border-soft-stone focus:border-sage-green w-16 rounded-lg border px-2 py-1 text-sm focus:outline-none"
+                                aria-label="Tax rate percent"
+                              />
+                            </div>
+                          </div>
+                        )}
                       </div>
                       <div className="flex items-center gap-4">
                         <span className="font-semibold">₹{lineTotal(item).toFixed(2)}</span>
@@ -728,6 +911,29 @@ export default function VoiceBilling() {
           )}
         </motion.div>
       </div>
+
+      <AmbiguousProductModal
+        item={ambiguousItem}
+        onPick={(candidate, asNew) => resolveAmbiguous(ambiguousItem, candidate, asNew)}
+        onClose={() => {
+          setExtractedItems((prev) =>
+            prev.map((entry) =>
+              entry === ambiguousItem ? { ...entry, match: 'new' } : entry
+            )
+          );
+          setAmbiguousItem(null);
+        }}
+      />
+      <PriceUpdateModal
+        open={showPriceUpdateModal}
+        changes={priceChanges}
+        onClose={() => {
+          setShowPriceUpdateModal(false);
+          setPriceChanges([]);
+        }}
+        onUpdatePrices={confirmPriceUpdates}
+        updating={updatingDefaults}
+      />
     </motion.div>
   );
 }

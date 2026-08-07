@@ -33,3 +33,15 @@ export const SHOP_TYPES = [
   { value: 'clothing', label: 'Clothing' },
   { value: 'other', label: 'Other' },
 ];
+
+export const CATEGORIES = [
+  { value: 'grocery', label: 'Grocery' },
+  { value: 'bakery', label: 'Bakery' },
+  { value: 'restaurant', label: 'Restaurant' },
+  { value: 'pharmacy', label: 'Pharmacy' },
+  { value: 'electronics', label: 'Electronics' },
+  { value: 'clothing', label: 'Clothing' },
+  { value: 'hardware', label: 'Hardware' },
+  { value: 'stationery', label: 'Stationery' },
+  { value: 'other', label: 'Other' },
+];
