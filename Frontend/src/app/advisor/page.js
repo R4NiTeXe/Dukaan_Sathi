@@ -124,7 +124,7 @@ export default function AIAdvisor() {
       initial="initial"
       animate="animate"
       exit="exit"
-      className="bg-off-white border-soft-stone mx-auto flex h-[calc(100dvh-140px)] max-w-6xl min-w-0 flex-col overflow-hidden rounded-2xl border shadow-[var(--shadow-soft)] md:h-[calc(100vh-120px)] md:flex-row"
+      className="bg-off-white border-soft-stone mx-auto flex h-[calc(100dvh-96px)] max-w-6xl min-w-0 flex-col overflow-hidden rounded-2xl border shadow-[var(--shadow-soft)] md:h-[calc(100vh-120px)] md:flex-row"
     >
       {/* Left Sidebar - Removed Recent Chats since there's no backend for it, kept clear layout */}
       <div className="border-soft-stone bg-warm-ivory hidden w-72 flex-col border-r md:flex">

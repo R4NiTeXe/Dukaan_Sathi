@@ -111,16 +111,16 @@ export default function BillDetails({ params }) {
 
       <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
         {/* Main Receipt */}
-        <div className="bg-off-white border-soft-stone relative rounded-2xl border p-8 shadow-[var(--shadow-soft)] md:col-span-2">
+        <div className="bg-off-white border-soft-stone relative rounded-2xl border p-4 shadow-[var(--shadow-soft)] sm:p-6 md:col-span-2 md:p-8">
           {/* Status Badge */}
-          <div className="absolute top-8 right-8">
+          <div className="absolute top-4 right-4 sm:top-8 sm:right-8">
             <Badge variant={bill.paymentStatus === 'paid' ? 'success' : 'warning'}>
               <CheckCircle2 className="mr-1 h-4 w-4" />
               {bill.paymentStatus}
             </Badge>
           </div>
 
-          <div className="mb-10">
+          <div className="mb-8 pr-16 sm:mb-10 sm:pr-0">
             <h2 className="mb-1 text-sm font-medium tracking-wider text-neutral-500 uppercase">
               Token No
             </h2>
@@ -129,8 +129,8 @@ export default function BillDetails({ params }) {
             </p>
           </div>
 
-          <div className="w-full">
-            <table className="w-full border-collapse text-left">
+          <div className="w-full overflow-x-auto">
+            <table className="w-full min-w-[380px] border-collapse text-left">
               <thead>
                 <tr className="border-soft-stone border-b text-sm text-neutral-600">
                   <th className="pb-4 font-medium">Item Description</th>
@@ -142,7 +142,7 @@ export default function BillDetails({ params }) {
               <tbody className="text-neutral-700">
                 {bill.items?.map((item, idx) => (
                   <tr key={idx} className="border-soft-stone border-b">
-                    <td className="py-4 font-medium">{item.productName}</td>
+                    <td className="py-4 min-w-0 break-words font-medium">{item.productName}</td>
                     <td className="py-4 text-center">{item.quantity}</td>
                     <td className="py-4 text-right">₹{unitPrice(item).toFixed(2)}</td>
                     <td className="py-4 text-right font-semibold text-neutral-900">
@@ -155,7 +155,7 @@ export default function BillDetails({ params }) {
           </div>
 
           <div className="mt-8 flex justify-end pt-6">
-            <div className="w-64 space-y-3">
+            <div className="w-full space-y-3 sm:w-64">
               <div className="flex justify-between text-neutral-500">
                 <span>Subtotal</span>
                 <span>₹{subtotal.toFixed(2)}</span>
@@ -185,7 +185,7 @@ export default function BillDetails({ params }) {
               </div>
               <div>
                 <p className="mb-1 text-sm text-neutral-500">Transaction ID</p>
-                <p className="font-mono text-sm font-medium">{bill._id.toUpperCase()}</p>
+                <p className="break-all font-mono text-sm font-medium">{bill._id.toUpperCase()}</p>
               </div>
               <div>
                 <p className="mb-1 text-sm text-neutral-500">Date</p>

@@ -589,7 +589,7 @@ export default function VoiceBilling() {
         {/* Left Column: Voice Input */}
         <motion.div
           variants={listItemVariants}
-          className="bg-off-white border-soft-stone relative flex min-h-[400px] flex-col items-center justify-center overflow-hidden rounded-2xl border p-8 shadow-[var(--shadow-soft)]"
+          className="bg-off-white border-soft-stone relative flex min-h-[400px] flex-col items-center justify-center overflow-hidden rounded-2xl border p-6 shadow-[var(--shadow-soft)] sm:p-8"
         >
           {/* Pulsing rings when recording */}
           <AnimatePresence>
@@ -701,7 +701,7 @@ export default function VoiceBilling() {
         {/* Right Column: Extracted Bill Preview */}
         <motion.div
           variants={listItemVariants}
-          className="bg-off-white border-soft-stone flex flex-col rounded-2xl border p-8 shadow-[var(--shadow-soft)]"
+          className="bg-off-white border-soft-stone flex flex-col rounded-2xl border p-6 shadow-[var(--shadow-soft)] sm:p-8"
         >
           <h2 className="mb-6 flex items-center justify-between text-xl font-bold">
             Bill Preview
@@ -723,9 +723,9 @@ export default function VoiceBilling() {
                       initial={{ opacity: 0, x: 20 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: idx * 0.1 }}
-                      className="bg-warm-ivory border-soft-stone group flex items-center justify-between rounded-xl border p-4"
+                      className="bg-warm-ivory border-soft-stone group flex items-start justify-between gap-3 rounded-xl border p-3 sm:p-4"
                     >
-                      <div>
+                      <div className="min-w-0">
                         <p className="flex flex-wrap items-center gap-2 font-semibold text-neutral-800">
                           {item.productName || item.name}
                           {item.match === 'new' && (
@@ -739,7 +739,7 @@ export default function VoiceBilling() {
                             </span>
                           )}
                         </p>
-                        <div className="mt-1.5 flex items-center gap-2">
+                        <div className="mt-1.5 flex flex-wrap items-center gap-2">
                           <label className="text-xs text-neutral-400">Qty</label>
                           <input
                             type="number"

@@ -40,6 +40,32 @@
   html {
     overflow-x: hidden;
     max-width: 100vw;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+
+  body {
+    -webkit-tap-highlight-color: transparent;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Mobile inputs smaller than 16px make iOS Safari auto-zoom on focus,
+     which throws off the whole layout every time a cashier taps a field.
+     Keep the compact size on desktop, force 16px on phones and tablets. */
+  @media (max-width: 767px) {
+    input,
+    select,
+    textarea {
+      font-size: 16px !important;
+    }
+  }
+
+  input,
+  select,
+  textarea,
+  button {
+    touch-action: manipulation;
   }
 
   :root {
