@@ -4,8 +4,9 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, User, Menu, X, LogOut, Settings } from 'lucide-react';
+import { Search, Menu, X, LogOut, Settings, UserRound, PencilLine, ChevronDown } from 'lucide-react';
 import ThemeToggle from '@/components/layout/ThemeToggle';
+import Avatar from '@/components/ui/Avatar';
 import { useAuth } from '@/context/AuthContext';
 import { navItems } from '@/constants/navigation';
 
@@ -89,44 +90,86 @@ export default function Topbar() {
           <div id="profile-menu-container" className="relative">
             <button
               onClick={() => setIsProfileOpen(!isProfileOpen)}
-              className="bg-sage-green/20 border-sage-green/30 text-forest-green flex h-9 w-9 cursor-pointer items-center justify-center rounded-full border font-medium shadow-sm transition-shadow hover:shadow-md focus:outline-none md:h-10 md:w-10"
+              className="group flex cursor-pointer items-center gap-2 rounded-full transition-shadow focus:outline-none"
               aria-label="User menu"
               aria-expanded={isProfileOpen}
+              aria-haspopup="menu"
             >
-              {user?.ownerName ? (
-                user.ownerName.charAt(0).toUpperCase()
-              ) : (
-                <User className="h-4 w-4 md:h-5 md:w-5" />
-              )}
+              <Avatar
+                src={user?.avatar}
+                name={user?.ownerName}
+                size="md"
+                className="border-sage-green/30 border-2 transition-transform group-hover:scale-105"
+              />
+              <ChevronDown
+                className={`hidden text-neutral-400 transition-transform sm:block ${
+                  isProfileOpen ? 'rotate-180' : ''
+                }`}
+                size={16}
+              />
             </button>
 
             {/* Profile Dropdown */}
             <AnimatePresence>
               {isProfileOpen && (
                 <motion.div
+                  role="menu"
                   initial={{ opacity: 0, y: 10, scale: 0.95 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: 10, scale: 0.95 }}
                   transition={{ duration: 0.15, ease: 'easeOut' }}
-                  className="bg-warm-ivory border-soft-stone absolute right-0 z-50 mt-3 w-56 overflow-hidden rounded-2xl border py-2 shadow-[var(--shadow-medium)]"
+                  className="bg-warm-ivory border-soft-stone absolute right-0 z-50 mt-3 w-60 overflow-hidden rounded-2xl border py-2 shadow-[var(--shadow-medium)]"
                 >
-                  <div className="border-soft-stone bg-off-white/50 mb-1 border-b px-4 py-3">
-                    <p className="truncate text-sm font-semibold text-neutral-900">
-                      {user?.ownerName || 'Shop Owner'}
-                    </p>
-                    <p className="mt-0.5 truncate text-xs text-neutral-500">
-                      {user?.email || 'admin@shop.com'}
-                    </p>
+                  <div className="border-soft-stone bg-off-white/50 mb-1 flex items-center gap-3 border-b px-4 py-3">
+                    <Avatar src={user?.avatar} name={user?.ownerName} size="md" />
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-semibold text-neutral-900">
+                        {user?.ownerName || 'Shop Owner'}
+                      </p>
+                      <p className="truncate text-xs text-neutral-500">{user?.email}</p>
+                    </div>
                   </div>
+
+                  <Link
+                    href="/profile"
+                    role="menuitem"
+                    onClick={() => setIsProfileOpen(false)}
+                    className="flex w-full items-center px-4 py-2.5 text-sm text-neutral-700 transition-colors hover:bg-soft-stone/50 hover:text-neutral-900"
+                  >
+                    <UserRound className="mr-3 h-4 w-4 text-neutral-400" />
+                    My Profile
+                  </Link>
+                  <Link
+                    href="/profile?edit=1"
+                    role="menuitem"
+                    onClick={() => setIsProfileOpen(false)}
+                    className="flex w-full items-center px-4 py-2.5 text-sm text-neutral-700 transition-colors hover:bg-soft-stone/50 hover:text-neutral-900"
+                  >
+                    <PencilLine className="mr-3 h-4 w-4 text-neutral-400" />
+                    Edit Profile
+                  </Link>
+                  <Link
+                    href="/settings"
+                    role="menuitem"
+                    onClick={() => setIsProfileOpen(false)}
+                    className="flex w-full items-center px-4 py-2.5 text-sm text-neutral-700 transition-colors hover:bg-soft-stone/50 hover:text-neutral-900"
+                  >
+                    <Settings className="mr-3 h-4 w-4 text-neutral-400" />
+                    Settings
+                  </Link>
+
+                  <div className="border-soft-stone/50 my-1 border-t" />
+
                   <button
+                    role="menuitem"
                     onClick={() => {
                       setIsProfileOpen(false);
                       logout();
                     }}
-                    className="flex w-full items-center px-4 py-2.5 text-sm text-red-600 transition-colors hover:bg-red-50/50"
+                    className="text-muted-red flex w-full items-center px-4 py-2.5 text-sm transition-colors hover:bg-red-50/50"
                   >
                     <LogOut className="mr-3 h-4 w-4" />
-                    Sign Out
+                    Logout
                   </button>
                 </motion.div>
               )}
